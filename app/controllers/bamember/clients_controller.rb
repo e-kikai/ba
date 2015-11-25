@@ -6,7 +6,6 @@ class Bamember::ClientsController < Bamember::ApplicationController
   def new
     @client = Client.new
   end
-  
 
   def create
     Client.transaction do
