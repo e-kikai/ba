@@ -1,0 +1,16 @@
+ja:
+  activerecord:
+    models:
+      client: クライアント情報
+      client_table: クライアントテーブル
+      client_column: クライアントテーブル項目
+    attributes:
+      client:
+        name:  クライアント名
+        email: メールアドレス
+        encrypted_password: パスワード
+      client_column:
+        name:        項目名
+        column_name: 項目物理名
+        column_type: 型
+        unique:      ユニーク

@@ -1,0 +1,76 @@
+- set_meta_tags title: "#{@client.name}/#{@table.name} 項目管理"
+- breadcrumb :clients_something, "#{@table.name} 項目管理", @table.client
+
+coffee:
+  $ ->
+    $(document).on 'change', 'select.column_type', ->
+      $_sel = $(@).closest('tr').find('textarea.selector')
+      
+      if $(@).val().match /selector/ then $_sel.show() else $_sel.hide()
+      
+    $('select.column_type').trigger('change')
+
+sass:
+  table td
+    input[type=text]
+      width: 160px
+    textarea.selector
+      width: 160px
+      height: 160px
+    
+.col-md-12
+  - if @table.errors.any?
+    .alert.alert-danger
+      ul
+        - @table.errors.full_messages.each do |msg|
+          li = msg
+            
+  = nested_form_for(@table, class: 'form-horizontal', role: 'form', url: {action: 'update'}, method: :patch)  do |f|
+    table#client_columns.table.table-striped.table-hover.table-responsive
+      caption テーブル項目
+      tr
+        th 名称
+        th 型
+        / th 選択肢(改行区切り)<br/ >選択型のみ
+        th デフォルト値
+        th ユニーク
+        th 必須
+        th 非表示
+        / th 削除
+      tr
+        td ID (変更不可)
+        td 整数
+        / td 
+        td
+        td = check_box_tag :dummy, 1, true,   disabled: true
+        td = check_box_tag :dummy, 1, true,   disabled: true
+        td = check_box_tag :dummy, 1, false,  disabled: true
+        / td 変更不可
+      / tr
+      /   td 登録日時
+      /   td 日時型
+      /   td 
+      /   td
+      /   td = check_box_tag :dummy, 1, false,  disabled: true
+      /   td = check_box_tag :dummy, 1, false,  disabled: true
+      /   td 変更不可
+      / tr
+      /   td 変更日時
+      /   td 日時型
+      /   td 
+      /   td
+      /   td = check_box_tag :dummy, 1, false,  disabled: true
+      /   td = check_box_tag :dummy, 1, false,  disabled: true
+      /   td 変更不可
+
+      = f.fields_for :client_columns, wrapper: false do |co|
+        = render "client_column_fields", f: co
+
+    = f.link_to_add :client_columns, class: "btn btn-default", data: { target: "#client_columns"} do
+      span.glyphicon.glyphicon-plus
+      =< "項目を追加"
+    end
+          
+    = f.button data: { confirm: "変更内容を反映してよろしいでしょうか\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-save
+      =< "項目変更を反映"

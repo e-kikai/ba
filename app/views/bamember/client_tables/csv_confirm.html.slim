@@ -1,0 +1,39 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} 確認"
+- breadcrumb  :clients_table_csv_matching, @table
+
+.col-md-8.col-md-offset-2
+  .panel.panel-default
+    .panel-body 
+      dl.dl-horizontal
+        dt アップロードされた情報
+        dd #{@csv[:body].length}件 (先頭行、空行を除く)
+        hr
+        dt マッチした情報
+        dd #{@csv[:body].count { |b| b[@csv[:header].length].split(",").count == 1  }}件
+        dt マッチしなかった情報
+        dd #{@csv[:body].count { |b| b[@csv[:header].length].blank? }}件#{" (新規登録)" if @csv[:option][:unmatch] == "new"} 
+        dt 重複マッチした情報
+        dd #{@csv[:body].count { |b| b[@csv[:header].length].split(",").count > 1 }}件
+        hr
+        dt バリデーションエラー
+        dd
+          - if @csv[:option][:unmatch] == "new"
+            | #{@csv[:body].count { |b| b[@csv[:header].length+1].present? }}件
+          - else
+            | #{@csv[:body].count { |b| b[@csv[:header].length+1].present? && b[@csv[:header].length].present? }}件
+        
+        
+  .panel.panel-default
+    .panel-heading 事前作業
+    .panel-body style="text-align:center;"
+      = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning" do
+        span.glyphicon.glyphicon-save-file
+        =< "バックアップCSVをダウンロード"
+      =< link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_error.csv", class: "btn btn-danger" do
+        span.glyphicon.glyphicon-save-file
+        =< "エラーCSVをダウンロード"
+  
+  = form_tag({action: :csv_update}, method: :patch, class: 'form-horizontal') do
+    = button_tag data: { confirm: "変更内容を反映してよろしいでしょうか\r事前にバックアップとエラー分のCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-save
+      =< "内容を反映"

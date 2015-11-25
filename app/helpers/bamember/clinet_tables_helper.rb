@@ -1,0 +1,2 @@
+module Bamember::ClinetTablesHelper
+end

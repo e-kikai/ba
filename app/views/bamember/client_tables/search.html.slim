@@ -1,0 +1,120 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} 検索"
+- breadcrumb  :clients_search, @table
+
+- client_columns = [["ID", :id]] + @table.show_client_columns.map { |co| [co.name, co.column_name] } + [["登録日時", :created_at], ["変更日時", "updated_at"]]
+- conditions     = { "で一致" => "eq", "で一致しない" => "not_eq", "が含まれる" => "cont", "が含まれない" => "not_cont",
+    "から始まる" => "start", "で終わる" => "end",
+    "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt", 
+  }
+
+coffee:
+  $ ->
+    $_blank = $('.form-group.blank').clone()
+    
+    $(document).on 'click', 'button.add', ->
+      $(this).before($_blank.clone())
+      
+sass:
+  hr
+    border-top-color: #666
+    
+  nav.affix-nav
+    background: #EEE
+    padding: 8px
+    
+  td
+    &.id
+      text-align: right
+    &.integer, &.float
+      text-align: right
+    &.icon
+      text-align: center
+      &.delete a
+        color: #900
+      &.edit a
+        color: #090
+    
+nav.affix-nav.col-md-2
+  = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/new", class: "btn btn-success center-block" do
+    span.glyphicon.glyphicon-plus
+    =< "データを新規登録"
+  
+  = label_tag "", "検索条件"
+  = form_tag({}, method: :get) do
+    - @s.each do |s|
+      .form-group
+        = select_tag("s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control")
+        = text_field_tag "s[][value]", s[:value], class: "form-control"
+        = select_tag("s[][cond]", options_for_select(conditions, s[:cond]), class: "form-control")
+      
+    .form-group.blank
+      = select_tag "s[][column_name]", options_for_select(client_columns), class: "form-control"
+      = text_field_tag "s[][value]", "", class: "form-control"
+      = select_tag "s[][cond]", options_for_select(conditions), class: "form-control"
+    = button_tag type: "button", class: "btn btn-default add" do
+      span.glyphicon.glyphicon-plus
+      =< "検索条件を追加"
+          
+    = label_tag :order_column, "ソート"
+    .form-group
+      .col-md-7 style="padding:0;"
+        = select_tag :order_column, options_for_select(client_columns, @order_column), class: "form-control"
+      .col-md-5 style="padding:0;"
+        = select_tag :order_type, options_for_select({"昇順" => "asc", "降順" => "desc"}, @order_type), class: "form-control"
+    .form-group
+      = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-info center-block" do
+        span.glyphicon.glyphicon-search
+        =< "検索"
+      end
+    
+    - if @datas.present?
+      hr
+      = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success center-block" do
+        span.glyphicon.glyphicon-save-file
+        =< "検索結果をCSV出力"
+    
+    hr
+    = link_to "#{request.path_info}", class: "btn btn-warning center-block" do
+      span.glyphicon.glyphicon-remove
+      =< "検索条件をリセット"
+
+.col-md-10
+  .table-responsive
+    - if @datas.blank?
+      .alert.alert-info 検索結果がありませんでした
+      
+    - else
+      . = page_entries_info @datas, entry_name: @table.name
+      
+      = paginate @datas
+      table.table.table-bordered.table-striped.table-hover.table-condensed
+        tr
+          th ID
+          th 変更
+          - @table.show_client_columns.each do |co|
+            th = co.name
+          th 登録日時
+          th 変更日時
+          th 削除
+        - @datas.each do |d|
+          tr
+            td.id
+              - if @table.show_client_columns.find_by(column_name: "name")
+                = d[:id]
+              - else
+                = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+            td.icon.edit = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}/edit" do
+              span.glyphicon.glyphicon-edit
+            - @table.show_client_columns.each do |co|
+              td class="#{co.db_column_type[:type]} #{co.column_name}"
+                - if co.column_name == "name"
+                  = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+                - else
+                  = d[co.column_name]
+            td.datetime = d[:created_at]
+            td.datetime = d[:updated_at]
+            td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
+              span.glyphicon.glyphicon-remove
+            end
+            
+      = paginate @datas

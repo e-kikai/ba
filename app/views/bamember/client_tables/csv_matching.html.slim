@@ -1,0 +1,62 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} マッチング"
+- breadcrumb  :clients_table_csv_matching, @table
+
+coffee:
+  $ ->
+    $(document).on 'change', 'select.column_name', ->
+      $_act = $(@).closest('tr').find('select.action')
+      
+      if $(@).val() then $_act.show() else $_act.hide()
+      if $(@).val() == 'id' then $_act.val('matching')
+      $_act.attr('readonly', (if $(@).val() == 'id' then 'readonly' else null))
+      
+    $('select.column_name').trigger('change')
+
+sass:
+  .example
+    color: #999
+  
+.col-md-8.col-md-offset-2
+  .panel.panel-default
+    .panel-body
+      dl.dl-horizontal
+        dt アップロードされた情報
+        dd #{@csv[:body].length}件 (先頭行、空行を除く)
+    
+  = form_tag({action: :csv_matching_check}, method: :post, class: 'form-horizontal') do
+    table.table.table-striped.table-hover.table-responsive
+      caption マッチング項目設定
+      tr
+        th CSV項目
+        th ⇒
+        th テーブル項目
+        th 処理
+      - @csv[:header].each_with_index do |h, i|
+        tr
+          td
+            .column  = h
+            .example = @csv[:body].first[i]
+          td ⇒
+          td = select_tag("table_header[#{i}]",
+            options_for_select([["--使用しない--", ""], ["ID", :id]] + @table.show_client_columns.pluck(:name, :column_name), @csv[:table_header][i]),
+            class: "form-control column_name")
+          td = select_tag("method[#{i}]",
+            options_for_select({"空欄に保存" => :save, "上書き" => :update, "マッチング" => :matching}, @csv[:method][i]),
+            class: "form-control action")
+          
+    .form-group
+      / .col-sm-4 = label_tag  :option_if, "マッチング条件", class: "control-label"
+      .col-sm-3: label.control-label(for="option[if]") マッチング条件
+      .col-sm-6 = select_tag("option[if]",
+        options_for_select({"AND条件でなければOR条件(曖昧検索)" => nil, "AND条件" => :and, "OR条件" => :or}, @csv[:option][:if]),
+        class: "form-control")
+    .form-group
+      .col-sm-3 = label_tag  "option[unmatch]", "マッチしなかったデータ", class: "control-label"
+      .col-sm-6 = select_tag "option[unmatch]", options_for_select({"エラーCSVに出力" => nil, "新規登録" => :new}, @csv[:option][:unmatch]), class: "form-control"
+    .form-group
+      .col-sm-3 = label_tag      "option[action_tag]", "アクション(未実装)", class: "control-label"
+      .col-sm-3 = text_field_tag "option[action_tag]", params[:option_action], class: "form-control", placehodler: "タグ"
+      .col-sm-6 = text_field_tag "option[action_body]", params[:option_action], class: "form-control", placehodler: "内容"
+    = button_tag data: { "disable-with" => "マッチング中..." }, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-check
+      =< "項目をマッチング"

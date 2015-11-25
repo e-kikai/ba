@@ -1,0 +1,10 @@
+tr.fields
+  td = f.text_field :name, class: "form-control"
+  td = f.select :column_type, ClientColumn::COLUMN_TYPES.map { |key, c| [c[:name], key] }, { prompt: "▼選択▼"}, class: "form-control column_type"
+
+  / td = f.text_area  :selector, class: "form-control selector"
+  td = f.text_field :default, class: "form-control"
+  td = f.check_box  :unique
+  td = f.check_box  :presence
+  td = f.check_box  :hidden
+  / td = f.link_to_remove  "削除"

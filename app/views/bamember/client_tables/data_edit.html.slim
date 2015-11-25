@@ -1,0 +1,50 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} #{@data.name}"
+- breadcrumb  :clients_data, @table, @data
+
+sass:
+  hr
+    border-top-color: #666
+    
+  nav.affix-nav
+    background: #EEE
+    padding: 8px
+    
+  td
+    &.id
+      text-align: right
+    &.integer, &.float
+      text-align: right
+    &.icon
+      text-align: center
+      &.delete a
+        color: #900
+      &.edit a
+        color: #090
+        
+.col-md-offset-3.col-md-6
+  = form_for @data, url: "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{@data.id}", method: :patch do |f|
+    table.table.table-hover.table-condensed
+      tr
+        th ID
+        td.id = @data[:id]
+      - @table.show_client_columns.each do |co|
+        tr
+          th class="#{co.db_column_type[:type]} #{co.column_name}" = co.name
+          td class="#{co.db_column_type[:type]} #{co.column_name}"
+            - if co.db_column_type[:type] == :text
+              = f.text_area co.column_name, class: "form-control"
+            - elsif co.db_column_type[:type] == :integer || co.db_column_type[:type] == :float
+              = f.number_field co.column_name, class: "form-control"
+            - else 
+              = f.text_field co.column_name, class: "form-control"
+      tr
+        th 登録日時
+        td.id = @data[:created_at]
+      tr
+        th 変更日時
+        td.id = @data[:updated_at]
+        
+    = f.button data: { confirm: "保存してよろしいでしょうか", "disable-with" => "保存中..."}, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-save
+      =< "保存"
+      

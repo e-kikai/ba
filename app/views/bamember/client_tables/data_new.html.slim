@@ -1,0 +1,38 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} 新規登録"
+- breadcrumb  :clients_data, @table, @data
+
+sass:
+  hr
+    border-top-color: #666
+    
+  nav.affix-nav
+    background: #EEE
+    padding: 8px
+    
+  td
+    &.id
+      text-align: right
+    &.integer, &.float
+      text-align: right
+        
+.col-md-offset-3.col-md-6
+  = form_for @data, url: "/bamember/clients/#{@table.client_id}/table/#{@table.id}", method: :post do |f|
+    table.table.table-hover.table-condensed
+      tr
+        th ID
+        td.id 新規登録
+      - @table.show_client_columns.each do |co|
+        tr
+          th class="#{co.db_column_type[:type]} #{co.column_name}" = co.name
+          td class="#{co.db_column_type[:type]} #{co.column_name}"
+            - if co.db_column_type[:type] == :text
+              = f.text_area co.column_name, class: "form-control"
+            - elsif co.db_column_type[:type] == :integer
+              = f.number_field co.column_name, class: "form-control"
+            - else 
+              = f.text_field co.column_name, class: "form-control"
+        
+    = f.button data: { confirm: "保存してよろしいでしょうか", "disable-with" => "保存中..."}, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-save
+      =< "保存"
+      

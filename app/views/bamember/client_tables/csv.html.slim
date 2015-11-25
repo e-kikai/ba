@@ -1,0 +1,40 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name}ファイルアップロード"
+- breadcrumb  :clients_table_csv, @table
+
+coffee:
+  $ ->
+    $('.js-csv-upload').fileinput
+      showPreview: false
+      maxFileCount: 1
+      browseClass: 'btn btn-info fileinput-browse-button'
+      browseIcon: '<span class="glyphicon glyphicon-folder-open"></span>'
+      browseLabel: ' ファイル選択'
+      removeClass: 'btn btn-warning'
+      removeIcon: '<span class="glyphicon glyphicon-remove"></span>'
+      removeLabel: ' キャンセル'
+      uploadClass: 'btn btn-success fileinput-upload-button'
+      uploadIcon: '<i class="fa fa-upload"></i>'
+      uploadLabel: ' アップロード'
+      allowedFileExtensions: ['csv', 'xls', 'xlsx', 'ods']
+      msgValidationError: '''
+        <span class="text-danger">
+          <span class="glyphicon glyphicon-alert"></span>アップロードできるファイル形式はCSV, xls, xlsx, odsです。
+        </span>
+      '''
+
+sass:
+  .fileinput-upload-button
+    display: none
+    
+.col-md-10.col-md-offset-1
+  .panel.panel-default style="margin-top: 16px;"
+    .panel-body
+      = form_tag({action: :csv_upload}, multipart: true, method: :post, class: 'form-horizontal') do
+       fieldset
+        .form-group
+          = label_tag :csv, "CSVファイル"
+          = file_field_tag :file, class: "js-csv-upload", required: "required"
+        
+        = button_tag(data: { "disable-with" => "アップロード中..."}, class: "btn btn-success center-block") do
+          span.glyphicon.glyphicon-upload
+          =< "アップロード"

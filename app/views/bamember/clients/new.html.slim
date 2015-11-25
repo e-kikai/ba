@@ -1,0 +1,40 @@
+- set_meta_tags title: "新規クライアント登録フォーム"
+
+- breadcrumb  :bamember_something, "新規クライアント登録"
+
+.row
+  .col-lg-offset-2.col-lg-8
+    
+    .panel.panel-default
+      .panel-heading
+        span.glyphicon.glyphicon-envelope
+        =< "新規クライアント登録"
+      .panel-body
+        = form_for(@client, class: 'form-horizontal', role: 'form', url: {:action => 'create'})  do |f|
+          - if @client.errors.any?
+            .alert.alert-danger
+              ul
+                - @client.errors.full_messages.each do |msg|
+                  li = msg
+          
+          .form-group
+            = f.label :name
+            .input-group
+              span.input-group-addon: span.glyphicon.glyphicon-home
+              = f.text_field :name, class: 'form-control', placeholder: "顧客名(必須)", required: "required"
+
+          .form-group
+            = f.label :email
+            .input-group
+              span.input-group-addon: span.glyphicon.glyphicon-envelope
+              = f.text_field :email, class: 'form-control', placeholder: "メールアドレス(必須)", required: "required"
+
+          .form-group
+            = f.label :password
+            .input-group
+              span.input-group-addon: span.glyphicon.glyphicon-user
+              = f.password_field :password, class: 'form-control', placeholder: "パスワード", required: "required"
+
+          = f.button type:"submit", class: 'btn btn-primary', data: {confirm: "保存します。よろしいですか。", disable_with: '保存中・・・' } do
+            span.glyphicon.glyphicon-send
+            =< "保存"
