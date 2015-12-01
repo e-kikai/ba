@@ -33,6 +33,9 @@ class Bamember::ClientTablesController < ApplicationController
 
     @datas = @datas.order(@order_column => @order_type).order(:id)
 
+    # 表示項目
+    @show_columns = params[:all].present? ? @table. client_columns : @table.client_columns.show
+
     # CSV出力
     respond_to do |format|
       format.html do
@@ -59,15 +62,27 @@ class Bamember::ClientTablesController < ApplicationController
     else raise "不明なファイルタイプです: #{file.original_filename}"
     end
 
+    # データが大量のため、セッションではなくテンポラリファイルに一時保存
+    csv_count = 0
+    tf = Tempfile.create(['csv-'])
+    (2..spreadsheet.last_row).each do |i|
+      next if spreadsheet.row(i).all?(&:blank?)
+      tf.puts(CSV.generate_line(spreadsheet.row(i).map { |v| v.to_s.normalize_charwidth.strip }))
+      csv_count += 1
+    end
+    tf.close
+
     session[:csv] = {
       header: spreadsheet.row(1).map { |v| v.to_s.normalize_charwidth.strip },
-      body:   (2..spreadsheet.last_row).map do |i|
-        next if spreadsheet.row(i).all?(&:blank?)
-        spreadsheet.row(i).map { |v| v.to_s.normalize_charwidth.strip }
-      end.compact,
+      first:  spreadsheet.row(2).map { |v| v.to_s.normalize_charwidth.strip },
+
+      body_path:    tf.path,
+
       table_header: [],
       method:       [],
-      option:       {}
+      option:       {},
+
+      counts:       { all: csv_count },
     }
 
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/"
@@ -85,48 +100,78 @@ class Bamember::ClientTablesController < ApplicationController
     matching_id_key = @csv[:header].length
     error_key       = @csv[:header].length + 1
 
+    counts = {
+      all:      session[:csv][:counts][:all],
+      match:    0,
+      overlap:  0,
+      none:     0,
+      new:      0,
+      notvalid: 0,
+    }
+
     # 項目設定がされているか
-    if @csv[:table_header].select.with_index { |h, i| h.present? && @csv[:method][i] == "matching" }.blank? && @csv[:option][:unmatch] != "new"
-      raise "マッチング項目が設定されていません"
-    # elsif @csv[:header].none?.with_index { |h, i| @csv[:table_header][i].present? && (@csv[:method][i].blank? || @csv[:method][i] == :update) }
-    #   raise "保存・上書き項目が設定されていません"
+    matchings = []
+    @csv[:table_header].each.with_index do |h, i|
+      matchings << {table_header: h, i: i } if h.present? && @csv[:method][i] == "matching"
     end
 
-    @csv[:body].each_with_index do |d, key|
-      # AND条件マッチング
-      if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
-        res = @table.datas
+    raise "マッチング項目が設定されていません" if matchings.blank? && @csv[:option][:unmatch] != "new"
 
-        @csv[:header].each_with_index do |h, i|
-          if @csv[:table_header][i].present? && @csv[:method][i] == "matching"
-            res = res.where(@csv[:table_header][i] => d[i])
-          end
+    #
+    tf = Tempfile.create(['csv-'])
+
+    klass = @table.klass
+    # @csv[:body].each_with_index do |d, key|
+    CSV.foreach(@csv[:body_path]) do |d|
+      if matchings.present?
+        values = matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h
+        values = @table.filter(values)
+
+        # AND条件マッチング
+        if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
+          res = klass.where(values)
         end
-      end
 
-      # OR条件マッチング
-      if @csv[:option][:if]  == "or" || (@csv[:option][:if] .blank? && res.blank?)
-        cond = nil
-        @csv[:header].each_with_index do |h, i|
-          if @csv[:table_header][i].present? && @csv[:method][i] == "matching"
-            cond = cond ? cond.or(@table.klass.arel_table[@csv[:table_header][i]].eq(d[i])) : @table.klass.arel_table[@csv[:table_header][i]].eq(d[i])
+        # OR条件マッチング
+        if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
+          cond = nil
+          values.each do |k, v|
+            cond = cond ? cond.or(klass.arel_table[k].eq(v)) : klass.arel_table[k].eq(v)
           end
-        end
-        res = @table.klass.where(cond)
-      end
 
-      @csv[:body][key][matching_id_key] = res.pluck(:id).join(", ")
-      @csv[:body][key][error_key] = if res.count > 1
-        "複数マッチしました"
-      elsif @csv[:option][:unmatch] != "new" && res.count == 0
-        "マッチしませんでした"
+          res = klass.where(cond)
+        end
+
+        # マッチング結果
+        matchng_ids = res.pluck(:id)
+        d[matching_id_key] = matchng_ids.join(", ")
+
+        data = if matchng_ids.length == 1
+          counts[:match] += 1
+          res.first # マッチ
+        elsif matchng_ids.length > 1
+          counts[:overlap] += 1
+          d[error_key] = "複数マッチしました"
+          nil
+        elsif @csv[:option][:unmatch] != "new" && matchng_ids.blank?
+          counts[:none] += 1
+          d[error_key] = "マッチしませんでした"
+          nil
+        else
+          counts[:new] += 1
+          klass.new # 新規登録
+        end
       else
-        # 新規かどうか
-        data = res.count == 1 ? res.first : @table.klass.new
+        counts[:new] += 1
+        data = klass.new
+      end
 
+      # バリデーション
+      if data.present?
         @csv[:header].each_with_index do |h, i|
           next if @csv[:table_header][i].blank?
 
+          # データ(バリデーション用に)格納
           if @csv[:method][i] == "update" \
              || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
              || (@csv[:method][i] == "matching" && res.count == 0 && @csv[:table_header][i] != "id")
@@ -134,13 +179,22 @@ class Bamember::ClientTablesController < ApplicationController
           end
         end
 
-        # バリデーション・フィルタリング(saveはまだしない)
+        # バリデーション(saveはまだしない)
         data.valid?
-        data.errors.messages.map do |k, v|
+        d[error_key] = data.errors.messages.map do |k, v|
           v.map { |mes| "#{k} #{mes}" }.join("\n")
         end.join("\n")
+
+        counts[:notvalid] += 1 if d[error_key].present?
       end
+
+      tf.puts CSV.generate_line(d)
     end
+
+    session[:csv][:counts]    = counts
+    session[:csv][:body_path] = tf.path
+
+    tf.close
 
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/"
   rescue => e
@@ -155,17 +209,18 @@ class Bamember::ClientTablesController < ApplicationController
     error_key       = @csv[:header].length + 1
 
     # トランザクション
-    @table.klass.transaction do
-      @csv[:body].each_with_index do |d, key|
+    klass = @table.klass
+    klass.transaction do
+      CSV.foreach(@csv[:body_path]) do |d|
         next if d[error_key].present?
 
-        matching_id = d[matching_id_key].split(",")
+        matching_ids = d[matching_id_key].try(:split, ",")
 
         # データ取り出し、新規作成
-        if matching_id.blank? && @csv[:option][:unmatch] == "new"
-          data = @table.klass.new
-        elsif matching_id.count == 1
-          data = @table.datas.find(matching_id.first)
+        if matching_ids.blank? && @csv[:option][:unmatch] == "new"
+          data = klass.new
+        elsif matching_ids.length == 1
+          data = klass.find(matching_ids.first)
         else
           next
         end
@@ -176,7 +231,7 @@ class Bamember::ClientTablesController < ApplicationController
 
           if @csv[:method][i] == "update" \
              || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
-             || (@csv[:method][i] == "matching" && matching_id.blank? && @csv[:table_header][i] != "id")
+             || (@csv[:method][i] == "matching" && matching_ids.blank? && @csv[:table_header][i] != "id")
             data[@csv[:table_header][i]] = d[i]
           end
         end
@@ -184,6 +239,12 @@ class Bamember::ClientTablesController < ApplicationController
         data.save!
       end
     end
+
+    # 保存済のCSV情報をクリア
+    session[:csv] = nil
+    ActiveRecord::Base.connection.execute("VACUUM;")
+    ActiveRecord::Base.connection.execute("REINDEX;")
+
     redirect_to "/bamember/clients/#{@table.client.id}/", notice: "データをテーブルに反映しました"
   rescue => e
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/", alert: e.message
@@ -264,7 +325,7 @@ class Bamember::ClientTablesController < ApplicationController
   end
 
   def check_session_spreadseet
-    if session[:csv][:body].blank?
+    if session[:csv][:header].blank?
       redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv/", alert: 'ファイルがアップロードされていません'
     end
 
@@ -274,10 +335,6 @@ class Bamember::ClientTablesController < ApplicationController
   def client_table_params
     params.require(:client_table).permit(client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :_destroy])
   end
-
-  # def csv_matching_params
-  #   params.require(:columns)
-  # end
 
   def data_params
     params.require(:client_table_data).permit(@table.show_client_columns.map(&:column_name))

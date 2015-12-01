@@ -1,6 +1,9 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} マッチング"
 - breadcrumb  :clients_table_csv_matching, @table
 
+- select_client_columns = [["--使用しない--", ""], ["ID", :id]] + @table.show_client_columns.pluck(:name, :column_name)
+- select_methods        = {"空欄に保存" => :save, "上書き" => :update, "マッチング" => :matching}
+
 coffee:
   $ ->
     $(document).on 'change', 'select.column_name', ->
@@ -21,7 +24,7 @@ sass:
     .panel-body
       dl.dl-horizontal
         dt アップロードされた情報
-        dd #{@csv[:body].length}件 (先頭行、空行を除く)
+        dd #{@csv[:counts][:all]}件 (先頭行、空行を除く)
     
   = form_tag({action: :csv_matching_check}, method: :post, class: 'form-horizontal') do
     table.table.table-striped.table-hover.table-responsive
@@ -35,13 +38,13 @@ sass:
         tr
           td
             .column  = h
-            .example = @csv[:body].first[i]
+            .example = @csv[:first][i]
           td ⇒
           td = select_tag("table_header[#{i}]",
-            options_for_select([["--使用しない--", ""], ["ID", :id]] + @table.show_client_columns.pluck(:name, :column_name), @csv[:table_header][i]),
+            options_for_select(select_client_columns, @csv[:table_header][i]),
             class: "form-control column_name")
           td = select_tag("method[#{i}]",
-            options_for_select({"空欄に保存" => :save, "上書き" => :update, "マッチング" => :matching}, @csv[:method][i]),
+            options_for_select(select_methods, @csv[:method][i]),
             class: "form-control action")
           
     .form-group

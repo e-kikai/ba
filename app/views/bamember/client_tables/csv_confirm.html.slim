@@ -6,22 +6,23 @@
     .panel-body 
       dl.dl-horizontal
         dt アップロードされた情報
-        dd #{@csv[:body].length}件 (先頭行、空行を除く)
+        dd #{@csv[:counts][:all]}件 (先頭行、空行を除く)
         hr
         dt マッチした情報
-        dd #{@csv[:body].count { |b| b[@csv[:header].length].split(",").count == 1  }}件
+        dd #{@csv[:counts][:match]}件
+        
         dt マッチしなかった情報
-        dd #{@csv[:body].count { |b| b[@csv[:header].length].blank? }}件#{" (新規登録)" if @csv[:option][:unmatch] == "new"} 
+        - if @csv[:counts][:new] == 0
+          dd #{@csv[:counts][:none]}件
+        - else
+          dd #{@csv[:counts][:new]}件 (新規登録)
+
         dt 重複マッチした情報
-        dd #{@csv[:body].count { |b| b[@csv[:header].length].split(",").count > 1 }}件
+        dd #{@csv[:counts][:overlap]}件
+        
         hr
         dt バリデーションエラー
-        dd
-          - if @csv[:option][:unmatch] == "new"
-            | #{@csv[:body].count { |b| b[@csv[:header].length+1].present? }}件
-          - else
-            | #{@csv[:body].count { |b| b[@csv[:header].length+1].present? && b[@csv[:header].length].present? }}件
-        
+        dd #{@csv[:counts][:notvalid]}件
         
   .panel.panel-default
     .panel-heading 事前作業

@@ -1,7 +1,7 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} 検索"
 - breadcrumb  :clients_search, @table
 
-- client_columns = [["ID", :id]] + @table.show_client_columns.map { |co| [co.name, co.column_name] } + [["登録日時", :created_at], ["変更日時", "updated_at"]]
+- client_columns = [["ID", :id]] + @show_columns.map { |co| [co.name, co.column_name] } + [["登録日時", :created_at], ["変更日時", "updated_at"]]
 - conditions     = { "で一致" => "eq", "で一致しない" => "not_eq", "が含まれる" => "cont", "が含まれない" => "not_cont",
     "から始まる" => "start", "で終わる" => "end",
     "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt", 
@@ -91,21 +91,18 @@ nav.affix-nav.col-md-2
         tr
           th ID
           th 変更
-          - @table.show_client_columns.each do |co|
+          - @show_columns.each do |co|
             th = co.name
           th 登録日時
           th 変更日時
-          th 削除
+          / th 削除
         - @datas.each do |d|
           tr
             td.id
-              - if @table.show_client_columns.find_by(column_name: "name")
-                = d[:id]
-              - else
-                = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+              = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
             td.icon.edit = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}/edit" do
               span.glyphicon.glyphicon-edit
-            - @table.show_client_columns.each do |co|
+            - @show_columns.each do |co|
               td class="#{co.db_column_type[:type]} #{co.column_name}"
                 - if co.column_name == "name"
                   = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
@@ -113,7 +110,7 @@ nav.affix-nav.col-md-2
                   = d[co.column_name]
             td.datetime = d[:created_at]
             td.datetime = d[:updated_at]
-            td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
+            / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
               span.glyphicon.glyphicon-remove
             end
             

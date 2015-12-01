@@ -6,11 +6,11 @@ class ClientTableData < ActiveRecord::Base
   before_validation do |data|
     client_table = self.class.get_client_table
 
-    client_table.client_columns.each do |co|
-      if co.db_column_type[:filter].present?
-        data[co.column_name] = co.db_column_type[:filter].call(data[co.column_name])
-      end
+    # フィルタ
+    data = client_table.filter(data)
 
+    # デフォルト値
+    client_table.client_columns.each do |co|
       if co[:default].present?
         data[co.column_name] = co[:default] if new_record? && data[co.column_name].blank?
       end

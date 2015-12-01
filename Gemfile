@@ -106,3 +106,5 @@ gem 'meta-tags'
 gem 'activerecord-session_store'
 
 gem 'roo'
+
+gem 'bullet', :group => :development

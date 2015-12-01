@@ -6,7 +6,16 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
+role :app, %w{vagrant@e-kikai_production}
+role :web, %w{vagrant@e-kikai_production}
+role :db,  %w{vagrant@e-kikai_production}
 
+set :rails_env, :production
+set :unicorn_rack_env, :production
+
+ask(:branch, 'master')
+
+# set :whenever_environment, :production
 
 
 # role-based syntax

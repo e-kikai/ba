@@ -11,6 +11,8 @@ class ClientColumn < ActiveRecord::Base
 
   belongs_to :client_table
 
+  scope :show, -> { where(hidden: false) }
+
   before_validation :default_column_name
   before_create     :add_client_column
   before_update     :change_client_column

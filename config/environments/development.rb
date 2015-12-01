@@ -19,7 +19,7 @@ Rails.application.configure do
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
-  config.logger = Logger.new("log/production.log", 8, 10 * 1024 * 1024)
+  config.logger = Logger.new("log/development.log", 8, 10 * 1024 * 1024)
 
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
@@ -40,4 +40,12 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.alert = true
+    Bullet.bullet_logger = true
+    Bullet.console = true
+    Bullet.rails_logger = true
+  end
 end
