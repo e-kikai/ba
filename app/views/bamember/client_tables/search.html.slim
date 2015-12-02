@@ -79,14 +79,14 @@ nav.affix-nav.col-md-2
       =< "検索条件をリセット"
 
 .col-md-10
-  .table-responsive
-    - if @datas.blank?
-      .alert.alert-info 検索結果がありませんでした
-      
-    - else
-      . = page_entries_info @datas, entry_name: @table.name
-      
-      = paginate @datas
+  - if @datas.blank?
+    .alert.alert-info 検索結果がありませんでした
+    
+  - else
+    . = page_entries_info @datas, entry_name: @table.name
+    
+    = paginate @datas
+    .table-responsive
       table.table.table-bordered.table-striped.table-hover.table-condensed
         tr
           th ID
@@ -103,15 +103,23 @@ nav.affix-nav.col-md-2
             td.icon.edit = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}/edit" do
               span.glyphicon.glyphicon-edit
             - @show_columns.each do |co|
-              td class="#{co.db_column_type[:type]} #{co.column_name}"
+              td class="#{co.db_column_type[:type]} #{co.column_type} #{co.column_name}"
                 - if co.column_name == "name"
                   = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
-                - else
+                - elsif d[co.column_name].present?
                   = d[co.column_name]
+                  
+                  / - if co.column_type == "address"
+                  /   =< link_to "https://maps.google.co.jp/maps?f=q&q=#{d[co.column_name]}&source=embed&hl=ja&geocode=&ie=UTF8&t=m&z=14", target: "_blank" do
+                  /     span.glyphicon.glyphicon-map-marker
+                  / - elsif co.column_type == "url"
+                  /   =< link_to d[co.column_name], target: "_blank" do
+                  /     span.glyphicon.glyphicon-new-window
+
             td.datetime = d[:created_at]
             td.datetime = d[:updated_at]
             / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
               span.glyphicon.glyphicon-remove
             end
             
-      = paginate @datas
+    = paginate @datas

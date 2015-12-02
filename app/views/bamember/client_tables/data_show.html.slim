@@ -30,7 +30,19 @@ sass:
     - @table.show_client_columns.each do |co|
       tr
         th class="#{co.db_column_type[:type]} #{co.column_name}" = co.name
-        td class="#{co.db_column_type[:type]} #{co.column_name}" = @data[co.column_name]
+        td class="#{co.db_column_type[:type]} #{co.column_name}"
+          - if co.column_type == "url"
+            =< link_to @data[co.column_name], @data[co.column_name], target: "_blank"
+          - elsif co.column_type == "mail"
+            =< link_to @data[co.column_name], "mailto:#{@data[co.column_name]}", target: "_blank"
+          - else
+            = @data[co.column_name]
+          
+            - if co.column_type == "address"
+              =< link_to "https://maps.google.co.jp/maps?f=q&q=#{@data[co.column_name]}&source=embed&hl=ja&geocode=&ie=UTF8&t=m&z=14", target: "_blank" do
+                span.glyphicon.glyphicon-map-marker
+                =< "MAP"
+
     tr
       th 登録日時
       td.id = @data[:created_at]
