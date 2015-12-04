@@ -13,10 +13,15 @@ coffee:
 sass:
   table td
     input[type=text]
-      width: 160px
+      width: 150px
     textarea.selector
-      width: 160px
-      height: 160px
+      width: 120px
+      height: 150px
+    select.column_type
+      width: 150px
+    input.order_no
+      width: 76px
+      text-align: right
     
 .col-md-12
   - if @table.errors.any?
@@ -33,9 +38,10 @@ sass:
         th 型
         / th 選択肢(改行区切り)<br/ >選択型のみ
         th デフォルト値
-        th ユニーク
+        th 一意
         th 必須
-        th 非表示
+        th 非表
+        th 並び順
         / th 削除
       tr
         td ID (変更不可)
@@ -45,23 +51,8 @@ sass:
         td = check_box_tag :dummy, 1, true,   disabled: true
         td = check_box_tag :dummy, 1, true,   disabled: true
         td = check_box_tag :dummy, 1, false,  disabled: true
+        td
         / td 変更不可
-      / tr
-      /   td 登録日時
-      /   td 日時型
-      /   td 
-      /   td
-      /   td = check_box_tag :dummy, 1, false,  disabled: true
-      /   td = check_box_tag :dummy, 1, false,  disabled: true
-      /   td 変更不可
-      / tr
-      /   td 変更日時
-      /   td 日時型
-      /   td 
-      /   td
-      /   td = check_box_tag :dummy, 1, false,  disabled: true
-      /   td = check_box_tag :dummy, 1, false,  disabled: true
-      /   td 変更不可
 
       = f.fields_for :client_columns, wrapper: false do |co|
         = render "client_column_fields", f: co
@@ -69,8 +60,8 @@ sass:
     = f.link_to_add :client_columns, class: "btn btn-default", data: { target: "#client_columns"} do
       span.glyphicon.glyphicon-plus
       =< "項目を追加"
-    end
-          
-    = f.button data: { confirm: "変更内容を反映してよろしいでしょうか\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
+    
+    - message = "変更内容を反映してよろしいでしょうか\r・ 型を変更した場合、データ変更時に、既に入っているデータに影響が出る場合があります\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
+    = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
       span.glyphicon.glyphicon-save
       =< "項目変更を反映"

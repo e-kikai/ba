@@ -11,7 +11,57 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151120030852) do
+ActiveRecord::Schema.define(version: 20151203081302) do
+
+  create_table "c26_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+  end
+
+  add_index "c26_companies", ["name"], name: "index_c26_companies_on_name"
+
+  create_table "c26_persons", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+  end
+
+  add_index "c26_persons", ["name"], name: "index_c26_persons_on_name"
+
+  create_table "c27_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name"
+    t.text     "co_20151120164951_23568"
+    t.text     "co_20151120164951_82182"
+    t.text     "co_20151122122324_53749"
+    t.text     "co_20151202174325_72251", default: "", null: false
+    t.text     "co_20151202174325_93365", default: "", null: false
+    t.text     "co_20151203015047_48771", default: "", null: false
+  end
+
+  add_index "c27_companies", ["co_20151120164951_23568"], name: "index_c27_companies_on_co_20151120164951_23568"
+  add_index "c27_companies", ["co_20151120164951_82182"], name: "index_c27_companies_on_co_20151120164951_82182"
+  add_index "c27_companies", ["co_20151122122324_53749"], name: "index_c27_companies_on_co_20151122122324_53749"
+  add_index "c27_companies", ["co_20151202174325_72251"], name: "index_c27_companies_on_co_20151202174325_72251"
+  add_index "c27_companies", ["co_20151202174325_93365"], name: "index_c27_companies_on_co_20151202174325_93365"
+  add_index "c27_companies", ["co_20151203015047_48771"], name: "index_c27_companies_on_co_20151203015047_48771"
+  add_index "c27_companies", ["name"], name: "index_c27_companies_on_name"
+
+  create_table "c27_people", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name"
+    t.text     "co_20151124200756_41084", default: "", null: false
+  end
+
+  add_index "c27_people", ["co_20151124200756_41084"], name: "index_c27_people_on_co_20151124200756_41084"
+  add_index "c27_people", ["name"], name: "index_c27_people_on_name"
 
   create_table "c_10_persons", force: :cascade do |t|
     t.string   "name\u2028"
@@ -321,50 +371,53 @@ ActiveRecord::Schema.define(version: 20151120030852) do
   end
 
   create_table "client_columns", force: :cascade do |t|
-    t.string   "name",              default: "",    null: false
-    t.string   "column_name",       default: "",    null: false
+    t.string   "name",              default: "",     null: false
+    t.string   "column_name",       default: "",     null: false
     t.string   "column_type"
     t.text     "selector"
     t.string   "default"
-    t.boolean  "unique",            default: false, null: false
-    t.boolean  "presence",          default: false, null: false
-    t.boolean  "nochange",          default: false, null: false
-    t.boolean  "hidden",            default: false, null: false
+    t.boolean  "unique",            default: false,  null: false
+    t.boolean  "presence",          default: false,  null: false
+    t.boolean  "nochange",          default: false,  null: false
+    t.boolean  "hidden",            default: false,  null: false
     t.text     "comment"
     t.integer  "client_table_id"
-    t.datetime "created_at",                        null: false
-    t.datetime "updated_at",                        null: false
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
     t.datetime "soft_destroyed_at"
+    t.integer  "order_no",          default: 999999, null: false
   end
 
   add_index "client_columns", ["soft_destroyed_at"], name: "index_client_columns_on_soft_destroyed_at"
 
   create_table "client_tables", force: :cascade do |t|
-    t.string   "name",              default: "", null: false
-    t.string   "table_name",        default: "", null: false
+    t.string   "name",              default: "",     null: false
+    t.string   "table_name",        default: "",     null: false
     t.integer  "client_id"
-    t.datetime "created_at",                     null: false
-    t.datetime "updated_at",                     null: false
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
     t.datetime "soft_destroyed_at"
+    t.integer  "order_no",          default: 999999, null: false
   end
 
   add_index "client_tables", ["soft_destroyed_at"], name: "index_client_tables_on_soft_destroyed_at"
 
   create_table "clients", force: :cascade do |t|
-    t.string   "name",                   default: "", null: false
-    t.string   "email",                  default: "", null: false
-    t.string   "encrypted_password",     default: "", null: false
+    t.string   "name",                   default: "",     null: false
+    t.string   "email",                  default: "",     null: false
+    t.string   "encrypted_password",     default: "",     null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          default: 0,  null: false
+    t.integer  "sign_in_count",          default: 0,      null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",                              null: false
     t.datetime "soft_destroyed_at"
+    t.integer  "order_no",               default: 999999, null: false
   end
 
   add_index "clients", ["email"], name: "index_clients_on_email", unique: true

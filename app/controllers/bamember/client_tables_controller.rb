@@ -333,7 +333,7 @@ class Bamember::ClientTablesController < ApplicationController
   end
 
   def client_table_params
-    params.require(:client_table).permit(client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :_destroy])
+    params.require(:client_table).permit(client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :order_no, :_destroy])
   end
 
   def data_params

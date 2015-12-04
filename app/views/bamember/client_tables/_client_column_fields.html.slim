@@ -7,4 +7,12 @@ tr.fields
   td = f.check_box  :unique
   td = f.check_box  :presence
   td = f.check_box  :hidden
+  td
+    / = button_tag type: :button, class: "btn btn-default order_up" do
+    /   span.glyphicon.glyphicon-arrow-up
+    / = button_tag type: :button, class: "btn btn-default order_down" do
+    /   span.glyphicon.glyphicon-arrow-down
+    / = f.hidden_field :order_no, class: "order_no"
+    = f.text_field :order_no, class: "form-control order_no"
+    
   / td = f.link_to_remove  "削除"

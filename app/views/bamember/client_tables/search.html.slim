@@ -35,10 +35,6 @@ sass:
         color: #090
     
 nav.affix-nav.col-md-2
-  = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/new", class: "btn btn-success center-block" do
-    span.glyphicon.glyphicon-plus
-    =< "データを新規登録"
-  
   = label_tag "", "検索条件"
   = form_tag({}, method: :get) do
     - @s.each do |s|
@@ -62,7 +58,7 @@ nav.affix-nav.col-md-2
       .col-md-5 style="padding:0;"
         = select_tag :order_type, options_for_select({"昇順" => "asc", "降順" => "desc"}, @order_type), class: "form-control"
     .form-group
-      = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-info center-block" do
+      = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
         span.glyphicon.glyphicon-search
         =< "検索"
       end
@@ -77,15 +73,19 @@ nav.affix-nav.col-md-2
     = link_to "#{request.path_info}", class: "btn btn-warning center-block" do
       span.glyphicon.glyphicon-remove
       =< "検索条件をリセット"
-
+    
 .col-md-10
   - if @datas.blank?
     .alert.alert-info 検索結果がありませんでした
     
   - else
+    .
+      = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/new", class: "btn btn-success" do
+        span.glyphicon.glyphicon-plus
+        =< "データを新規登録"
     . = page_entries_info @datas, entry_name: @table.name
-    
     = paginate @datas
+    
     .table-responsive
       table.table.table-bordered.table-striped.table-hover.table-condensed
         tr
