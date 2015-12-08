@@ -10,15 +10,30 @@ class Bamember::ClientTablesController < ApplicationController
     if params[:s].present?
       search_query = {}
       params[:s].each do |s|
-        value = s[:value].to_s.normalize_charwidth.strip
+        value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
+
+        if ["present", "blank"].include? s[:cond]
+          value = 1
+        elsif ["in", "not_in" ,"cont_any", "not_cont_any"].include? s[:cond]
+          value = value.split(" ")
+        elsif s[:cond] == "overlap"
+          value = 1
+        end
+
         next if value.blank?
-        search_query["#{s[:column_name]}_#{s[:cond]}"] = value
+
+        if s[:cond] == "overlap"
+          temp_in =  @table.datas.select(s[:column_name]).where.not(s[:column_name] => "").group(s[:column_name]).having("count(*) > 1").pluck(s[:column_name])
+          search_query["#{s[:column_name]}_in"] = temp_in.presence || "XXXXXXXDDEFEFEFGBSRDHJHhdft"
+        else
+          search_query["#{s[:column_name]}_#{s[:cond]}"] = value
+        end
+
         @s << { column_name: s[:column_name], cond: s[:cond], value: value }
       end
-    end
 
-    if search_query.present?
-      @datas = @datas.search(search_query).result
+      @datas = @datas.search(search_query).result if search_query.present?
+      @search_query = search_query
     end
 
     # 並び順

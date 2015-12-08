@@ -2,9 +2,13 @@
 - breadcrumb  :clients_search, @table
 
 - client_columns = [["ID", :id]] + @show_columns.map { |co| [co.name, co.column_name] } + [["登録日時", :created_at], ["変更日時", "updated_at"]]
-- conditions     = { "で一致" => "eq", "で一致しない" => "not_eq", "が含まれる" => "cont", "が含まれない" => "not_cont",
-    "から始まる" => "start", "で終わる" => "end",
-    "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt", 
+- conditions     = { "が含まれる" => "cont", "が含まれない" => "not_cont", "で一致" => "eq", "で一致しない" => "not_eq", 
+    "から始まる" => "start", "から始まらない" => "not_start", "で終わる" => "end", "で終わらない" => "not_end",
+    "空白" => "blank", "空白でない" => "present",
+    "のいずれかを含む(空白区切り)" => "cont_any", "のいずれかを含まない(空白区切り)" => "not_cont_any",
+    "のいずれかに一致(空白区切り)" => "in", "のいずれか一致しない(空白区切り)" => "not_in",
+    "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt",
+    "重複している" => "overlap",
   }
 
 coffee:
