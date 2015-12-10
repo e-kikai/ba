@@ -16,6 +16,12 @@ sass:
       text-align: right
         
 .col-md-offset-3.col-md-6
+  - if @data.errors.full_messages.present?
+    .alert.alert-danger
+      ul
+        - @data.errors.full_messages.each do |msg|
+          li = msg
+      
   = form_for @data, url: "/bamember/clients/#{@table.client_id}/table/#{@table.id}", method: :post do |f|
     table.table.table-hover.table-condensed
       tr

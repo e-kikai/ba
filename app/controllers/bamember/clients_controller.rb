@@ -18,7 +18,6 @@ class Bamember::ClientsController < Bamember::ApplicationController
     end
     redirect_to "/bamember/", notice: '新規クライアントを登録しました'
   rescue => e
-    flash.now[:alert] = "テーブル作成に失敗しました : #{e.message}"
     render :new
   end
 

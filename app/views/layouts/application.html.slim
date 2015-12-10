@@ -32,10 +32,12 @@ html
       = raw breadcrumbs style: :bootstrap, semantic: true
 
       - if notice.present?
-        .alert.alert-success = notice
+        .alert.alert-success
+          span.glyphicon.glyphicon-info-sign
+          =< notice
       - if alert.present?
         .alert.alert-danger
-          span.glyphicon.glyphicon-exclamation-sign
+          span.glyphicon.glyphicon-alert
           =< alert
 
       - if content_for?(:page_title)

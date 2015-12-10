@@ -10,10 +10,6 @@ sass:
     padding: 8px
     
   td
-    &.id
-      text-align: right
-    &.integer, &.float
-      text-align: right
     &.icon
       text-align: center
       &.delete a
@@ -22,6 +18,12 @@ sass:
         color: #090
         
 .col-md-offset-3.col-md-6
+  - if @data.errors.full_messages.present?
+    .alert.alert-danger
+      ul
+        - @data.errors.full_messages.each do |msg|
+          li = msg
+        
   = form_for @data, url: "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{@data.id}", method: :patch do |f|
     table.table.table-hover.table-condensed
       tr
@@ -33,7 +35,7 @@ sass:
           td class="#{co.db_column_type[:type]} #{co.column_name}"
             - if co.db_column_type[:type] == :text
               = f.text_area co.column_name, class: "form-control"
-            - elsif co.db_column_type[:type] == :integer || co.db_column_type[:type] == :float
+            - elsif co.db_column_type[:type] == :integer
               = f.number_field co.column_name, class: "form-control"
             - else 
               = f.text_field co.column_name, class: "form-control"

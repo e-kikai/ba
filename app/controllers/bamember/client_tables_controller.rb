@@ -299,7 +299,7 @@ class Bamember::ClientTablesController < ApplicationController
     @data = @table.klass.create(data_params)
 
     if @data.save
-      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id} #{@data.name}を新規作成しました"
+      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を新規作成しました"
     else
       render :data_new
     end
@@ -318,7 +318,7 @@ class Bamember::ClientTablesController < ApplicationController
     @data = @table.datas.find(params[:data_id])
 
     if @data.update(data_params)
-      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id} #{@data.name}を保存しました"
+      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を保存しました"
     else
       render :data_edit
     end
@@ -328,7 +328,7 @@ class Bamember::ClientTablesController < ApplicationController
     @data = @table.datas.find(params[:data_id])
     @data.soft_destroy
 
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id} #{@data.name}を削除しました"
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を削除しました"
   end
 
   private
