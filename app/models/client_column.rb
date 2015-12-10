@@ -23,14 +23,22 @@ class ClientColumn < ActiveRecord::Base
     string:  { name: "文字列",   type: :string },
     text:    { name: "テキスト", type: :text },
     integer: {
-      name:  "整数",
-      type:  :integer,
-      valid: -> (v) { Integer(v) rescue false },
+      name:   "整数",
+      type:   :integer,
+      filter: -> (v) { v.gsub(/[,、]/, "") },
+      valid:  -> (v) { Integer(v) rescue false },
     },
     float: {
-      name:  "小数",
-      type:  :float,
-      valid: -> (v) { Float(v) rescue false },
+      name:   "小数",
+      type:   :float,
+      filter: -> (v) { v.gsub(/[,、]/, "") },
+      valid:  -> (v) { Float(v) rescue false },
+    },
+    datetime: {
+      name:   "日時",
+      type:   :datetime,
+      filter: -> (v) { Time.parse(v) rescue "notdate" },
+      valid:  -> (v) { v != "notdate" },
     },
     company: {
       name:   "会社名",
