@@ -1,17 +1,16 @@
 - set_meta_tags title: "BAメニュー"
 
 .col-md-10.col-md-offset-1
-  .panel.panel-default
-    .panel-heading クライアント一覧
-    .table-responsive
-      table.table.table-bordered.table-striped.table-hover.table-condensed
+  .table-responsive
+    table.table.table-bordered.table-striped.table-hover.table-condensed
+      caption クライアント一覧
+      tr
+        th クライアント名
+        th メールアドレス
+      - @clients.each do |c|
         tr
-          th クライアント名
-          th メールアドレス
-        - @clients.each do |c|
-          tr
-            td = link_to c.name, "/bamember/clients/#{c.id}/"
-            td = mail_to c.email
+          td = link_to c.name, "/bamember/clients/#{c.id}/"
+          td = mail_to c.email
   
   / table.table.table-striped.table-hover.table-responsive
   /   caption BAテーブル

@@ -41,6 +41,10 @@ sass:
         color: #090
     
 nav.affix-nav.col-md-2
+  = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/new", class: "btn btn-success center-block" do
+    span.glyphicon.glyphicon-plus
+    =< "データを新規登録"
+  
   = label_tag "", "検索条件"
   = form_tag({}, method: :get) do
     - @s.each do |s|
@@ -85,10 +89,6 @@ nav.affix-nav.col-md-2
     .alert.alert-info 検索結果がありませんでした
     
   - else
-    .
-      = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/new", class: "btn btn-success" do
-        span.glyphicon.glyphicon-plus
-        =< "データを新規登録"
     . = page_entries_info @datas, entry_name: @table.name
     = paginate @datas
     
