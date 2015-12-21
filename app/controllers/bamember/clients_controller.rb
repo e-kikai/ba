@@ -4,20 +4,30 @@ class Bamember::ClientsController < Bamember::ApplicationController
   end
 
   def new
-    @client = Client.new
+    @clients = Client.all.order :created_at
+
+    @client      = Client.new
+    @template_id = nil
   end
 
   def create
     Client.transaction do
+      @template_id = params[:template_id]
+
       @client = Client.new(client_params)
       @client.save
 
-      ClientTable.create_companies(@client.id)
-      ClientTable.create_persons(@client.id)
-      # ClientTable.create_actions(@client.id)
+      if @template_id.present?
+        ClientTable.clone_tables(@client.id, @template_id)
+      else
+        ClientTable.init_tables(@client.id)
+      end
+
     end
     redirect_to "/bamember/", notice: '新規クライアントを登録しました'
   rescue => e
+    @clients = Client.all.order :created_at
+    flash[:alert] = e.message
     render :new
   end
 

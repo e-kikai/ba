@@ -34,6 +34,12 @@
             .input-group
               span.input-group-addon: span.glyphicon.glyphicon-user
               = f.password_field :password, class: 'form-control', placeholder: "パスワード", required: "required"
+              
+          .form-group
+            = label_tag :template_id, "データベース構成を複製"
+            .input-group
+              span.input-group-addon: span.glyphicon.glyphicon-copy
+              = select_tag :template_id, options_for_select([["複製しない", nil]] + @clients.pluck(:name, :id)), class: "form-control"
 
           = f.button type:"submit", class: 'btn btn-primary', data: {confirm: "保存します。よろしいですか。", disable_with: '保存中・・・' } do
             span.glyphicon.glyphicon-send

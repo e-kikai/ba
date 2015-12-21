@@ -31,6 +31,12 @@ sass:
           li = msg
             
   = nested_form_for(@table, class: 'form-horizontal', role: 'form', url: {action: 'update'}, method: :patch)  do |f|
+  
+    .form-group.form-inline
+      = f.label :name, "テーブル名"
+      = f.text_field :name, class: 'form-control', placeholder: "テーブル名(必須)", required: "required"
+      | テーブル
+      
     table#client_columns.table.table-striped.table-hover.table-responsive
       caption テーブル項目
       tr

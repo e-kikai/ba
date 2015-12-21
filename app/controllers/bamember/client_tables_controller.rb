@@ -279,7 +279,7 @@ class Bamember::ClientTablesController < ApplicationController
 
   def update
     if @table.update(client_table_params)
-      redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}の項目を変更しました"
+      redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルの項目を変更しました"
     else
       render :edit
     end
@@ -287,7 +287,7 @@ class Bamember::ClientTablesController < ApplicationController
 
   def destroy
     @table.soft_destroy
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}の項目を削除しました"
+    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルを削除しました"
   end
 
   ### data table ###
@@ -348,7 +348,7 @@ class Bamember::ClientTablesController < ApplicationController
   end
 
   def client_table_params
-    params.require(:client_table).permit(client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :order_no, :_destroy])
+    params.require(:client_table).permit(:name, client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :order_no, :_destroy])
   end
 
   def data_params

@@ -25,19 +25,35 @@ class ClientTable < ActiveRecord::Base
     table
   end
 
-  def self.create_companies(client_id)
-    table = self.create(client_id: client_id, name: "会社テーブル", table_name: "c#{client_id}_companies")
+  def self.init_tables(client_id)
+    # 会社テーブル初期化
+    table = self.create(client_id: client_id, name: "会社", table_name: "c#{client_id}_companies")
     table.client_columns.create(name: "会社名", column_name: :name, column_type: :company, nochange: true)
-  end
 
-  def self.create_persons(client_id)
-    table = self.create(client_id: client_id, name: "人テーブル", table_name: "c#{client_id}_people")
+    # 人テーブル初期化
+    table = self.create(client_id: client_id, name: "人", table_name: "c#{client_id}_people")
     table.client_columns.create(name: "氏名", column_name: :name, column_type: :string, nochange: true)
   end
 
-  def self.create_actions(client_id)
-    table = self.create(client_id: client_id, name: "アクションテーブル", table_name:  "c#{client_id}_actions")
-    table.client_columns.create(name: "アクション名", column_name: :name, column_type: :string, nochange: true)
+  def self.clone_tables(client_id, template_id)
+    temp_client = Client.find(template_id)
+
+    temp_client.client_tables.each do |t|
+      t.clone_table(client_id)
+    end
+  end
+
+  def clone_table(client_id)
+    # テーブル複製
+    clone_name = table_name.sub(/([0-9]+)/, client_id.to_s)
+    table      = ClientTable.create(client_id: client_id, name: name, table_name: clone_name)
+
+    # カラム複製
+    client_columns.each do |co|
+      column = co.dup
+      column.client_table_id = table.id
+      column.save
+    end
   end
 
   def show_client_columns

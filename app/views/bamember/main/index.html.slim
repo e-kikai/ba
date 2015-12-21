@@ -3,10 +3,15 @@
 .col-md-10.col-md-offset-1
   .panel.panel-default
     .panel-heading クライアント一覧
-    .panel-body
-      ul.nav.nav-stacked
+    .table-responsive
+      table.table.table-bordered.table-striped.table-hover.table-condensed
+        tr
+          th クライアント名
+          th メールアドレス
         - @clients.each do |c|
-          li = link_to c.name, "/bamember/clients/#{c.id}/"
+          tr
+            td = link_to c.name, "/bamember/clients/#{c.id}/"
+            td = mail_to c.email
   
   / table.table.table-striped.table-hover.table-responsive
   /   caption BAテーブル
