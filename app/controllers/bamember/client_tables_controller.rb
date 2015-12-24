@@ -1,52 +1,9 @@
-class Bamember::ClientTablesController < ApplicationController
+class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_table
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
 
   def search
-    @datas = @table.datas
-
-    # 検索条件
-    @s = []
-    if params[:s].present?
-      search_query = {}
-      params[:s].each do |s|
-        value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
-
-        if ["present", "blank"].include? s[:cond]
-          value = 1
-        elsif ["in", "not_in" ,"cont_any", "not_cont_any"].include? s[:cond]
-          value = value.split(" ")
-        elsif s[:cond] == "overlap"
-          value = 1
-        end
-
-        next if value.blank?
-
-        if s[:cond] == "overlap"
-          temp_in =  @table.datas.select(s[:column_name]).where.not(s[:column_name] => "").group(s[:column_name]).having("count(*) > 1").pluck(s[:column_name])
-          search_query["#{s[:column_name]}_in"] = temp_in.presence || "XXXXXXXDDEFEFEFGBSRDHJHhdft"
-        else
-          search_query["#{s[:column_name]}_#{s[:cond]}"] = value
-        end
-
-        @s << { column_name: s[:column_name], cond: s[:cond], value: value }
-      end
-
-      @datas = @datas.search(search_query).result if search_query.present?
-      @search_query = search_query
-    end
-
-    # 並び順
-    @order_column = params[:order_column].presence || :id
-    @order_type   = params[:order_type].presence   || :asc
-
-    @datas = @datas.order("CASE WHEN #{@order_column} IS NULL OR #{@order_column} = '' THEN 1 ELSE 0 END")
-
-    if oc = @table.client_columns.find_by(column_name: @order_column)
-      @datas = @datas.order("CAST(#{@order_column} as #{oc.db_column_type[:type]}) #{@order_type}")
-    end
-
-    @datas = @datas.order(@order_column => @order_type).order(:id)
+    @datas, @s, @order_column, @order_type = @table.klass.table_search(params)
 
     # 表示項目
     @show_columns = params[:all].present? ? @table. client_columns : @table.client_columns.show

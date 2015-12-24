@@ -7,8 +7,19 @@ Rails.application.routes.draw do
     path_names: {sign_in: 'login', sign_out: 'logout'},
     only:       [:sessions]
 
-  root to: "bamember/main#index"
+  # root to: "bamember/main#index"
 
+  devise_for :clients,
+    path:       'client',
+    path_names: {sign_in: 'login', sign_out: 'logout'},
+    only:       [:sessions]
+
+  # user pages
+  root to: "client#index"
+  get 'client_tables/:id/search'   => 'client_tables#search'
+  get 'client_tables/:id/:data_id' => 'client_tables#data_show'
+
+  # BA member pages
   namespace :bamember do
     root      to: "main#index"
     resources :clients, expect: :index

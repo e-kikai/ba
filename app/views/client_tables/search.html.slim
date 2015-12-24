@@ -1,0 +1,122 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} 検索"
+- breadcrumb  :search, @table
+
+- client_columns = [["ID", :id]] + @show_columns.map { |co| [co.name, co.column_name] } + [["登録日時", :created_at], ["変更日時", "updated_at"]]
+- conditions     = { "が含まれる" => "cont", "が含まれない" => "not_cont", "で一致" => "eq", "で一致しない" => "not_eq", 
+    "から始まる" => "start", "から始まらない" => "not_start", "で終わる" => "end", "で終わらない" => "not_end",
+    "空白" => "blank", "空白でない" => "present",
+    "のいずれかを含む(空白区切り)" => "cont_any", "のいずれかを含まない(空白区切り)" => "not_cont_any",
+    "のいずれかに一致(空白区切り)" => "in", "のいずれか一致しない(空白区切り)" => "not_in",
+    "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt",
+    "重複している" => "overlap",
+  }
+
+coffee:
+  $ ->
+    $_blank = $('.form-group.blank').clone()
+    
+    $(document).on 'click', 'button.add', ->
+      $(this).before($_blank.clone())
+      
+sass:
+  hr
+    border-top-color: #666
+    
+  nav.affix-nav
+    background: #EEE
+    padding: 8px
+    
+  th
+    white-space: nowrap
+  td
+    &.id
+      text-align: right
+    &.integer, &.float
+      text-align: right
+    &.icon
+      text-align: center
+      &.delete a
+        color: #900
+      &.edit a
+        color: #090
+    
+nav.affix-nav.col-md-2
+  = label_tag "", "検索条件"
+  = form_tag({}, method: :get) do
+    - @s.each do |s|
+      .form-group
+        = select_tag("s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control")
+        = text_field_tag "s[][value]", s[:value], class: "form-control"
+        = select_tag("s[][cond]", options_for_select(conditions, s[:cond]), class: "form-control")
+      
+    .form-group.blank
+      = select_tag "s[][column_name]", options_for_select(client_columns), class: "form-control"
+      = text_field_tag "s[][value]", "", class: "form-control"
+      = select_tag "s[][cond]", options_for_select(conditions), class: "form-control"
+    = button_tag type: "button", class: "btn btn-default add" do
+      span.glyphicon.glyphicon-plus
+      =< "検索条件を追加"
+          
+    = label_tag :order_column, "ソート"
+    .form-group
+      .col-md-7 style="padding:0;"
+        = select_tag :order_column, options_for_select(client_columns, @order_column), class: "form-control"
+      .col-md-5 style="padding:0;"
+        = select_tag :order_type, options_for_select({"昇順" => "asc", "降順" => "desc"}, @order_type), class: "form-control"
+    .form-group
+      = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
+        span.glyphicon.glyphicon-search
+        =< "検索"
+      end
+    
+    - if @datas.present?
+      hr
+      = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success center-block" do
+        span.glyphicon.glyphicon-save-file
+        =< "検索結果をCSV出力"
+    
+    hr
+    = link_to "#{request.path_info}", class: "btn btn-warning center-block" do
+      span.glyphicon.glyphicon-remove
+      =< "検索条件をリセット"
+    
+.col-md-10
+  - if @datas.blank?
+    .alert.alert-info 検索結果がありませんでした
+    
+  - else
+    . = page_entries_info @datas, entry_name: @table.name
+    = paginate @datas
+    
+    .table-responsive
+      table.table.table-bordered.table-striped.table-hover.table-condensed
+        tr
+          th ID
+          - @show_columns.each do |co|
+            th = co.name
+          th 登録日時
+          th 変更日時
+        - @datas.each do |d|
+          tr
+            td.id
+              = link_to d[:id], "/bamember/client_tables/#{@table.id}/#{d[:id]}"
+            - @show_columns.each do |co|
+              td class="#{co.db_column_type[:type]} #{co.column_type} #{co.column_name}"
+                - if co.column_name == "name"
+                  = link_to d[co.column_name].presence || "(UNKNOWN)", "/client_tables/#{@table.id}/#{d[:id]}"
+                - elsif ['integer', 'float'].include? co.column_type
+                  = number_with_delimiter d[co.column_name]
+                - elsif d[co.column_name].present?
+                  = d[co.column_name]
+                  
+                  / - if co.column_type == "address"
+                  /   =< link_to "https://maps.google.co.jp/maps?f=q&q=#{d[co.column_name]}&source=embed&hl=ja&geocode=&ie=UTF8&t=m&z=14", target: "_blank" do
+                  /     span.glyphicon.glyphicon-map-marker
+                  / - elsif co.column_type == "url"
+                  /   =< link_to d[co.column_name], target: "_blank" do
+                  /     span.glyphicon.glyphicon-new-window
+
+            td.datetime = d[:created_at]
+            td.datetime = d[:updated_at]
+            
+    = paginate @datas

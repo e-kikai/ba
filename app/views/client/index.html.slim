@@ -1,0 +1,17 @@
+- set_meta_tags title: "#{@client.name} メニュー"
+- breadcrumb    :client_root, @client
+
+.col-md-10.col-md-offset-1
+  table.table.table-striped.table-hover.table-responsive
+    caption テーブル管理
+    - @client.client_tables.each do |t|
+      tr
+        td #{t.name}テーブル
+        td #{t.klass.count}件
+        td = link_to "検索",            "/client_tables/#{t.id}/search/"
+        td = link_to "バックアップ",    "/client_tables/#{t.id}/search.csv"
+        
+  ul.nav.nav-stacked
+    / li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
+    li = link_to "パスワード変更" "/client/passwords/edit"
+    

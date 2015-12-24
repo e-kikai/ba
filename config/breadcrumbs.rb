@@ -3,6 +3,21 @@
 #   link "HOME", "/"
 # end
 
+### client ###
+crumb :client_root do
+  link "TOP", "/"
+end
+
+crumb :search do |table|
+  link   "#{table.name} 検索", "/client_tables/#{table.id}/search"
+  parent :client_root, table.client
+end
+
+crumb :data do |table, data|
+  link   data.name, "/client_tables/#{table.id}/#{data.id}"
+  parent :search, table
+end
+
 ### 管理者画面 ###
 crumb :bamember_root do
   link "BAメニュー", "/bamember/"
