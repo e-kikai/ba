@@ -5,24 +5,28 @@
   .panel.panel-default
     .panel-body 
       dl.dl-horizontal
-        dt アップロードされた情報
-        dd #{@csv[:counts][:all]}件 (先頭行、空行を除く)
-        hr
-        dt マッチした情報
-        dd #{@csv[:counts][:match]}件
+        dt アップロードデータ
+        dd #{number_with_delimiter(@csv[:counts][:all])}件 (先頭行、空行を除く)
         
-        dt マッチしなかった情報
+        hr
+        dt マッチ
+        dd #{number_with_delimiter(@csv[:counts][:match])}件
+        
+        dt マッチしなかった
         - if @csv[:counts][:new] == 0
-          dd #{@csv[:counts][:none]}件
+          dd #{number_with_delimiter(@csv[:counts][:none])}件
         - else
-          dd #{@csv[:counts][:new]}件 (新規登録)
+          dd #{number_with_delimiter(@csv[:counts][:new])}件 (新規登録)
 
-        dt 重複マッチした情報
-        dd #{@csv[:counts][:overlap]}件
+        dt 重複マッチ
+        dd #{number_with_delimiter(@csv[:counts][:overlap])}件
+        
+        dt 空白でスキップ
+        dd #{number_with_delimiter(@csv[:counts][:skip])}件
         
         hr
         dt バリデーションエラー
-        dd #{@csv[:counts][:notvalid]}件
+        dd #{number_with_delimiter(@csv[:counts][:notvalid])}件
         
   .panel.panel-default
     .panel-heading 事前作業
@@ -35,6 +39,6 @@
         =< "エラーCSVをダウンロード"
   
   = form_tag({action: :csv_update}, method: :patch, class: 'form-horizontal') do
-    = button_tag data: { confirm: "変更内容を反映してよろしいでしょうか\r事前にバックアップとエラー分のCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
+    = button_tag data: { confirm: "データを反映してよろしいでしょうか\r事前にバックアップとエラー分のCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
       span.glyphicon.glyphicon-save
       =< "内容を反映"

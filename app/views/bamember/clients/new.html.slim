@@ -10,6 +10,7 @@
         span.glyphicon.glyphicon-envelope
         =< "新規クライアント登録"
       .panel-body
+        div パスワードは半角8文字以上
         = form_for(@client, class: 'form-horizontal', role: 'form', url: {:action => 'create'})  do |f|
           - if @client.errors.any?
             .alert.alert-danger
@@ -32,7 +33,7 @@
           .form-group
             = f.label :password
             .input-group
-              span.input-group-addon: span.glyphicon.glyphicon-user
+              span.input-group-addon: span.glyphicon.glyphicon-ok
               = f.password_field :password, class: 'form-control', placeholder: "パスワード", required: "required"
               
           .form-group
@@ -42,5 +43,5 @@
               = select_tag :template_id, options_for_select([["複製しない", nil]] + @clients.pluck(:name, :id)), class: "form-control"
 
           = f.button type:"submit", class: 'btn btn-primary', data: {confirm: "保存します。よろしいですか。", disable_with: '保存中・・・' } do
-            span.glyphicon.glyphicon-send
+            span.glyphicon.glyphicon-save
             =< "保存"

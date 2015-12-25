@@ -78,6 +78,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       overlap:  0,
       none:     0,
       new:      0,
+      skip:     0,
       notvalid: 0,
     }
 
@@ -89,50 +90,56 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     raise "マッチング項目が設定されていません" if matchings.blank? && @csv[:option][:unmatch] != "new"
 
-    #
-    tf = Tempfile.create(['csv-'])
+    tf = Tempfile.create(['csv-']) # 一時保存ファイル
 
     klass = @table.klass
-    # @csv[:body].each_with_index do |d, key|
     CSV.foreach(@csv[:body_path]) do |d|
       if matchings.present?
-        values = matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h
-        values = @table.filter(values)
+        values = @table.filter(matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h)
 
-        # AND条件マッチング
-        if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
-          res = klass.where(values)
-        end
-
-        # OR条件マッチング
-        if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
-          cond = nil
-          values.each do |k, v|
-            cond = cond ? cond.or(klass.arel_table[k].eq(v)) : klass.arel_table[k].eq(v)
+        if values.has_value? ""
+          count = :skip
+        else
+          # AND条件マッチング
+          if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
+            res = klass.where(values)
           end
 
-          res = klass.where(cond)
+          # OR条件マッチング
+          if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
+            cond = nil
+            values.each do |k, v|
+              cond = cond ? cond.or(klass.arel_table[k].eq(v)) : klass.arel_table[k].eq(v)
+            end
+
+            res = klass.where(cond)
+          end
+
+          count              = res.count
+          matchng_ids        = res.limit(10).pluck(:id)
+          d[matching_id_key] = matchng_ids.join(", ")
         end
 
-        # マッチング結果
-        matchng_ids = res.pluck(:id)
-        d[matching_id_key] = matchng_ids.join(", ")
-
-        data = if matchng_ids.length == 1
+        case count
+        when 1
           counts[:match] += 1
-          res.first # マッチ
-        elsif matchng_ids.length > 1
-          counts[:overlap] += 1
-          d[error_key] = "複数マッチしました"
-          nil
-        elsif @csv[:option][:unmatch] != "new" && matchng_ids.blank?
-          counts[:none] += 1
-          d[error_key] = "マッチしませんでした"
-          nil
+          data = res.first # マッチ
+        when 0
+          if @csv[:option][:unmatch] == "new"
+            counts[:new] += 1
+            data = klass.new # 新規登録
+          else
+            counts[:none] += 1
+            d[error_key] = "マッチしませんでした"
+          end
+        when :skip
+          counts[:skip] += 1
+          d[error_key] = "マッチング項目が空白なのでスキップ"
         else
-          counts[:new] += 1
-          klass.new # 新規登録
+          counts[:overlap] += 1
+          d[error_key] = "複数マッチ:#{count}件"
         end
+
       else
         counts[:new] += 1
         data = klass.new

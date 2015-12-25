@@ -13,5 +13,5 @@
         
   ul.nav.nav-stacked
     / li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
-    li = link_to "パスワード変更" "/client/passwords/edit"
-    
+    li = link_to "パスワード変更", "/client/edit_password"
+    li = link_to "ログアウト", "/client/logout", method: :delete

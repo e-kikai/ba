@@ -39,6 +39,9 @@ sass:
         color: #900
       &.edit a
         color: #090
+        
+  th.datetime, td.datetime
+    white-space: nowrap
     
 nav.affix-nav.col-md-2
   = label_tag "", "検索条件"
@@ -91,11 +94,32 @@ nav.affix-nav.col-md-2
     .table-responsive
       table.table.table-bordered.table-striped.table-hover.table-condensed
         tr
-          th ID
+          th
+            | ID
+            =< link_to params.merge(order_column: :id, order_type: :asc), class: "btn btn-primary btn-xs" do
+              span.glyphicon.glyphicon-chevron-down
+            =< link_to params.merge(order_column: :id, order_type: :desc), class: "btn btn-primary btn-xs" do
+              span.glyphicon.glyphicon-chevron-up
           - @show_columns.each do |co|
-            th = co.name
-          th 登録日時
-          th 変更日時
+            th
+              = co.name
+              =< link_to params.merge(order_column: co.column_name, order_type: :asc), class: "btn btn-primary btn-xs" do
+                span.glyphicon.glyphicon-chevron-down
+              =< link_to params.merge(order_column: co.column_name, order_type: :desc), class: "btn btn-primary btn-xs" do
+                span.glyphicon.glyphicon-chevron-up
+                
+          th.datetime
+            | 登録日時
+            =< link_to params.merge(order_column: :created_at, order_type: :asc), class: "btn btn-primary btn-xs" do
+              span.glyphicon.glyphicon-chevron-down
+            =< link_to params.merge(order_column: :created_at, order_type: :desc), class: "btn btn-primary btn-xs" do
+              span.glyphicon.glyphicon-chevron-up
+          th.datetime
+            | 変更日時
+            =< link_to params.merge(order_column: :updated_at, order_type: :asc), class: "btn btn-primary btn-xs" do
+              span.glyphicon.glyphicon-chevron-down
+            =< link_to params.merge(order_column: :updated_at, order_type: :desc), class: "btn btn-primary btn-xs" do
+              span.glyphicon.glyphicon-chevron-up
         - @datas.each do |d|
           tr
             td.id

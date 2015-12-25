@@ -23,8 +23,8 @@ sass:
   .panel.panel-default
     .panel-body
       dl.dl-horizontal
-        dt アップロードされた情報
-        dd #{@csv[:counts][:all]}件 (先頭行、空行を除く)
+        dt アップロードデータ
+        dd #{number_with_delimiter(@csv[:counts][:all])}件 (先頭行、空行を除く)
     
   = form_tag({action: :csv_matching_check}, method: :post, class: 'form-horizontal') do
     table.table.table-striped.table-hover.table-responsive
@@ -51,7 +51,7 @@ sass:
       / .col-sm-4 = label_tag  :option_if, "マッチング条件", class: "control-label"
       .col-sm-3: label.control-label(for="option[if]") マッチング条件
       .col-sm-6 = select_tag("option[if]",
-        options_for_select({"AND条件でなければOR条件(曖昧検索)" => nil, "AND条件" => :and, "OR条件" => :or}, @csv[:option][:if]),
+        options_for_select({"AND条件" => :and, "OR条件" => :or, "AND条件でなければOR条件(曖昧検索)" => nil}, @csv[:option][:if]),
         class: "form-control")
     .form-group
       .col-sm-3 = label_tag  "option[unmatch]", "マッチしなかったデータ", class: "control-label"

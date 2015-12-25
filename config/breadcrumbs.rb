@@ -18,6 +18,11 @@ crumb :data do |table, data|
   parent :search, table
 end
 
+crumb :something do |title|
+  link   title
+  parent :client_root
+end
+
 ### 管理者画面 ###
 crumb :bamember_root do
   link "BAメニュー", "/bamember/"

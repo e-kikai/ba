@@ -1,6 +1,7 @@
 class Bamember::ClientsController < Bamember::ApplicationController
+  before_action :get_client, only: ["show", "edit", "update", "destroy", "edit_password", "update_password"]
+
   def show
-    @client = Client.find(params[:id])
   end
 
   def new
@@ -32,12 +33,9 @@ class Bamember::ClientsController < Bamember::ApplicationController
   end
 
   def edit
-    @client = Client.find(params[:id])
   end
 
   def update
-    @client = Client.find(params[:id])
-
     if @client.update(client_params)
       redirect_to "/bamember/clients/#{params[:id]}/", notice: 'クライアント情報を変更しました'
     else
@@ -46,14 +44,32 @@ class Bamember::ClientsController < Bamember::ApplicationController
   end
 
   def destroy
-    @client = Client.find(params[:id])
     @client.destroy!
     redirect_to "/bamember/clients/#{params[:id]}/", notice: 'クライアント情報を削除しました'
   end
 
+  def edit_password
+  end
+
+  def update_password
+    if @client.update(password_params)
+      redirect_to "/bamember/clients/#{params[:id]}/", notice: 'クライアントのパスワードを変更しました'
+    else
+      render :edit_password
+    end
+  end
+
   private
+
+  def get_client
+    @client = Client.find(params[:id])
+  end
 
   def client_params
     params.require(:client).permit(:name, :email, :password)
+  end
+
+  def password_params
+    params.require(:client).permit(:password, :password_confirmation)
   end
 end

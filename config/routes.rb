@@ -16,6 +16,9 @@ Rails.application.routes.draw do
 
   # user pages
   root to: "client#index"
+  get   'client/edit_password' => 'client#edit_password'
+  patch 'client/edit_password' => 'client#update_password'
+
   get 'client_tables/:id/search'   => 'client_tables#search'
   get 'client_tables/:id/:data_id' => 'client_tables#data_show'
 
@@ -23,6 +26,8 @@ Rails.application.routes.draw do
   namespace :bamember do
     root      to: "main#index"
     resources :clients, expect: :index
+    get   'clients/:id/edit_password' => 'clients#edit_password'
+    patch 'clients/:id/edit_password' => 'clients#update_password'
 
     get    'clients/:client_id/table/:id/search'       => 'client_tables#search'
     get    'clients/:client_id/table/:id/csv'          => 'client_tables#csv'
