@@ -9,9 +9,23 @@ coffee:
     $(document).on 'change', 'select.column_name', ->
       $_act = $(@).closest('tr').find('select.action')
       
-      if $(@).val() then $_act.show() else $_act.hide()
-      if $(@).val() == 'id' then $_act.val('matching')
-      $_act.attr('readonly', (if $(@).val() == 'id' then 'readonly' else null))
+      # 処理項目の表示切替
+      val = $(@).val()
+      if val then $_act.show() else $_act.hide()
+      if val == 'id' then $_act.val('matching')
+      
+      # IDはマッチングのみ選択
+      $_act.attr('readonly', (if val == 'id' then 'readonly' else null))
+      
+      # 使用済み項目を非表示
+      $('select.column_name option').show()
+      $('select.column_name').each ->
+        val2 = $(@).val()
+        if val2 == "" then return true
+        $('select.column_name').each ->
+          if $(@).val() != val2
+            $(@).find('option').each ->
+              if $(@).attr('value') == val2 then $(@).hide()
       
     $('select.column_name').trigger('change')
 

@@ -54,11 +54,16 @@ crumb :clients_data do |table, data|
 end
 
 crumb :clients_table_csv do |table|
-  link   "#{table.name} ファイルアップロード", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv"
+  link   "#{table.name}テーブル ファイルアップロード", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv"
   parent :clients_show, table.client
 end
 
 crumb :clients_table_csv_matching do |table|
   link   "マッチング", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv_matching"
   parent :clients_table_csv, table
+end
+
+crumb :clients_table_csv_confirm do |table|
+  link   "確認", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv_confirm"
+  parent :clients_table_csv_matching, table
 end
