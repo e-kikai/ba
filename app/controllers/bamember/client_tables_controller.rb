@@ -77,7 +77,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       match:    0,
       overlap:  0,
       none:     0,
-      new:      0,
       skip:     0,
       notvalid: 0,
     }
@@ -125,16 +124,19 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
           counts[:match] += 1
           data = res.first # マッチ
         when 0
+          counts[:none] += 1
           if @csv[:option][:unmatch] == "new"
-            counts[:new] += 1
             data = klass.new # 新規登録
           else
-            counts[:none] += 1
             d[error_key] = "マッチしませんでした"
           end
         when :skip
           counts[:skip] += 1
-          d[error_key] = "マッチング項目が空白なのでスキップ"
+          if @csv[:option][:unmatch] == "new"
+            data = klass.new # 新規登録
+          else
+            d[error_key] = "マッチング項目が空白なのでスキップ"
+          end
         else
           counts[:overlap] += 1
           d[error_key] = "複数マッチ:#{count}件"
@@ -153,7 +155,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
           # データ(バリデーション用に)格納
           if @csv[:method][i] == "update" \
              || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
-             || (@csv[:method][i] == "matching" && res.count == 0 && @csv[:table_header][i] != "id")
+             || (@csv[:method][i] == "matching" && (count == 0 || count == :skip) && @csv[:table_header][i] != "id")
             data[@csv[:table_header][i]] = d[i]
           end
         end

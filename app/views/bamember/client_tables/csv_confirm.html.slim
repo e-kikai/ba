@@ -13,16 +13,13 @@
         dd #{number_with_delimiter(@csv[:counts][:match])}件
         
         dt マッチしなかった
-        - if @csv[:counts][:new] == 0
-          dd #{number_with_delimiter(@csv[:counts][:none])}件
-        - else
-          dd #{number_with_delimiter(@csv[:counts][:new])}件 (新規登録)
-
+        dd #{number_with_delimiter(@csv[:counts][:none])}件 #{ "(新規登録)" if @csv[:option][:unmatch] == "new"}
+          
+        dt 空白でスキップ
+        dd #{number_with_delimiter(@csv[:counts][:skip])}件 #{ "(新規登録)" if @csv[:option][:unmatch] == "new"}
+        
         dt 重複マッチ
         dd #{number_with_delimiter(@csv[:counts][:overlap])}件
-        
-        dt 空白でスキップ
-        dd #{number_with_delimiter(@csv[:counts][:skip])}件
         
         hr
         dt バリデーションエラー
