@@ -64,7 +64,7 @@ class ClientTableData < ActiveRecord::Base
         ### 値の整形 ###
         tmp = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
 
-        value = if ["present", "blank", "overlap"].include? s[:cond]
+        value = if ["present", "blank", "overlap", "unique"].include? s[:cond]
           1
         elsif ["in", "not_in" ,"cont_any", "not_cont_any"].include? s[:cond]
           tmp.split(" ")
@@ -74,15 +74,20 @@ class ClientTableData < ActiveRecord::Base
 
         next if value.blank?
 
-        ### 検索条件の整形(overlap用)
-        if s[:cond] == "overlap"
-          temp_in = select(s[:column_name]).where.not(s[:column_name] => "").group(s[:column_name]).having("count(*) > 1").pluck(s[:column_name])
-          search_query["#{s[:column_name]}_in"] = temp_in.presence || "XXXXXXXDDEFEFEFGBSRDHJHhdft"
-        else
+        unless ["overlap", "unique"].include? s[:cond]
           search_query["#{s[:column_name]}_#{s[:cond]}"] = value
         end
 
         sparam << { column_name: s[:column_name], cond: s[:cond], value: value }
+      end
+
+      ### 検索条件の整形(overlap, unique用)
+      params[:s].each do |s|
+        if ["overlap", "unique"].include? s[:cond]
+          temp_in = search(search_query).result.select(s[:column_name]).where.not(s[:column_name] => "").group(s[:column_name]).having("count(*) > 1").pluck(s[:column_name]) || "XXXXXXXDDEFEFEFGBSRDHJHhdft"
+
+          search_query["#{s[:column_name]}_#{s[:cond] == "overlap" ? "in" : "not_in"}"] = temp_in
+        end
       end
     end
 
