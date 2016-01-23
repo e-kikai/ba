@@ -60,13 +60,15 @@ class ClientTableData < ActiveRecord::Base
 
     if params[:s].present?
       params[:s].each do |s|
+        next if s[:column_name].blank?
 
         ### 値の整形 ###
         tmp = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
 
-        value = if ["present", "blank", "overlap", "unique"].include? s[:cond]
+        value = case s[:cond]
+        when "present", "blank", "overlap", "unique"
           1
-        elsif ["in", "not_in" ,"cont_any", "not_cont_any"].include? s[:cond]
+        when "in", "not_in" ,"cont_any", "not_cont_any"
           tmp.split(" ")
         else
           tmp
@@ -93,18 +95,32 @@ class ClientTableData < ActiveRecord::Base
 
     res = search(search_query).result
 
-    ### 並び順 ###
-    order_column = params[:order_column].presence || :id
-    order_type   = params[:order_type].presence   || :asc
+    # 集計
+    sum     = params[:sum] || {}
+    sum_res = {}
+    sums    = res
+    if sum[:methods].present?
+      sum[:group].each do |g|
+        sums = sums.group(g) if g.present?
+      end
 
-    res = res.order("CASE WHEN #{order_column} IS NULL OR #{order_column} = '' THEN 1 ELSE 0 END")
-
-    if oc = self.get_client_table.client_columns.find_by(column_name: order_column)
-      res = res.order("CAST(#{order_column} as #{oc.db_column_type[:type]}) #{order_type}")
+      sum_method = sum[:methods].split('__')
+      sum_res    = sums.try(sum_method[1], sum_method[0])
     end
 
-    res = res.order(order_column => order_type).order(:id)
+    ### 並び順 ###
+    order = params[:order] || {}
+    order[:column] = order[:column].presence || :id
+    order[:type]   = order[:type] == "desc" ? :desc : :asc
 
-    [res, sparam, order_column, order_type]
+    res = res.order("CASE WHEN #{order[:column]} IS NULL OR #{order[:column]} = '' THEN 1 ELSE 0 END")
+
+    if oc = self.get_client_table.client_columns.find_by(column_name: order[:column])
+      res = res.order("CAST(#{order[:column]} as #{oc.db_column_type[:type]}) #{order[:type]}")
+    end
+
+    res = res.order(order[:column] => order[:type]).order(:id)
+
+    [res, sparam, order, sum, sum_res]
   end
 end

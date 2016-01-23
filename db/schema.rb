@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151204101141) do
+ActiveRecord::Schema.define(version: 20160122072240) do
 
   create_table "bamembers", force: :cascade do |t|
     t.string   "name",                   default: "", null: false
@@ -64,6 +64,7 @@ ActiveRecord::Schema.define(version: 20151204101141) do
     t.text     "co_20151202174325_72251", default: "", null: false
     t.text     "co_20151202174325_93365", default: "", null: false
     t.text     "co_20151203015047_48771", default: "", null: false
+    t.text     "co_20151210180722_16415", default: "", null: false
   end
 
   add_index "c27_companies", ["co_20151120164951_23568"], name: "index_c27_companies_on_co_20151120164951_23568"
@@ -72,6 +73,7 @@ ActiveRecord::Schema.define(version: 20151204101141) do
   add_index "c27_companies", ["co_20151202174325_72251"], name: "index_c27_companies_on_co_20151202174325_72251"
   add_index "c27_companies", ["co_20151202174325_93365"], name: "index_c27_companies_on_co_20151202174325_93365"
   add_index "c27_companies", ["co_20151203015047_48771"], name: "index_c27_companies_on_co_20151203015047_48771"
+  add_index "c27_companies", ["co_20151210180722_16415"], name: "index_c27_companies_on_co_20151210180722_16415"
   add_index "c27_companies", ["name"], name: "index_c27_companies_on_name"
 
   create_table "c27_people", force: :cascade do |t|
@@ -84,6 +86,126 @@ ActiveRecord::Schema.define(version: 20151204101141) do
 
   add_index "c27_people", ["co_20151124200756_41084"], name: "index_c27_people_on_co_20151124200756_41084"
   add_index "c27_people", ["name"], name: "index_c27_people_on_name"
+
+  create_table "c28_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151202174325_93365", default: "", null: false
+    t.text     "co_20151120164951_23568", default: "", null: false
+    t.text     "co_20151120164951_82182", default: "", null: false
+    t.text     "co_20151202174325_72251", default: "", null: false
+    t.text     "co_20151203015047_48771", default: "", null: false
+    t.text     "co_20151122122324_53749", default: "", null: false
+    t.text     "co_20151210180722_16415", default: "", null: false
+  end
+
+  add_index "c28_companies", ["co_20151120164951_23568"], name: "index_c28_companies_on_co_20151120164951_23568"
+  add_index "c28_companies", ["co_20151120164951_82182"], name: "index_c28_companies_on_co_20151120164951_82182"
+  add_index "c28_companies", ["co_20151122122324_53749"], name: "index_c28_companies_on_co_20151122122324_53749"
+  add_index "c28_companies", ["co_20151202174325_72251"], name: "index_c28_companies_on_co_20151202174325_72251"
+  add_index "c28_companies", ["co_20151202174325_93365"], name: "index_c28_companies_on_co_20151202174325_93365"
+  add_index "c28_companies", ["co_20151203015047_48771"], name: "index_c28_companies_on_co_20151203015047_48771"
+  add_index "c28_companies", ["co_20151210180722_16415"], name: "index_c28_companies_on_co_20151210180722_16415"
+  add_index "c28_companies", ["name"], name: "index_c28_companies_on_name"
+
+  create_table "c28_people", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151124200756_41084", default: "", null: false
+  end
+
+  add_index "c28_people", ["co_20151124200756_41084"], name: "index_c28_people_on_co_20151124200756_41084"
+  add_index "c28_people", ["name"], name: "index_c28_people_on_name"
+
+  create_table "c29_companies", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c29_companies", ["name"], name: "index_c29_companies_on_name"
+
+  create_table "c29_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c29_people", ["name"], name: "index_c29_people_on_name"
+
+  create_table "c30_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151202174325_93365", default: "", null: false
+    t.text     "co_20151120164951_23568", default: "", null: false
+    t.text     "co_20151120164951_82182", default: "", null: false
+    t.text     "co_20151202174325_72251", default: "", null: false
+    t.text     "co_20151203015047_48771", default: "", null: false
+    t.text     "co_20151122122324_53749", default: "", null: false
+    t.text     "co_20151210180722_16415", default: "", null: false
+  end
+
+  add_index "c30_companies", ["co_20151120164951_23568"], name: "index_c30_companies_on_co_20151120164951_23568"
+  add_index "c30_companies", ["co_20151120164951_82182"], name: "index_c30_companies_on_co_20151120164951_82182"
+  add_index "c30_companies", ["co_20151122122324_53749"], name: "index_c30_companies_on_co_20151122122324_53749"
+  add_index "c30_companies", ["co_20151202174325_72251"], name: "index_c30_companies_on_co_20151202174325_72251"
+  add_index "c30_companies", ["co_20151202174325_93365"], name: "index_c30_companies_on_co_20151202174325_93365"
+  add_index "c30_companies", ["co_20151203015047_48771"], name: "index_c30_companies_on_co_20151203015047_48771"
+  add_index "c30_companies", ["co_20151210180722_16415"], name: "index_c30_companies_on_co_20151210180722_16415"
+  add_index "c30_companies", ["name"], name: "index_c30_companies_on_name"
+
+  create_table "c30_people", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151124200756_41084", default: "", null: false
+  end
+
+  add_index "c30_people", ["co_20151124200756_41084"], name: "index_c30_people_on_co_20151124200756_41084"
+  add_index "c30_people", ["name"], name: "index_c30_people_on_name"
+
+  create_table "c31_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151202174325_93365", default: "", null: false
+    t.text     "co_20151120164951_23568", default: "", null: false
+    t.text     "co_20151120164951_82182", default: "", null: false
+    t.text     "co_20151202174325_72251", default: "", null: false
+    t.text     "co_20151203015047_48771", default: "", null: false
+    t.text     "co_20151122122324_53749", default: "", null: false
+    t.text     "co_20151210180722_16415", default: "", null: false
+  end
+
+  add_index "c31_companies", ["co_20151120164951_23568"], name: "index_c31_companies_on_co_20151120164951_23568"
+  add_index "c31_companies", ["co_20151120164951_82182"], name: "index_c31_companies_on_co_20151120164951_82182"
+  add_index "c31_companies", ["co_20151122122324_53749"], name: "index_c31_companies_on_co_20151122122324_53749"
+  add_index "c31_companies", ["co_20151202174325_72251"], name: "index_c31_companies_on_co_20151202174325_72251"
+  add_index "c31_companies", ["co_20151202174325_93365"], name: "index_c31_companies_on_co_20151202174325_93365"
+  add_index "c31_companies", ["co_20151203015047_48771"], name: "index_c31_companies_on_co_20151203015047_48771"
+  add_index "c31_companies", ["co_20151210180722_16415"], name: "index_c31_companies_on_co_20151210180722_16415"
+  add_index "c31_companies", ["name"], name: "index_c31_companies_on_name"
+
+  create_table "c31_people", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151124200756_41084", default: "", null: false
+  end
+
+  add_index "c31_people", ["co_20151124200756_41084"], name: "index_c31_people_on_co_20151124200756_41084"
+  add_index "c31_people", ["name"], name: "index_c31_people_on_name"
 
   create_table "c_10_persons", force: :cascade do |t|
     t.string   "name\u2028"
@@ -408,6 +530,7 @@ ActiveRecord::Schema.define(version: 20151204101141) do
     t.datetime "updated_at",                         null: false
     t.datetime "soft_destroyed_at"
     t.integer  "order_no",          default: 999999, null: false
+    t.boolean  "sumally",           default: false,  null: false
   end
 
   add_index "client_columns", ["soft_destroyed_at"], name: "index_client_columns_on_soft_destroyed_at"

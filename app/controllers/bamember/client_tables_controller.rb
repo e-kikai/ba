@@ -3,16 +3,19 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
 
   def search
-    @datas, @s, @order_column, @order_type = @table.klass.table_search(params)
+    @datas, @s, @order, @sum, @sum_res = @table.klass.table_search(params)
 
     # 表示項目
     @show_columns = params[:all].present? ? @table. client_columns : @table.client_columns.show
 
+    @sums = @datas.group("")
+
     # CSV出力
     respond_to do |format|
       format.html do
-        @datas = @datas.page(params[:page])
+        @pdatas = @datas.page(params[:page])
       end
+
       format.csv { send_data render_to_string,
         content_type: 'text/csv;charset=shift_jis',
         filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
@@ -314,7 +317,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def client_table_params
-    params.require(:client_table).permit(:name, client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :order_no, :_destroy])
+    params.require(:client_table).permit(:name, client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :sumally, :order_no, :_destroy])
   end
 
   def data_params

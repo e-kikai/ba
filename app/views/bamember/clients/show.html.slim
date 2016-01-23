@@ -7,7 +7,7 @@
     - @client.client_tables.each do |t|
       tr
         td #{t.name}テーブル
-        td #{t.klass.count}件
+        td #{number_with_delimiter(t.klass.count)}件
         td = link_to "検索",            "/bamember/clients/#{@client.id}/table/#{t.id}/search/"
         td = link_to "CSVアップロード", "/bamember/clients/#{@client.id}/table/#{t.id}/csv/"
         td = link_to "項目管理",        "/bamember/clients/#{@client.id}/table/#{t.id}/edit/"
