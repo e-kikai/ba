@@ -24,8 +24,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def test_01
-    @company_id = @table.client_columns.find_by(name: "会社ID").column_name
-    @order_date = @table.client_columns.find_by(name: "受注日").column_name
+    @company_table = @client.client_tables.where("table_name LIKE '%companies%'").first
+    @company_id    = @table.client_columns.find_by(name: "会社ID").column_name
+    @order_date    = @table.client_columns.find_by(name: "受注日").column_name
 
     @x = params[:x]
     @y = params[:y]
@@ -75,9 +76,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       " count(*) "
     end
 
-    # x_select = " min((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', co_20160126141247_9609) * 12 + strftime('%m', co_20160126141247_9609))) "
-    # y_select = " count(*) "
-
     companies_sql = "SELECT #{@company_id}, #{x_select} as x, #{y_select} as y FROM #{@table.table_name} WHERE #{@company_id} <> ''  GROUP BY #{@company_id} ORDER BY x, y"
 
     # RFM
@@ -99,8 +97,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     # @count_all = @table.klass.count
 
     @sums = @table.klass.find_by_sql(sql)
-    puts @sums
-
   end
 
   def csv

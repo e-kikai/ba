@@ -113,7 +113,7 @@ h1 RFMサンプル
             - if sum_res[[row, col]].blank?
               | 0
             - else
-              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, id: 50, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}
+              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, id: @company_table.id, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}
               .percent = "#{(sum_res[[row, col]][:count].to_f * 100 / sum_count).round(2)}%"
               
         th.integer = sum_res.select { |key, v| key[0] == row }.inject(0) { |sum, (key, s)| sum + s[:count] }
