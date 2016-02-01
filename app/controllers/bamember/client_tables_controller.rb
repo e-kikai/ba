@@ -78,7 +78,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     # x_select = " min((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', co_20160126141247_9609) * 12 + strftime('%m', co_20160126141247_9609))) "
     # y_select = " count(*) "
 
-    companies_sql = "SELECT #{@company_id}, #{x_select} as x, #{y_select} as y FROM #{@table.table_name} WHERE #{@company_id} <> '' AND co_20160126141247_9609 <> '' GROUP BY #{@company_id} ORDER BY x, y"
+    companies_sql = "SELECT #{@company_id}, #{x_select} as x, #{y_select} as y FROM #{@table.table_name} WHERE #{@company_id} <> ''  GROUP BY #{@company_id} ORDER BY x, y"
 
     # RFM
 
