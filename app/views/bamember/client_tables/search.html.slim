@@ -136,22 +136,22 @@ nav.affix-nav.col-md-2
     - else
       - rows = @sum_res.map { |k, v| k[0] }.uniq
       - cols = @sum_res.map { |k, v| k[1] }.uniq
-      
-      table.table.table-bordered.table-striped.table-hover.table-condensed
-        tr
-          th #{client_columns.invert[groups[0]]} / #{client_columns.invert[groups[1]]}
-          - cols.each do |col|
-            th = col
-        - rows.each do |row|
+      .table-responsive
+        table.table.table-bordered.table-striped.table-hover.table-condensed
           tr
-            th = row
+            th #{client_columns.invert[groups[0]]} / #{client_columns.invert[groups[1]]}
             - cols.each do |col|
-              td.integer
-                - if @sum_res[[row, col]].blank?
-                  | 0
-                - else
-                  = link_to number_with_delimiter(@sum_res[[row, col]]), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: row, cond: :eq}, {column_name: groups[1], value: col, cond: :eq}]})
-            
+              th = col
+          - rows.each do |row|
+            tr
+              th = row
+              - cols.each do |col|
+                td.integer
+                  - if @sum_res[[row, col]].blank?
+                    | 0
+                  - else
+                    = link_to number_with_delimiter(@sum_res[[row, col]]), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: row, cond: :eq}, {column_name: groups[1], value: col, cond: :eq}]})
+              
   - else
     / div = page_entries_info @pdatas, entry_name: @table.name
 

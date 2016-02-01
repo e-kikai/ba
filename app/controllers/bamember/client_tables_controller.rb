@@ -6,7 +6,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @datas, @s, @order, @sum, @sum_res = @table.klass.table_search(params)
 
     # 表示項目
-    @show_columns = params[:all].present? ? @table. client_columns : @table.client_columns.show
+    @show_columns = params[:all].present? ? @table.client_columns : @table.client_columns.show
 
     @sums = @datas.group("")
 
@@ -21,6 +21,86 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
       }
     end
+  end
+
+  def test_01
+    @company_id = @table.client_columns.find_by(name: "会社ID").column_name
+    @order_date = @table.client_columns.find_by(name: "受注日").column_name
+
+    @x = params[:x]
+    @y = params[:y]
+    @x_unit = "1"
+    @y_unit = ""
+
+    x_select = case @x
+    when "count"
+      @x_unit = "回"
+      " count(*) "
+    when /^order__(.*)__(.*)$/
+      func = $2 == "min" ? "min" : "max"
+      case $1
+      when "day"
+        @x_unit = "日"
+        " #{func}((strftime('%s', current_timestamp)) / 86400 - (strftime('%s', #{@order_date})) / 86400) "
+      when "year"
+        @x_unit = "年"
+        " #{func}((strftime('%Y', current_timestamp)) - (strftime('%Y', #{@order_date}))) "
+      else
+        @x_unit = "ヶ月"
+        " #{func}((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', #{@order_date}) * 12 + strftime('%m', #{@order_date}))) "
+      end
+    else
+      @x = :order__month__min
+      @x_unit = "ヶ月"
+      " min((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', #{@order_date}) * 12 + strftime('%m', #{@order_date}))) "
+    end
+
+    y_select = case @y
+    when /^order__(.*)__(.*)$/
+      func = $2 == "min" ? "min" : "max"
+      case $1
+      when "day"
+        @y_unit = "日"
+        " #{func}((strftime('%s', current_timestamp)) / 86400 - (strftime('%s', #{@order_date})) / 86400) "
+      when "year"
+        @y_unit = "年"
+        " #{func}((strftime('%Y', current_timestamp)) - (strftime('%Y', #{@order_date}))) "
+      else
+        @y_unit = "ヶ月"
+        " #{func}((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', #{@order_date}) * 12 + strftime('%m', #{@order_date}))) "
+      end
+    else
+      @x = :count
+      @y_unit = "回"
+      " count(*) "
+    end
+
+    # x_select = " min((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', co_20160126141247_9609) * 12 + strftime('%m', co_20160126141247_9609))) "
+    # y_select = " count(*) "
+
+    companies_sql = "SELECT #{@company_id}, #{x_select} as x, #{y_select} as y FROM #{@table.table_name} WHERE #{@company_id} <> '' AND co_20160126141247_9609 <> '' GROUP BY #{@company_id} ORDER BY x, y"
+
+    # RFM
+
+    @x_sepa = (params[:x_separater].presence || "3, 6, 9, 12, 15, 18, 21, 24").split(",").map(&:to_i).sort
+    @y_sepa = (params[:y_separater].presence || "1, 2, 3, 4, 6, 10, 15, 20, 30").split(",").map(&:to_i).sort
+
+    y_case = @y_sepa.inject(" CASE ") do |s, i|
+      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.y <= ? THEN ? ", i, i])
+    end + " ELSE 'more' END "
+
+    x_case = @x_sepa.inject(" CASE ") do |s, i|
+      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.x <= ? THEN ? ", i, i])
+    end + " ELSE 'more' END "
+
+    sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, group_concat(#{@company_id}, ' ') as company_ids FROM (#{companies_sql}) cs
+    GROUP BY x, y ORDER BY x, y;"
+
+    # @count_all = @table.klass.count
+
+    @sums = @table.klass.find_by_sql(sql)
+    puts @sums
+
   end
 
   def csv
@@ -146,7 +226,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         end
 
       else
-        counts[:new] += 1
+        counts[:skip] += 1
         data = klass.new
       end
 

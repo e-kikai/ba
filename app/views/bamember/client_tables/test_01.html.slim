@@ -1,0 +1,129 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} test_01"
+- breadcrumb  :clients_search, @table
+
+coffee:
+  $ ->
+    $('.data a').click ->
+      $('iframe.detail_frame').attr("src", $(@).attr('href'))
+      return false
+    
+    $('iframe.detail_frame').load ->
+      ifrmDoc = $(@)[0].contentWindow.document
+      
+      $('header, nav', ifrmDoc).hide()
+      $('#detail').modal('show')
+
+sass:
+  th
+    white-space: nowrap
+
+  .integer, .float
+    text-align: right
+    
+  .percent
+    color: #777
+    font-size: 90%
+    
+- cols = @x_sepa + ["more"]
+- rows = (@y_sepa + ["more"]).reverse
+
+- sum_res = {}
+- @sums.each do |s|
+  - sum_res[[s.y, s.x]] = { count: s.count || 0, company_ids: s.company_ids }
+
+- sum_count = sum_res.inject(0) { |sum, (key, s)| sum + s[:count] }
+
+- targets = {"件数" => :count, "注文日時(日) : 最長" => :order__day__max, "注文日時(日) : 最短" => :order__day__max, "注文日時(月) : 最長" => :order__month__max, "注文日時(月) : 最短" => :order__month__min, "注文日時(年) : 最長" => :order__year__max, "注文日時(年) : 最短" => :order__year__min, }
+
+h1 RFMサンプル
+
+= button_tag  "設定", type: :button, class: "btn btn-primary", data: { toggle: :modal, target: "#RFMForm" }
+#RFMForm.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+  .modal-dialog
+    .modal-content
+      = form_tag({}, method: :get, class: "form-horizontal") do
+        .modal-header
+          = button_tag type: :button, class: :close, data: { dismiss: :modal } do
+            span.glyphicon.glyphicon-remove
+          h4 RFM設定フォーム
+        .modal-body
+          .form-group
+            .col-sm-3 = label_tag  :x, "X軸項目", class: "control-label"
+            .col-sm-9 = select_tag :x, options_for_select(targets, @x), class: "form-control"
+
+          .form-group
+            .col-sm-3 = label_tag  :y, "Y軸項目", class: "control-label"
+            .col-sm-9 = select_tag :y, options_for_select(targets, @y), class: "form-control"
+          .form-group
+            .col-sm-3 = label_tag  :x_separater, "X軸セパレート", class: "control-label"
+            .col-sm-9 = text_field_tag :x_separater, @x_sepa.join(","), class: "form-control", placeholder: ",区切り"
+          .form-group
+            .col-sm-3 = label_tag  :y_separater, "Y軸セパレート", class: "control-label"
+            .col-sm-9 = text_field_tag :y_separater, @y_sepa.join(","), class: "form-control", placeholder: ",区切り"
+            
+          .form-group.has-error
+            .col-sm-3 = label_tag  "hotspots_0_0", "ホットスポット1", class: "control-label"
+            .col-sm-3 = text_field_tag "hotspots_0_0", params[:hotspots_0_0], class: "form-control", placeholder: "Xコマ数"
+            .col-sm-3 = text_field_tag "hotspots_0_1", params[:hotspots_0_1], class: "form-control", placeholder: "Yコマ数"
+          .form-group.has-warning
+            .col-sm-3 = label_tag  "hotspots_1_0", "ホットスポット2", class: "control-label"
+            .col-sm-3 = text_field_tag "hotspots_1_0", params[:hotspots_1_0], class: "form-control", placeholder: "Xコマ数"
+            .col-sm-3 = text_field_tag "hotspots_1_1", params[:hotspots_1_1], class: "form-control", placeholder: "Yコマ数"
+          .form-group.has-success
+            .col-sm-3 = label_tag  "hotspots_2_0", "ホットスポット3", class: "control-label"
+            .col-sm-3 = text_field_tag "hotspots_2_0", params[:hotspots_2_0], class: "form-control", placeholder: "Xコマ数"
+            .col-sm-3 = text_field_tag "hotspots_2_1", params[:hotspots_2_1], class: "form-control", placeholder: "Yコマ数"
+          .form-group.has-info
+            .col-sm-3 = label_tag  "hotspots_3_0", "ホットスポット4", class: "control-label"
+            .col-sm-3 = text_field_tag "hotspots_3_0", params[:hotspots_3_0], class: "form-control", placeholder: "Xコマ数"
+            .col-sm-3 = text_field_tag "hotspots_3_1", params[:hotspots_3_1], class: "form-control", placeholder: "Yコマ数"
+
+        .modal-footer
+          = button_tag "Σ 集計", type: :submit, class: "btn btn-primary"
+
+#detail.modal.fade abindex="-1" role="dialog" aria-labelledby="detail" aria-hidden="true"
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        = button_tag  type: :button, class: :close, data: { dismiss: :modal } do
+          span.glyphicon.glyphicon-remove
+        h4 会社情報
+      .modal-body
+        .embed-responsive.embed-responsive-16by9
+          iframe.detail_frame.embed-responsive-item src=""
+
+.table-responsive
+  table.table.table-bordered.table-striped.table-hover.table-condensed
+    - rows.each.with_index do |row, i|
+      tr
+        th = row == "more" ? "それ以上" : "〜 #{row}#{@y_unit}"
+        - cols.each.with_index do |col, j|
+          - if i < params[:hotspots_0_0].to_i && j < params[:hotspots_0_1].to_i 
+            - c = :danger
+          - elsif i < params[:hotspots_1_0].to_i && j < params[:hotspots_1_1].to_i 
+            - c = :warning
+          - elsif i < params[:hotspots_2_0].to_i && j < params[:hotspots_2_1].to_i 
+            - c = :success
+          - elsif i < params[:hotspots_3_0].to_i && j < params[:hotspots_3_1].to_i 
+            - c = :info
+          - else
+            - c = ""
+            
+          td.integer class=c
+            - if sum_res[[row, col]].blank?
+              | 0
+            - else
+              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, id: 50, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}
+              .percent = "#{(sum_res[[row, col]][:count].to_f * 100 / sum_count).round(2)}%"
+              
+        th.integer = sum_res.select { |key, v| key[0] == row }.inject(0) { |sum, (key, s)| sum + s[:count] }
+    tr
+      th
+      - cols.each do |col|
+        th.integer = number_with_delimiter(sum_res.select { |key, v| key[1] == col }.inject(0) { |sum, (key, s)| sum + s[:count] })
+      th.integer = number_with_delimiter(sum_count)
+    tr
+      th
+      - cols.each do |col|
+        th = col == "more" ? "それ以上" : "〜 #{col}#{@x_unit}"
+      th 合計(人)
