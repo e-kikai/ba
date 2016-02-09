@@ -6,10 +6,10 @@
 
 .modal-body
   .
-    = link_to params.merge(id: 50), class: "btn btn-success", remote: true do
+    = link_to params.merge(id: @client.companies.id), class: "btn btn-success", remote: true do
       span.glyphicon.glyphicon-save-file
       =< "会社一覧"
-    = link_to params.merge(id: 51), class: "btn btn-success", remote: true do
+    = link_to params.merge(id: @client.companies.id + 1), class: "btn btn-success", remote: true do
       span.glyphicon.glyphicon-save-file
       =< "注文履歴一覧"
     = link_to params.merge(format: :csv), class: "btn btn-success" do
