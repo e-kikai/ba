@@ -9,10 +9,17 @@
         td #{t.name}テーブル
         td #{number_with_delimiter(t.klass.count)}件
         td = link_to "検索",            "/bamember/clients/#{@client.id}/table/#{t.id}/search/"
+        - unless t.table_name =~ /companies/
+          td = link_to "RFM", "/bamember/clients/#{@client.id}/table/#{t.id}/test_01/"
+          td = link_to "リレーション", "/bamember/clients/#{@client.id}/table/#{t.id}/relation/"
+        - else
+          td 
+          td
         td = link_to "CSVアップロード", "/bamember/clients/#{@client.id}/table/#{t.id}/csv/"
         td = link_to "項目管理",        "/bamember/clients/#{@client.id}/table/#{t.id}/edit/"
         td = link_to "バックアップ",    "/bamember/clients/#{@client.id}/table/#{t.id}/search.csv?all=1"
         
   ul.nav.nav-stacked
+    li = link_to "テーブルを追加", "/bamember/clients/#{@client.id}/table/new"
     li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
     li = link_to "パスワード変更", "/bamember/clients/#{@client.id}/edit_password"

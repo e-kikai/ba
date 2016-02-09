@@ -13,7 +13,7 @@ class ClientTable < ActiveRecord::Base
   before_create   :create_client_table
 
   def self.create_client_table(params)
-    params[:table_name] ||=  "c#{client_id}_#{Time.now.to_i}"
+    params[:table_name] ||=  "c#{params[:client_id]}_#{Time.now.to_i}"
 
     table = create!(params)
 
@@ -31,8 +31,12 @@ class ClientTable < ActiveRecord::Base
     table.client_columns.create(name: "会社名", column_name: :name, column_type: :company, nochange: true)
 
     # 人テーブル初期化
-    table = self.create(client_id: client_id, name: "人", table_name: "c#{client_id}_people")
-    table.client_columns.create(name: "氏名", column_name: :name, column_type: :string, nochange: true)
+    # table = self.create(client_id: client_id, name: "人", table_name: "c#{client_id}_people")
+    # table.client_columns.create(name: "氏名", column_name: :name, column_type: :string, nochange: true)
+  end
+
+  def self.init_child_table(client_id)
+
   end
 
   def self.clone_tables(client_id, template_id)
@@ -78,10 +82,15 @@ class ClientTable < ActiveRecord::Base
     data
   end
 
+  def companies?
+    table_name =~ /companies/ ? true : false
+  end
+
   private
 
   def create_client_table
-    self[:table_name] ||=  "c_#{client_id}_#{Time.now..strftime('%Y%m%d%H%M%S')}_#{rand(99999)}"
+    self[:table_name] ||=  "c_#{client_id}_#{Time.now.strftime('%Y%m%d%H%M%S')}_#{rand(99999)}"
+
     ActiveRecord::Base.connection.create_table(self[:table_name]) do |t|
       t.timestamps null: false
       t.datetime   :soft_destroyed_at

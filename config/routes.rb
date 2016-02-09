@@ -29,6 +29,8 @@ Rails.application.routes.draw do
     get   'clients/:id/edit_password' => 'clients#edit_password'
     patch 'clients/:id/edit_password' => 'clients#update_password'
 
+    get    'clients/:client_id/table/new'              => 'client_tables#new'
+    post   'clients/:client_id/table/'                 => 'client_tables#create'
     get    'clients/:client_id/table/:id/search'       => 'client_tables#search'
     get    'clients/:client_id/table/:id/csv'          => 'client_tables#csv'
     post   'clients/:client_id/table/:id/csv'          => 'client_tables#csv_upload'

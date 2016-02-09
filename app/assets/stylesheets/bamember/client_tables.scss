@@ -1,3 +1,54 @@
 // Place all the styles related to the bamember/clinet_tables controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+table.search-table {
+  th {
+    white-space: nowrap;
+  }
+
+  td {
+    &.id {
+      text-align: right;
+    }
+
+    &.icon {
+      text-align: center;
+      &.delete a {
+        color: #900;
+      }
+
+      &.edit a {
+        color: #090;
+      }
+    }
+    &.company {
+      min-width: 200px;
+    }
+  }
+
+  th.datetime, td.datetime {
+    white-space: nowrap;
+  }
+}
+
+.percent {
+  color: #777;
+  font-size: 90%;
+}
+
+hr {
+  border-top-color: #666;
+}
+
+nav.affix-nav {
+  background: #EEE;
+  padding: 8px;
+}
+
+.integer, .float {
+  text-align: right;
+}
+
+#modal_company {
+  overflow: scroll
+}

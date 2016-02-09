@@ -1,0 +1,21 @@
+- set_meta_tags title: "#{@client.name} テーブルを追加"
+- breadcrumb :clients_something, "テーブルを追加", @client
+    
+.col-md-12
+  - if @table.errors.any?
+    .alert.alert-danger
+      ul
+        - @table.errors.full_messages.each do |msg|
+          li = msg
+            
+  = nested_form_for(@table, class: 'form-horizontal', role: 'form', url: {action: 'create'}, method: :post)  do |f|
+  
+    .form-group.form-inline
+      = f.label :name, "テーブル名"
+      = f.text_field :name, class: 'form-control', placeholder: "テーブル名(必須)", required: "required"
+      | テーブル
+      
+    - message = "テーブルを追加してよろしいでしょうか\r"
+    = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-save
+      =< "テーブルを追加"

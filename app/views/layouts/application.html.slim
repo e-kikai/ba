@@ -11,8 +11,8 @@ html
 
   body
     header.navbar.navbar-default.container-fluid role="navigation"
-      .container-fluid
-        div BA System
+      .navbar-header
+        .navbar-brand BA System
     /     .navbar-header
     /       button.navbar-toggle data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
     /         span.sr-only Toggle navigation
@@ -28,7 +28,7 @@ html
     /         li = link_to 'サイトマップ',    "/sitemap"
     /         li = link_to '管理者画面',      "/company_users/sign_in"
 
-    .container
+    .container-fluid
       = raw breadcrumbs style: :bootstrap, semantic: true
 
       - if notice.present?

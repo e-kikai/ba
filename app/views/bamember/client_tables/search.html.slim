@@ -1,4 +1,4 @@
-- set_meta_tags title: "#{@table.client.name}/#{@table.name} 検索"
+- set_meta_tags title: "#{@table.client.name}/#{@table.name}テーブル 検索"
 - breadcrumb  :clients_search, @table
 
 - client_columns = ([["-- 項目を選択 --", nil], ["ID", "id"]] + @show_columns.map { |co| [co.name, co.column_name] } + [["登録日時", "created_at"], ["変更日時", "updated_at"]]).to_h
@@ -23,32 +23,6 @@ coffee:
     
     $(document).on 'click', 'button.add', ->
       $(this).before($_blank.clone())
-      
-sass:
-  hr
-    border-top-color: #666
-    
-  nav.affix-nav
-    background: #EEE
-    padding: 8px
-    
-  th
-    white-space: nowrap
-    
-  td
-    &.id
-      text-align: right
-    &.integer, &.float
-      text-align: right
-    &.icon
-      text-align: center
-      &.delete a
-        color: #900
-      &.edit a
-        color: #090
-        
-  th.datetime, td.datetime
-    white-space: nowrap
     
 nav.affix-nav.col-md-2
   = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/new", class: "btn btn-success center-block" do
@@ -88,7 +62,6 @@ nav.affix-nav.col-md-2
       = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
         span.glyphicon.glyphicon-search
         =< "検索"
-      end
     
     - if @datas.present?
       hr
@@ -117,7 +90,7 @@ nav.affix-nav.col-md-2
       
   - if @pdatas.blank?
     
-  - elsif @sum_res.present?    
+  - elsif @sum_res.present?
     - groups = (@sum[:group].reject(&:blank?) rescue {})
     - if groups.length == 0
       table.table.table-bordered.table-hover.table-condensed style="width:40%;"
@@ -155,113 +128,115 @@ nav.affix-nav.col-md-2
   - else
     / div = page_entries_info @pdatas, entry_name: @table.name
 
+    - sumally = ""
+    - @show_columns.each do |co|
+      - if co.sumally
+        - sumally += "、#{co.name}ありが#{number_with_delimiter(@datas.where.not(co.column_name => "").count)}件"
+
     div
-      | うち、
-      - @show_columns.each do |co|
-        - if co.sumally
-          span #{co.name}ありが#{number_with_delimiter(@datas.where.not(co.column_name => "").count)}件、
-      
-    = paginate @pdatas
-    .
+      - if sumally.present?
+        | うち#{sumally}
       | (#{number_with_delimiter(@pdatas.offset_value + 1)}件 〜 
       | #{number_with_delimiter(@pdatas.offset_value + @pdatas.length)}件を表示中)
-
-    .table-responsive
-      table.table.table-bordered.table-striped.table-hover.table-condensed
-        tr
-          th
-            | ID
-            .dropdown style="display:inline-block;"
-              =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
-                span.glyphicon.glyphicon-option-vertical
-              ul.dropdown-menu role="menu"
-                li = link_to params.merge("order[column]" => :id, "order[type]" => :asc) do
-                    span.glyphicon.glyphicon-sort-by-alphabet
-                    =< "昇順でソート"
-                li = link_to params.merge("order[column]" => :id, "order[type]" => :desc) do
-                    span.glyphicon.glyphicon-sort-by-alphabet-alt
-                    =< "降順でソート"
-          th 変更
-          - @show_columns.each do |co|
+      
+    = paginate @pdatas
+    
+    .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
+      .table-responsive
+        table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
+          tr
             th
-              = co.name
+              | ID
               .dropdown style="display:inline-block;"
                 =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
                   span.glyphicon.glyphicon-option-vertical
                 ul.dropdown-menu role="menu"
-                  li = link_to params.merge("order[column]" => co.column_name, "order[type]" => :asc) do
+                  li = link_to params.merge("order[column]" => :id, "order[type]" => :asc) do
                       span.glyphicon.glyphicon-sort-by-alphabet
                       =< "昇順でソート"
-                  li = link_to params.merge("order[column]" => co.column_name, "order[type]" => :desc) do
+                  li = link_to params.merge("order[column]" => :id, "order[type]" => :desc) do
                       span.glyphicon.glyphicon-sort-by-alphabet-alt
                       =< "降順でソート"
-                  li.divider
-                  / li = link_to "すべて", params.merge("s[][column_name]" => co.column_name, "s[#{co.column_name}][cond]" => "")
-                  li = link_to "空白", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "", "s[][cond]" => :blank)
-                  li = link_to "空白でない", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :present)
-                  li = link_to "重複している", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :overlap)
-                  li = link_to "重複していない", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :unique)
-                  / li.divider
-                  / div
-                  /   - @datas.group(co.column_name).order(co.column_name => :desc).count.each do |key, c|
-                  /     label
-                  /       input type="checkbox" value="#{key}"
-                  /       = key
-                  /   = text_field_tag "s[s[#{co.column_name}][value]", "", class: "form-control center-block"
-                  /   
-                  /   = button_tag "検索", type: :submit, name: "s[s[#{co.column_name}][column_name]", value: co.column_name, class: "btn btn-primary btn-sm center-block"
-
-          th.datetime
-            | 登録日時
-            .dropdown style="display:inline-block;"
-              =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
-                span.glyphicon.glyphicon-option-vertical
-              ul.dropdown-menu role="menu"
-                li = link_to params.merge("order[column]" => :created_at, "order[type]" => :asc) do
-                    span.glyphicon.glyphicon-sort-by-alphabet
-                    =< "昇順でソート"
-                li = link_to params.merge("order[column]" => :created_at, "order[type]" => :desc) do
-                    span.glyphicon.glyphicon-sort-by-alphabet-alt
-                    =< "降順でソート"
-          th.datetime
-            | 変更日時
-            .dropdown style="display:inline-block;"
-              =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
-                span.glyphicon.glyphicon-option-vertical
-              ul.dropdown-menu role="menu"
-                li = link_to params.merge("order[column]" => :updated_at, "order[type]" => :asc) do
-                    span.glyphicon.glyphicon-sort-by-alphabet
-                    =< "昇順でソート"
-                li = link_to params.merge("order[column]" => :updated_at, "order[type]" => :desc) do
-                    span.glyphicon.glyphicon-sort-by-alphabet-alt
-                    =< "降順でソート"
-          / th 削除
-        - @pdatas.each do |d|
-          tr
-            td.id
-              = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
-            td.icon.edit = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}/edit" do
-              span.glyphicon.glyphicon-edit
+            th 変更
             - @show_columns.each do |co|
-              td class="#{co.db_column_type[:type]} #{co.column_type} #{co.column_name}"
-                - if co.column_name == "name"
-                  = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
-                - elsif ['integer', 'float'].include? co.column_type
-                  = number_with_delimiter d[co.column_name]
-                - elsif d[co.column_name].present?
-                  = d[co.column_name]
-                  
-                  / - if co.column_type == "address"
-                  /   =< link_to "https://maps.google.co.jp/maps?f=q&q=#{d[co.column_name]}&source=embed&hl=ja&geocode=&ie=UTF8&t=m&z=14", target: "_blank" do
-                  /     span.glyphicon.glyphicon-map-marker
-                  / - elsif co.column_type == "url"
-                  /   =< link_to d[co.column_name], target: "_blank" do
-                  /     span.glyphicon.glyphicon-new-window
+              th
+                = co.name
+                .dropdown style="display:inline-block;"
+                  =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
+                    span.glyphicon.glyphicon-option-vertical
+                  ul.dropdown-menu role="menu"
+                    li = link_to params.merge("order[column]" => co.column_name, "order[type]" => :asc) do
+                        span.glyphicon.glyphicon-sort-by-alphabet
+                        =< "昇順でソート"
+                    li = link_to params.merge("order[column]" => co.column_name, "order[type]" => :desc) do
+                        span.glyphicon.glyphicon-sort-by-alphabet-alt
+                        =< "降順でソート"
+                    li.divider
+                    / li = link_to "すべて", params.merge("s[][column_name]" => co.column_name, "s[#{co.column_name}][cond]" => "")
+                    li = link_to "空白", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "", "s[][cond]" => :blank)
+                    li = link_to "空白でない", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :present)
+                    li = link_to "重複している", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :overlap)
+                    li = link_to "重複していない", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :unique)
+                    / li.divider
+                    / div
+                    /   - @datas.group(co.column_name).order(co.column_name => :desc).count.each do |key, c|
+                    /     label
+                    /       input type="checkbox" value="#{key}"
+                    /       = key
+                    /   = text_field_tag "s[s[#{co.column_name}][value]", "", class: "form-control center-block"
+                    /   
+                    /   = button_tag "検索", type: :submit, name: "s[s[#{co.column_name}][column_name]", value: co.column_name, class: "btn btn-primary btn-sm center-block"
 
-            td.datetime = d[:created_at]
-            td.datetime = d[:updated_at]
-            / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
-              span.glyphicon.glyphicon-remove
-            end
+            th.datetime
+              | 登録日時
+              .dropdown style="display:inline-block;"
+                =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
+                  span.glyphicon.glyphicon-option-vertical
+                ul.dropdown-menu role="menu"
+                  li = link_to params.merge("order[column]" => :created_at, "order[type]" => :asc) do
+                      span.glyphicon.glyphicon-sort-by-alphabet
+                      =< "昇順でソート"
+                  li = link_to params.merge("order[column]" => :created_at, "order[type]" => :desc) do
+                      span.glyphicon.glyphicon-sort-by-alphabet-alt
+                      =< "降順でソート"
+            th.datetime
+              | 変更日時
+              .dropdown style="display:inline-block;"
+                =< button_tag type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" } do
+                  span.glyphicon.glyphicon-option-vertical
+                ul.dropdown-menu role="menu"
+                  li = link_to params.merge("order[column]" => :updated_at, "order[type]" => :asc) do
+                      span.glyphicon.glyphicon-sort-by-alphabet
+                      =< "昇順でソート"
+                  li = link_to params.merge("order[column]" => :updated_at, "order[type]" => :desc) do
+                      span.glyphicon.glyphicon-sort-by-alphabet-alt
+                      =< "降順でソート"
+            / th 削除
+          - @pdatas.each do |d|
+            tr
+              td.id
+                = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+              td.icon.edit = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}/edit" do
+                span.glyphicon.glyphicon-edit
+              - @show_columns.each do |co|
+                td class="#{co.db_column_type[:type]} #{co.column_type} #{co.column_name}"
+                  - if co.column_name == "name"
+                    = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+                  - elsif ['integer', 'float'].include? co.column_type
+                    = number_with_delimiter d[co.column_name]
+                  - elsif d[co.column_name].present?
+                    = d[co.column_name]
+                    
+                    / - if co.column_type == "address"
+                    /   =< link_to "https://maps.google.co.jp/maps?f=q&q=#{d[co.column_name]}&source=embed&hl=ja&geocode=&ie=UTF8&t=m&z=14", target: "_blank" do
+                    /     span.glyphicon.glyphicon-map-marker
+                    / - elsif co.column_type == "url"
+                    /   =< link_to d[co.column_name], target: "_blank" do
+                    /     span.glyphicon.glyphicon-new-window
+
+              td.datetime = d[:created_at]
+              td.datetime = d[:updated_at]
+              / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
+                span.glyphicon.glyphicon-remove
             
     = paginate @pdatas

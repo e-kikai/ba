@@ -8,4 +8,10 @@ class Client < ActiveRecord::Base
   default_scope { without_soft_destroyed }
 
   has_many :client_tables
+
+  def companies
+    client_tables.where("table_name LIKE '%companies%'").first
+  rescue
+    nil
+  end
 end

@@ -1,6 +1,22 @@
 class Bamember::ClientTablesController < Bamember::ApplicationController
-  before_action :find_table
+  before_action :find_table, except: [:new, :create]
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
+
+  def new
+    raise "クライアント情報が取得できません" unless @client = Client.find(params[:client_id])
+
+    @table = @client.client_tables.new
+  end
+
+  def create
+    raise "クライアント情報が取得できません" unless @client = Client.find(params[:client_id])
+
+    if ClientTable.create(client_id: @client.id, name: params[:client_table][:name], table_name: "c#{@client.id}_#{Time.now.strftime('%Y%m%d%H%M%S')}_#{rand(99999)}")
+      redirect_to "/bamember/clients/#{@client.id}/", notice: "#{client_table_params[:name]}テーブルを追加しました"
+    else
+      render :new
+    end
+  end
 
   def search
     @datas, @s, @order, @sum, @sum_res = @table.klass.table_search(params)
@@ -20,11 +36,13 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         content_type: 'text/csv;charset=shift_jis',
         filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
       }
+
+      format.js {}
     end
   end
 
   def test_01
-    @company_table = @client.client_tables.where("table_name LIKE '%companies%'").first
+    @company_table = @client.companies
     @company_id    = @table.client_columns.find_by(name: "会社ID").column_name
     @order_date    = @table.client_columns.find_by(name: "受注日").column_name
 

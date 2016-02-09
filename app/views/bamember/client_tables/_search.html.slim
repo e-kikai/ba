@@ -1,0 +1,44 @@
+
+.modal-header
+  = button_tag  type: :button, class: :close, data: { dismiss: :modal } do
+    span.glyphicon.glyphicon-remove
+  h4 #{@table.name}一覧
+
+.modal-body
+  .
+    = link_to params.merge(id: 50), class: "btn btn-success", remote: true do
+      span.glyphicon.glyphicon-save-file
+      =< "会社一覧"
+    = link_to params.merge(id: 51), class: "btn btn-success", remote: true do
+      span.glyphicon.glyphicon-save-file
+      =< "注文履歴一覧"
+    = link_to params.merge(format: :csv), class: "btn btn-success" do
+      span.glyphicon.glyphicon-save-file
+      =< "CSV出力"
+  .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
+    / iframe.detail_frame.embed-responsive-item src=""
+
+    table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
+      tr
+        th ID
+        - @show_columns.each do |co|
+          th = co.name
+
+        th.datetime 登録日時
+        th.datetime 変更日時
+
+      - @datas.each do |d|
+        tr
+          td.id
+            = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+          - @show_columns.each do |co|
+            td class="#{co.db_column_type[:type]} #{co.column_type} #{co.column_name}"
+              - if co.column_name == "name"
+                = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+              - elsif ['integer', 'float'].include? co.column_type
+                = number_with_delimiter d[co.column_name]
+              - elsif d[co.column_name].present?
+                = d[co.column_name]
+                
+          td.datetime = d[:created_at]
+          td.datetime = d[:updated_at]
