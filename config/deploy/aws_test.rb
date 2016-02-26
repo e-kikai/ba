@@ -6,15 +6,15 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-role :app, %w{vagrant@192.168.24.52}
-role :web, %w{vagrant@192.168.24.52}
-role :db,  %w{vagrant@192.168.24.52}
+role :app, %w{ec2-user@aws_test}
+role :web, %w{ec2-user@aws_test}
+role :db,  %w{ec2-user@aws_test}
 
-set :rails_env, :staging
+set :rails_env,        :staging
 set :unicorn_rack_env, :staging
-set :unicorn_options,  " -p 3001 "
+set :unicorn_options,  " -p 3000 "
 
-ask(:branch, 'master')
+ask :branch, 'master'
 
 # set :whenever_environment, :staging
 
