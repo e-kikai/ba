@@ -1,15 +1,17 @@
+- chilid_table = @client.client_tables.find(params[:child_table_id])
+- company_id   = chilid_table.client_columns.find_by(name: "会社ID").column_name
 
 .modal-header
   = button_tag  type: :button, class: :close, data: { dismiss: :modal } do
     span.glyphicon.glyphicon-remove
   h4 #{@table.name}一覧
-= params.to_s
+
 .modal-body
   .
     = link_to params.merge(id: @client.company_table.id), class: "btn btn-success", remote: true do
       span.glyphicon.glyphicon-save-file
       =< "会社一覧"
-    = link_to params.merge(id: params[:child_table_id]), class: "btn btn-success", remote: true do
+    = link_to params.merge(id: chilid_table.id, s: [ {column_name: company_id, value: params[:s][0][:value], cond: :in}]), class: "btn btn-success", remote: true do
       span.glyphicon.glyphicon-save-file
       =< "注文履歴一覧"
     = link_to params.merge(format: :csv), class: "btn btn-success" do
