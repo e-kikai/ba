@@ -1,16 +1,14 @@
 class Bamember::ClientTablesController < Bamember::ApplicationController
+  before_action :find_client
   before_action :find_table, except: [:new, :create]
+  before_action :find_company_table, only: [:test_01, :relation, :relation_confirm, :relation_do]
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
 
   def new
-    raise "クライアント情報が取得できません" unless @client = Client.find(params[:client_id])
-
     @table = @client.client_tables.new
   end
 
   def create
-    raise "クライアント情報が取得できません" unless @client = Client.find(params[:client_id])
-
     if ClientTable.create(client_id: @client.id, name: params[:client_table][:name], table_name: "c#{@client.id}_#{Time.now.strftime('%Y%m%d%H%M%S')}_#{rand(99999)}")
       redirect_to "/bamember/clients/#{@client.id}/", notice: "#{client_table_params[:name]}テーブルを追加しました"
     else
@@ -42,79 +40,100 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def test_01
-    @company_table = @client.companies
-    @company_id    = @table.client_columns.find_by(name: "会社ID").column_name
-    @order_date    = @table.client_columns.find_by(name: "受注日").column_name
+    begin
+      @company_id = @table.client_columns.find_by(name: "会社ID").column_name
+    rescue
+      redirect_to "/bamember/clients/#{@table.client.id}/", alert: "RFMに必要な情報(会社ID)がありません"
+    end
 
     @x = params[:x]
     @y = params[:y]
-    @x_unit = "1"
-    @y_unit = ""
+    @x_sepa = params[:x_separater].presence || "3, 6, 9, 12, 15, 18, 21, 24"
+    @y_sepa = params[:y_separater].presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
 
-    x_select = case @x
-    when "count"
-      @x_unit = "回"
-      " count(*) "
-    when /^order__(.*)__(.*)$/
-      func = $2 == "min" ? "min" : "max"
-      case $1
-      when "day"
-        @x_unit = "日"
-        " #{func}((strftime('%s', current_timestamp)) / 86400 - (strftime('%s', #{@order_date})) / 86400) "
-      when "year"
-        @x_unit = "年"
-        " #{func}((strftime('%Y', current_timestamp)) - (strftime('%Y', #{@order_date}))) "
-      else
-        @x_unit = "ヶ月"
-        " #{func}((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', #{@order_date}) * 12 + strftime('%m', #{@order_date}))) "
-      end
-    else
-      @x = :order__month__min
-      @x_unit = "ヶ月"
-      " min((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', #{@order_date}) * 12 + strftime('%m', #{@order_date}))) "
-    end
+    @x_unit, x_date, x_select, x_column = case @x
+    when /^(.*)__(.*)__(.*)$/
+      co = @table.client_columns.find_by(column_name: $1)
 
-    y_select = case @y
-    when /^order__(.*)__(.*)$/
-      func = $2 == "min" ? "min" : "max"
-      case $1
-      when "day"
-        @y_unit = "日"
-        " #{func}((strftime('%s', current_timestamp)) / 86400 - (strftime('%s', #{@order_date})) / 86400) "
-      when "year"
-        @y_unit = "年"
-        " #{func}((strftime('%Y', current_timestamp)) - (strftime('%Y', #{@order_date}))) "
-      else
-        @y_unit = "ヶ月"
-        " #{func}((strftime('%Y', current_timestamp) * 12 + strftime('%m', current_timestamp)) - (strftime('%Y', #{@order_date}) * 12 + strftime('%m', #{@order_date}))) "
+      if co.type == "datetime"
+        x_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
+        case $2
+        when "day"
+          ["日", "DAY", x_select, $1]
+        when "year"
+          ["年", "YEAR", x_select, $1]
+        else
+          ["ヶ月", "MONTH", x_select, $1]
+        end
+      elsif co.type == "integer" || co.type == "float"
+        case $2
+        when "sum"
+          ["", "", "SUM(#{$1})", $1]
+        when "max"
+          ["", "", "MAX(#{$1})", $1]
+        when "min"
+          ["", "", "MIN(#{$1})", $1]
+        when "avg"
+          ["", "", "AVG(#{$1})", $1]
+        else
+          ["", "", "MAX(#{$1})", $1]
+        end
       end
     else
       @x = :count
-      @y_unit = "回"
-      " count(*) "
+      ["回", "", " count(*) ", @company_id]
     end
 
-    companies_sql = "SELECT #{@company_id}, #{x_select} as x, #{y_select} as y FROM #{@table.table_name} WHERE #{@company_id} <> ''  GROUP BY #{@company_id} ORDER BY x, y"
+    @y_unit, y_date, y_select, y_column = case @y
+    when /^(.*)__(.*)__(.*)$/
+      co = @table.client_columns.find_by(column_name: $1)
 
-    # RFM
+      if co.column_type == "datetime"
+        y_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
+        case $2
+        when "day"
+          ["日", "DAY", y_select, $1]
+        when "year"
+          ["年", "YEAR", y_select, $1]
+        else
+          ["ヶ月", "MONTH", y_select, $1]
+        end
+      elsif co.column_type == "integer" || co.column_type == "float"
+        case $2
+        when "sum"
+          ["", "", "SUM(#{$1})", $1]
+        when "max"
+          ["", "", "MAX(#{$1})", $1]
+        when "min"
+          ["", "", "MIN(#{$1})", $1]
+        when "avg"
+          ["", "", "AVG(#{$1})", $1]
+        else
+          ["", "", "MAX(#{$1})", $1]
+        end
+      end
+    else
+      @y = "count"
+      ["回", "", " count(*) ", @company_id]
+    end
 
-    @x_sepa = (params[:x_separater].presence || "3, 6, 9, 12, 15, 18, 21, 24").split(",").map(&:to_i).sort
-    @y_sepa = (params[:y_separater].presence || "1, 2, 3, 4, 6, 10, 15, 20, 30").split(",").map(&:to_i).sort
+    companies_sql = "SELECT #{@company_id}, #{x_select} as ax, #{y_select} as ay FROM #{@table.table_name} WHERE #{@company_id} <> ''  AND #{x_column} <> '' AND #{y_column} <> '' GROUP BY #{@company_id} ORDER BY ax, ay"
 
-    y_case = @y_sepa.inject(" CASE ") do |s, i|
-      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.y <= ? THEN ? ", i, i])
+
+    x_case = @x_sepa.split(",").map(&:to_i).sort.map(&:to_s).inject(" CASE ") do |s, i|
+      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ax <= ? THEN ? ", "#{i} #{x_date}", "#{i}"])
     end + " ELSE 'more' END "
 
-    x_case = @x_sepa.inject(" CASE ") do |s, i|
-      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.x <= ? THEN ? ", i, i])
+    y_case = @y_sepa.split(",").map(&:to_i).sort.map(&:to_s).inject(" CASE ") do |s, i|
+      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ay <= ? THEN ? ", "#{i} #{y_date}", "#{i}"])
     end + " ELSE 'more' END "
 
-    sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, group_concat(#{@company_id}, ' ') as company_ids FROM (#{companies_sql}) cs
+    sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(#{@company_id}, ' ') as company_ids FROM (#{companies_sql}) cs
     GROUP BY x, y ORDER BY x, y;"
 
-    # @count_all = @table.klass.count
-
     @sums = @table.klass.find_by_sql(sql)
+  # rescue => e
+  #   @alert = e.message
   end
 
   def csv
@@ -394,12 +413,46 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を削除しました"
   end
 
+  def relation
+    @company_id_column = @table.client_columns.find_by(:name => "会社ID").column_name
+  end
+
+  def relation_confirm
+    @company_id_column = @table.client_columns.find_by(:name => "会社ID").column_name
+
+    ch = @table.klass.arel_table
+    co = @company_table.klass.arel_table
+
+    child = ch.project(ch[:id].count.as("count"), ch[:id]).group(ch[:id]).join(co).on(ch[params[:child_column]].eq(co[params[:company_column]])).where(ch[params[:child_column]].not_eq("")).where(ch[@company_id_column].eq(""))
+
+    # raise @table.klass.find_by_sql(child)[1][:id]
+
+    @res = @table.klass.find_by_sql(child)
+  end
+
+  def relation_do
+    ch = @table.klass.arel_table
+    co = @company_table.klass.arel_table
+
+    child = ch.join(co).on(ch[params[:child_column]].eq(co[params[:company_column]])).where(ch[params[:child_column]].not_eq(""))
+
+
+  end
+
   private
 
-  def find_table
+  def find_client
     raise "クライアント情報が取得できません" unless @client = Client.find(params[:client_id])
-    raise "テーブル情報が取得できません"     unless @table  = ClientTable.find(params[:id])
+  end
+
+  def find_table
+    raise "テーブル情報が取得できません" unless @table = ClientTable.find(params[:id])
     raise "このテーブルはクライアント所有ではありません" if @table.client_id != @client.id
+  end
+
+  def find_company_table
+    raise "このテーブルは会社テーブルです" if @table.company?
+    @company_table = @client.company_table
   end
 
   def check_session_spreadseet

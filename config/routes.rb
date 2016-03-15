@@ -40,6 +40,10 @@ Rails.application.routes.draw do
     patch  'clients/:client_id/table/:id/csv_confirm'  => 'client_tables#csv_update'
     get    'clients/:client_id/table/:id/csv_error'    => 'client_tables#csv_error'
 
+    get    'clients/:client_id/table/:id/relation'          => 'client_tables#relation'
+    post   'clients/:client_id/table/:id/relation_confirm'  => 'client_tables#relation_confirm'
+    patch  'clients/:client_id/table/:id/relation_do'       => 'client_tables#relation_do'
+
     get    'clients/:client_id/table/:id/test_01'       => 'client_tables#test_01'
 
     get    'clients/:client_id/table/:id/edit'         => 'client_tables#edit'

@@ -27,6 +27,7 @@ class ClientColumn < ActiveRecord::Base
       type:   :integer,
       filter: -> (v) { v.gsub(/[,、]/, "") },
       valid:  -> (v) { Integer(v) rescue false },
+      format: -> (v) { number_with_delimiter(v) }
     },
     float: {
       name:   "小数",
@@ -56,9 +57,10 @@ class ClientColumn < ActiveRecord::Base
       type:   :string,
     },
     tel: {
-      name:  "TEL",
-      type:  :string,
-      valid: -> (v) { v =~ /\A[0-9+-]*\z/ },
+      name:   "TEL",
+      type:   :string,
+      valid:  -> (v) { v =~ /\A[0-9+-]*\z/ },
+      filter: -> (v) { v.gsub(/[^0-9+]/, "") }
     },
     mail: {
       name:  "メールアドレス",
@@ -77,6 +79,7 @@ class ClientColumn < ActiveRecord::Base
 
   def db_column_type
     COLUMN_TYPES[column_type.intern] || {}
+
   end
 
   private

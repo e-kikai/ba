@@ -6,24 +6,24 @@
     .panel-body 
       dl.dl-horizontal
         dt アップロードデータ
-        dd #{number_with_delimiter(@csv[:counts][:all])}件 (先頭行、空行を除く)
+        dd #{number_with_delimiter(@csv[:counts][:all])} 件 (先頭行、空行を除く)
         
         hr
         dt マッチ
-        dd #{number_with_delimiter(@csv[:counts][:match])}件
+        dd #{number_with_delimiter(@csv[:counts][:match])} 件
         
         dt マッチしなかった
-        dd #{number_with_delimiter(@csv[:counts][:none])}件 #{ "(新規登録)" if @csv[:option][:unmatch] == "new"}
+        dd #{number_with_delimiter(@csv[:counts][:none])} 件 #{ "(新規登録)" if @csv[:option][:unmatch] == "new"}
           
         dt 空白でスキップ
-        dd #{number_with_delimiter(@csv[:counts][:skip])}件 #{ "(新規登録)" if @csv[:option][:unmatch] == "new"}
+        dd #{number_with_delimiter(@csv[:counts][:skip])} 件 #{ "(新規登録)" if @csv[:option][:unmatch] == "new"}
         
         dt 重複マッチ
-        dd #{number_with_delimiter(@csv[:counts][:overlap])}件
+        dd #{number_with_delimiter(@csv[:counts][:overlap])} 件
         
         hr
         dt バリデーションエラー
-        dd #{number_with_delimiter(@csv[:counts][:notvalid])}件
+        dd #{number_with_delimiter(@csv[:counts][:notvalid])} 件
         
   .panel.panel-default
     .panel-heading 事前作業

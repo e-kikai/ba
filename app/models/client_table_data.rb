@@ -43,6 +43,10 @@ class ClientTableData < ActiveRecord::Base
     end
   end
 
+  def client_column(column_name)
+    self.get_client_table.client_columns.find_by(column_name: column_name)
+  end
+
   def self.get_client_table
     ClientTable.find_by(table_name: self.table_name)
   end
@@ -113,11 +117,11 @@ class ClientTableData < ActiveRecord::Base
     order[:column] = order[:column].presence || :id
     order[:type]   = order[:type] == "desc" ? :desc : :asc
 
-    res = res.order("CASE WHEN #{order[:column]} IS NULL OR #{order[:column]} = '' THEN 1 ELSE 0 END")
+    # res = res.order("CASE WHEN #{order[:column]} IS NULL OR #{order[:column]} = '' THEN 1 ELSE 0 END")
 
-    if oc = self.get_client_table.client_columns.find_by(column_name: order[:column])
-      res = res.order("CAST(#{order[:column]} as #{oc.db_column_type[:type]}) #{order[:type]}")
-    end
+    # if oc = self.get_client_table.client_columns.find_by(column_name: order[:column])
+    #   res = res.order("CAST(#{order[:column]} as #{oc.db_column_type[:type]}) #{order[:type]}")
+    # end
 
     res = res.order(order[:column] => order[:type]).order(:id)
 

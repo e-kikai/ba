@@ -38,7 +38,7 @@ sass:
     .panel-body
       dl.dl-horizontal
         dt アップロードデータ
-        dd #{number_with_delimiter(@csv[:counts][:all])}件 (先頭行、空行を除く)
+        dd #{number_with_delimiter(@csv[:counts][:all])} 件 (先頭行、空行を除く)
     
   = form_tag({action: :csv_matching_check}, method: :post, class: 'form-horizontal') do
     table.table.table-striped.table-hover.table-responsive

@@ -11,7 +11,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160122072240) do
+ActiveRecord::Schema.define(version: 20160307075017) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
 
   create_table "bamembers", force: :cascade do |t|
     t.string   "name",                   default: "", null: false
@@ -31,488 +34,654 @@ ActiveRecord::Schema.define(version: 20160122072240) do
     t.datetime "soft_destroyed_at"
   end
 
-  add_index "bamembers", ["email"], name: "index_bamembers_on_email", unique: true
-  add_index "bamembers", ["reset_password_token"], name: "index_bamembers_on_reset_password_token", unique: true
-  add_index "bamembers", ["soft_destroyed_at"], name: "index_bamembers_on_soft_destroyed_at"
+  add_index "bamembers", ["email"], name: "index_bamembers_on_email", unique: true, using: :btree
+  add_index "bamembers", ["reset_password_token"], name: "index_bamembers_on_reset_password_token", unique: true, using: :btree
+  add_index "bamembers", ["soft_destroyed_at"], name: "index_bamembers_on_soft_destroyed_at", using: :btree
 
-  create_table "c26_companies", force: :cascade do |t|
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
-    t.datetime "soft_destroyed_at"
-    t.string   "name"
-  end
-
-  add_index "c26_companies", ["name"], name: "index_c26_companies_on_name"
-
-  create_table "c26_persons", force: :cascade do |t|
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
-    t.datetime "soft_destroyed_at"
-    t.string   "name"
-  end
-
-  add_index "c26_persons", ["name"], name: "index_c26_persons_on_name"
-
-  create_table "c27_companies", force: :cascade do |t|
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.datetime "soft_destroyed_at"
-    t.text     "name"
-    t.text     "co_20151120164951_23568"
-    t.text     "co_20151120164951_82182"
-    t.text     "co_20151122122324_53749"
-    t.text     "co_20151202174325_72251", default: "", null: false
-    t.text     "co_20151202174325_93365", default: "", null: false
-    t.text     "co_20151203015047_48771", default: "", null: false
-    t.text     "co_20151210180722_16415", default: "", null: false
-  end
-
-  add_index "c27_companies", ["co_20151120164951_23568"], name: "index_c27_companies_on_co_20151120164951_23568"
-  add_index "c27_companies", ["co_20151120164951_82182"], name: "index_c27_companies_on_co_20151120164951_82182"
-  add_index "c27_companies", ["co_20151122122324_53749"], name: "index_c27_companies_on_co_20151122122324_53749"
-  add_index "c27_companies", ["co_20151202174325_72251"], name: "index_c27_companies_on_co_20151202174325_72251"
-  add_index "c27_companies", ["co_20151202174325_93365"], name: "index_c27_companies_on_co_20151202174325_93365"
-  add_index "c27_companies", ["co_20151203015047_48771"], name: "index_c27_companies_on_co_20151203015047_48771"
-  add_index "c27_companies", ["co_20151210180722_16415"], name: "index_c27_companies_on_co_20151210180722_16415"
-  add_index "c27_companies", ["name"], name: "index_c27_companies_on_name"
-
-  create_table "c27_people", force: :cascade do |t|
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.datetime "soft_destroyed_at"
-    t.text     "name"
-    t.text     "co_20151124200756_41084", default: "", null: false
-  end
-
-  add_index "c27_people", ["co_20151124200756_41084"], name: "index_c27_people_on_co_20151124200756_41084"
-  add_index "c27_people", ["name"], name: "index_c27_people_on_name"
-
-  create_table "c28_companies", force: :cascade do |t|
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.datetime "soft_destroyed_at"
-    t.text     "name",                    default: "", null: false
-    t.text     "co_20151202174325_93365", default: "", null: false
-    t.text     "co_20151120164951_23568", default: "", null: false
-    t.text     "co_20151120164951_82182", default: "", null: false
-    t.text     "co_20151202174325_72251", default: "", null: false
-    t.text     "co_20151203015047_48771", default: "", null: false
-    t.text     "co_20151122122324_53749", default: "", null: false
-    t.text     "co_20151210180722_16415", default: "", null: false
-  end
-
-  add_index "c28_companies", ["co_20151120164951_23568"], name: "index_c28_companies_on_co_20151120164951_23568"
-  add_index "c28_companies", ["co_20151120164951_82182"], name: "index_c28_companies_on_co_20151120164951_82182"
-  add_index "c28_companies", ["co_20151122122324_53749"], name: "index_c28_companies_on_co_20151122122324_53749"
-  add_index "c28_companies", ["co_20151202174325_72251"], name: "index_c28_companies_on_co_20151202174325_72251"
-  add_index "c28_companies", ["co_20151202174325_93365"], name: "index_c28_companies_on_co_20151202174325_93365"
-  add_index "c28_companies", ["co_20151203015047_48771"], name: "index_c28_companies_on_co_20151203015047_48771"
-  add_index "c28_companies", ["co_20151210180722_16415"], name: "index_c28_companies_on_co_20151210180722_16415"
-  add_index "c28_companies", ["name"], name: "index_c28_companies_on_name"
-
-  create_table "c28_people", force: :cascade do |t|
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.datetime "soft_destroyed_at"
-    t.text     "name",                    default: "", null: false
-    t.text     "co_20151124200756_41084", default: "", null: false
-  end
-
-  add_index "c28_people", ["co_20151124200756_41084"], name: "index_c28_people_on_co_20151124200756_41084"
-  add_index "c28_people", ["name"], name: "index_c28_people_on_name"
-
-  create_table "c29_companies", force: :cascade do |t|
+  create_table "c10_companies", force: :cascade do |t|
     t.datetime "created_at",                     null: false
     t.datetime "updated_at",                     null: false
     t.datetime "soft_destroyed_at"
     t.text     "name",              default: "", null: false
   end
 
-  add_index "c29_companies", ["name"], name: "index_c29_companies_on_name"
+  add_index "c10_companies", ["name"], name: "index_c10_companies_on_name", using: :btree
 
-  create_table "c29_people", force: :cascade do |t|
+  create_table "c10_people", force: :cascade do |t|
     t.datetime "created_at",                     null: false
     t.datetime "updated_at",                     null: false
     t.datetime "soft_destroyed_at"
     t.text     "name",              default: "", null: false
   end
 
-  add_index "c29_people", ["name"], name: "index_c29_people_on_name"
+  add_index "c10_people", ["name"], name: "index_c10_people_on_name", using: :btree
 
-  create_table "c30_companies", force: :cascade do |t|
+  create_table "c11_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
     t.datetime "soft_destroyed_at"
     t.text     "name",                    default: "", null: false
-    t.text     "co_20151202174325_93365", default: "", null: false
-    t.text     "co_20151120164951_23568", default: "", null: false
-    t.text     "co_20151120164951_82182", default: "", null: false
-    t.text     "co_20151202174325_72251", default: "", null: false
-    t.text     "co_20151203015047_48771", default: "", null: false
-    t.text     "co_20151122122324_53749", default: "", null: false
-    t.text     "co_20151210180722_16415", default: "", null: false
+    t.text     "co_20160112162040_71595", default: "", null: false
+    t.text     "co_20160112162040_2204",  default: "", null: false
+    t.text     "co_20160112162040_36794", default: "", null: false
+    t.text     "co_20160112162040_51552", default: "", null: false
+    t.text     "co_20160112162040_56213", default: "", null: false
+    t.text     "co_20160112162040_27878", default: "", null: false
+    t.text     "co_20160112162040_7675",  default: "", null: false
+    t.text     "co_20160112162040_71492", default: "", null: false
+    t.text     "co_20160112162040_42082", default: "", null: false
+    t.text     "co_20160112162040_56292", default: "", null: false
+    t.text     "co_20160112162040_86901", default: "", null: false
+    t.text     "co_20160112162040_93871", default: "", null: false
+    t.text     "co_20160112162040_10685", default: "", null: false
+    t.text     "co_20160113114625_69017", default: "", null: false
+    t.text     "co_20160113114625_96401", default: "", null: false
+    t.text     "co_20160113114625_59776", default: "", null: false
   end
 
-  add_index "c30_companies", ["co_20151120164951_23568"], name: "index_c30_companies_on_co_20151120164951_23568"
-  add_index "c30_companies", ["co_20151120164951_82182"], name: "index_c30_companies_on_co_20151120164951_82182"
-  add_index "c30_companies", ["co_20151122122324_53749"], name: "index_c30_companies_on_co_20151122122324_53749"
-  add_index "c30_companies", ["co_20151202174325_72251"], name: "index_c30_companies_on_co_20151202174325_72251"
-  add_index "c30_companies", ["co_20151202174325_93365"], name: "index_c30_companies_on_co_20151202174325_93365"
-  add_index "c30_companies", ["co_20151203015047_48771"], name: "index_c30_companies_on_co_20151203015047_48771"
-  add_index "c30_companies", ["co_20151210180722_16415"], name: "index_c30_companies_on_co_20151210180722_16415"
-  add_index "c30_companies", ["name"], name: "index_c30_companies_on_name"
+  add_index "c11_companies", ["co_20160112162040_10685"], name: "index_c11_companies_on_co_20160112162040_10685", using: :btree
+  add_index "c11_companies", ["co_20160112162040_2204"], name: "index_c11_companies_on_co_20160112162040_2204", using: :btree
+  add_index "c11_companies", ["co_20160112162040_27878"], name: "index_c11_companies_on_co_20160112162040_27878", using: :btree
+  add_index "c11_companies", ["co_20160112162040_36794"], name: "index_c11_companies_on_co_20160112162040_36794", using: :btree
+  add_index "c11_companies", ["co_20160112162040_42082"], name: "index_c11_companies_on_co_20160112162040_42082", using: :btree
+  add_index "c11_companies", ["co_20160112162040_51552"], name: "index_c11_companies_on_co_20160112162040_51552", using: :btree
+  add_index "c11_companies", ["co_20160112162040_56213"], name: "index_c11_companies_on_co_20160112162040_56213", using: :btree
+  add_index "c11_companies", ["co_20160112162040_56292"], name: "index_c11_companies_on_co_20160112162040_56292", using: :btree
+  add_index "c11_companies", ["co_20160112162040_71492"], name: "index_c11_companies_on_co_20160112162040_71492", using: :btree
+  add_index "c11_companies", ["co_20160112162040_71595"], name: "index_c11_companies_on_co_20160112162040_71595", using: :btree
+  add_index "c11_companies", ["co_20160112162040_7675"], name: "index_c11_companies_on_co_20160112162040_7675", using: :btree
+  add_index "c11_companies", ["co_20160112162040_86901"], name: "index_c11_companies_on_co_20160112162040_86901", using: :btree
+  add_index "c11_companies", ["co_20160112162040_93871"], name: "index_c11_companies_on_co_20160112162040_93871", using: :btree
+  add_index "c11_companies", ["co_20160113114625_59776"], name: "index_c11_companies_on_co_20160113114625_59776", using: :btree
+  add_index "c11_companies", ["co_20160113114625_69017"], name: "index_c11_companies_on_co_20160113114625_69017", using: :btree
+  add_index "c11_companies", ["co_20160113114625_96401"], name: "index_c11_companies_on_co_20160113114625_96401", using: :btree
+  add_index "c11_companies", ["name"], name: "index_c11_companies_on_name", using: :btree
 
-  create_table "c30_people", force: :cascade do |t|
+  create_table "c11_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c11_people", ["name"], name: "index_c11_people_on_name", using: :btree
+
+  create_table "c12_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
     t.datetime "soft_destroyed_at"
     t.text     "name",                    default: "", null: false
-    t.text     "co_20151124200756_41084", default: "", null: false
+    t.text     "co_20160113133335_63208", default: "", null: false
+    t.text     "co_20160113133335_25158", default: "", null: false
+    t.text     "co_20160113133335_92308", default: "", null: false
+    t.text     "co_20160113133335_55292", default: "", null: false
+    t.text     "co_20160113133335_27331", default: "", null: false
+    t.text     "co_20160113133335_40604", default: "", null: false
+    t.text     "co_20160113133335_69971", default: "", null: false
+    t.text     "co_20160113133335_37799", default: "", null: false
+    t.text     "co_20160113133335_81558", default: "", null: false
+    t.text     "co_20160113133335_2096",  default: "", null: false
+    t.text     "co_20160113133335_14048", default: "", null: false
+    t.text     "co_20160113133335_38217", default: "", null: false
+    t.text     "co_20160113133335_40754", default: "", null: false
+    t.text     "co_20160113160005_22033", default: "", null: false
+    t.text     "co_20160113160005_8999",  default: "", null: false
+    t.text     "co_20160113160005_81105", default: "", null: false
   end
 
-  add_index "c30_people", ["co_20151124200756_41084"], name: "index_c30_people_on_co_20151124200756_41084"
-  add_index "c30_people", ["name"], name: "index_c30_people_on_name"
+  add_index "c12_companies", ["co_20160113133335_14048"], name: "index_c12_companies_on_co_20160113133335_14048", using: :btree
+  add_index "c12_companies", ["co_20160113133335_2096"], name: "index_c12_companies_on_co_20160113133335_2096", using: :btree
+  add_index "c12_companies", ["co_20160113133335_25158"], name: "index_c12_companies_on_co_20160113133335_25158", using: :btree
+  add_index "c12_companies", ["co_20160113133335_27331"], name: "index_c12_companies_on_co_20160113133335_27331", using: :btree
+  add_index "c12_companies", ["co_20160113133335_37799"], name: "index_c12_companies_on_co_20160113133335_37799", using: :btree
+  add_index "c12_companies", ["co_20160113133335_38217"], name: "index_c12_companies_on_co_20160113133335_38217", using: :btree
+  add_index "c12_companies", ["co_20160113133335_40604"], name: "index_c12_companies_on_co_20160113133335_40604", using: :btree
+  add_index "c12_companies", ["co_20160113133335_40754"], name: "index_c12_companies_on_co_20160113133335_40754", using: :btree
+  add_index "c12_companies", ["co_20160113133335_55292"], name: "index_c12_companies_on_co_20160113133335_55292", using: :btree
+  add_index "c12_companies", ["co_20160113133335_63208"], name: "index_c12_companies_on_co_20160113133335_63208", using: :btree
+  add_index "c12_companies", ["co_20160113133335_69971"], name: "index_c12_companies_on_co_20160113133335_69971", using: :btree
+  add_index "c12_companies", ["co_20160113133335_81558"], name: "index_c12_companies_on_co_20160113133335_81558", using: :btree
+  add_index "c12_companies", ["co_20160113133335_92308"], name: "index_c12_companies_on_co_20160113133335_92308", using: :btree
+  add_index "c12_companies", ["co_20160113160005_22033"], name: "index_c12_companies_on_co_20160113160005_22033", using: :btree
+  add_index "c12_companies", ["co_20160113160005_81105"], name: "index_c12_companies_on_co_20160113160005_81105", using: :btree
+  add_index "c12_companies", ["co_20160113160005_8999"], name: "index_c12_companies_on_co_20160113160005_8999", using: :btree
+  add_index "c12_companies", ["name"], name: "index_c12_companies_on_name", using: :btree
 
-  create_table "c31_companies", force: :cascade do |t|
+  create_table "c12_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c12_people", ["name"], name: "index_c12_people_on_name", using: :btree
+
+  create_table "c13_companies", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c13_companies", ["name"], name: "index_c13_companies_on_name", using: :btree
+
+  create_table "c13_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c13_people", ["name"], name: "index_c13_people_on_name", using: :btree
+
+  create_table "c14_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
     t.datetime "soft_destroyed_at"
     t.text     "name",                    default: "", null: false
-    t.text     "co_20151202174325_93365", default: "", null: false
-    t.text     "co_20151120164951_23568", default: "", null: false
-    t.text     "co_20151120164951_82182", default: "", null: false
-    t.text     "co_20151202174325_72251", default: "", null: false
-    t.text     "co_20151203015047_48771", default: "", null: false
-    t.text     "co_20151122122324_53749", default: "", null: false
-    t.text     "co_20151210180722_16415", default: "", null: false
+    t.text     "co_20160201160103_32599", default: "", null: false
+    t.text     "co_20160201160103_2108",  default: "", null: false
+    t.text     "co_20160201160103_26312", default: "", null: false
+    t.text     "co_20160201160103_7942",  default: "", null: false
+    t.text     "co_20160201160103_45065", default: "", null: false
+    t.text     "co_20160201160103_24157", default: "", null: false
+    t.text     "co_20160201160103_77414", default: "", null: false
+    t.text     "co_20160201160103_52130", default: "", null: false
+    t.text     "co_20160201160103_92488", default: "", null: false
+    t.text     "co_20160201160103_15941", default: "", null: false
+    t.text     "co_20160201160103_13989", default: "", null: false
+    t.text     "co_20160201160103_36021", default: "", null: false
+    t.text     "co_20160201160103_89095", default: "", null: false
   end
 
-  add_index "c31_companies", ["co_20151120164951_23568"], name: "index_c31_companies_on_co_20151120164951_23568"
-  add_index "c31_companies", ["co_20151120164951_82182"], name: "index_c31_companies_on_co_20151120164951_82182"
-  add_index "c31_companies", ["co_20151122122324_53749"], name: "index_c31_companies_on_co_20151122122324_53749"
-  add_index "c31_companies", ["co_20151202174325_72251"], name: "index_c31_companies_on_co_20151202174325_72251"
-  add_index "c31_companies", ["co_20151202174325_93365"], name: "index_c31_companies_on_co_20151202174325_93365"
-  add_index "c31_companies", ["co_20151203015047_48771"], name: "index_c31_companies_on_co_20151203015047_48771"
-  add_index "c31_companies", ["co_20151210180722_16415"], name: "index_c31_companies_on_co_20151210180722_16415"
-  add_index "c31_companies", ["name"], name: "index_c31_companies_on_name"
+  add_index "c14_companies", ["co_20160201160103_13989"], name: "index_c14_companies_on_co_20160201160103_13989", using: :btree
+  add_index "c14_companies", ["co_20160201160103_15941"], name: "index_c14_companies_on_co_20160201160103_15941", using: :btree
+  add_index "c14_companies", ["co_20160201160103_2108"], name: "index_c14_companies_on_co_20160201160103_2108", using: :btree
+  add_index "c14_companies", ["co_20160201160103_24157"], name: "index_c14_companies_on_co_20160201160103_24157", using: :btree
+  add_index "c14_companies", ["co_20160201160103_26312"], name: "index_c14_companies_on_co_20160201160103_26312", using: :btree
+  add_index "c14_companies", ["co_20160201160103_32599"], name: "index_c14_companies_on_co_20160201160103_32599", using: :btree
+  add_index "c14_companies", ["co_20160201160103_36021"], name: "index_c14_companies_on_co_20160201160103_36021", using: :btree
+  add_index "c14_companies", ["co_20160201160103_45065"], name: "index_c14_companies_on_co_20160201160103_45065", using: :btree
+  add_index "c14_companies", ["co_20160201160103_52130"], name: "index_c14_companies_on_co_20160201160103_52130", using: :btree
+  add_index "c14_companies", ["co_20160201160103_77414"], name: "index_c14_companies_on_co_20160201160103_77414", using: :btree
+  add_index "c14_companies", ["co_20160201160103_7942"], name: "index_c14_companies_on_co_20160201160103_7942", using: :btree
+  add_index "c14_companies", ["co_20160201160103_89095"], name: "index_c14_companies_on_co_20160201160103_89095", using: :btree
+  add_index "c14_companies", ["co_20160201160103_92488"], name: "index_c14_companies_on_co_20160201160103_92488", using: :btree
+  add_index "c14_companies", ["name"], name: "index_c14_companies_on_name", using: :btree
 
-  create_table "c31_people", force: :cascade do |t|
+  create_table "c14_people", force: :cascade do |t|
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
     t.datetime "soft_destroyed_at"
     t.text     "name",                    default: "", null: false
-    t.text     "co_20151124200756_41084", default: "", null: false
+    t.text     "co_20160201160239_978",   default: "", null: false
+    t.text     "co_20160201160239_54299", default: "", null: false
+    t.text     "co_20160201160239_89691", default: "", null: false
   end
 
-  add_index "c31_people", ["co_20151124200756_41084"], name: "index_c31_people_on_co_20151124200756_41084"
-  add_index "c31_people", ["name"], name: "index_c31_people_on_name"
+  add_index "c14_people", ["co_20160201160239_54299"], name: "index_c14_people_on_co_20160201160239_54299", using: :btree
+  add_index "c14_people", ["co_20160201160239_89691"], name: "index_c14_people_on_co_20160201160239_89691", using: :btree
+  add_index "c14_people", ["co_20160201160239_978"], name: "index_c14_people_on_co_20160201160239_978", using: :btree
+  add_index "c14_people", ["name"], name: "index_c14_people_on_name", using: :btree
 
-  create_table "c_10_persons", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_10companies", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_11_companies", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_11_persons", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_12_companies", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_12_persons", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_13_companies", force: :cascade do |t|
-    t.string   "aaaa\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_13_persons", force: :cascade do |t|
-    t.string   "aaaa\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_14_companies", force: :cascade do |t|
-    t.string "name"
-  end
-
-  create_table "c_14_persons", force: :cascade do |t|
-    t.string "name"
-  end
-
-  create_table "c_15_companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_15_persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_16_companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_16_persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_17_companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_17_persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_18_companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_18_persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_19_companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_19_persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_20_actions", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_20_companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_20_persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-  end
-
-  create_table "c_21_actions", force: :cascade do |t|
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-    t.datetime "deleted_at"
-    t.string   "c_1445654739"
-  end
-
-  create_table "c_21_companies", force: :cascade do |t|
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-    t.datetime "deleted_at"
-    t.string   "c_1445654739"
-  end
-
-  create_table "c_21_persons", force: :cascade do |t|
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-    t.datetime "deleted_at"
-    t.string   "c_1445654739"
-  end
-
-  create_table "c_22_actions", force: :cascade do |t|
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-    t.datetime "deleted_at"
-    t.string   "ClientTable"
-  end
-
-  create_table "c_22_companies", force: :cascade do |t|
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-    t.datetime "deleted_at"
-    t.string   "ClientTable"
-  end
-
-  create_table "c_22_persons", force: :cascade do |t|
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-    t.datetime "deleted_at"
-    t.string   "ClientTable"
-  end
-
-  create_table "c_23_actions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-    t.string   "name"
-  end
-
-  create_table "c_23_companies", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-    t.string   "name"
-  end
-
-  create_table "c_23_persons", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
-    t.string   "name"
-  end
-
-  create_table "c_24_actions", force: :cascade do |t|
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.datetime "deleted_at"
-    t.string   "co_1445835502"
-  end
-
-  create_table "c_24_companies", force: :cascade do |t|
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.datetime "deleted_at"
-    t.string   "co_1445835502"
-    t.string   "co_1446095033"
-    t.text     "co_1446109186"
-    t.float    "co_1446623714"
-    t.string   "co_1446803222"
-    t.text     "co_1446803318"
-  end
-
-  add_index "c_24_companies", ["co_1446095033"], name: "index_c_24_companies_on_co_1446095033"
-  add_index "c_24_companies", ["co_1446109186"], name: "index_c_24_companies_on_co_1446109186"
-  add_index "c_24_companies", ["co_1446623714"], name: "index_c_24_companies_on_co_1446623714"
-  add_index "c_24_companies", ["co_1446803222"], name: "index_c_24_companies_on_co_1446803222"
-  add_index "c_24_companies", ["co_1446803318"], name: "index_c_24_companies_on_co_1446803318"
-
-  create_table "c_24_persons", force: :cascade do |t|
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.datetime "deleted_at"
-    t.string   "co_1445835502"
-  end
-
-  create_table "c_25_companies", force: :cascade do |t|
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
+  create_table "c15_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
     t.datetime "soft_destroyed_at"
-    t.string   "name"
-    t.text     "co_20151109011323_34577"
-    t.string   "co_20151109011323_18499"
-    t.string   "co_20151109172317_5406"
-    t.text     "co_20151118164815_48332"
-    t.integer  "co_20151118164815_29932"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151225164530_33323", default: "", null: false
+    t.text     "co_20151225163928_40939", default: "", null: false
+    t.text     "co_20151225163928_74804", default: "", null: false
+    t.text     "co_20151225163928_17737", default: "", null: false
+    t.text     "co_20151225163928_64328", default: "", null: false
+    t.text     "co_20151225163928_77386", default: "", null: false
+    t.text     "co_20151225163928_71061", default: "", null: false
+    t.text     "co_20151225163928_13156", default: "", null: false
+    t.text     "co_20151225163928_35669", default: "", null: false
+    t.text     "co_20151225163928_51066", default: "", null: false
+    t.text     "co_20151225163928_75316", default: "", null: false
+    t.text     "co_20151225163928_41514", default: "", null: false
+    t.text     "co_20151225163928_5840",  default: "", null: false
+    t.text     "co_20151225163928_64029", default: "", null: false
+    t.text     "co_20151225163928_36354", default: "", null: false
+    t.text     "co_20151225163928_75089", default: "", null: false
+    t.text     "co_20151225163928_18218", default: "", null: false
+    t.text     "co_20151225163928_6457",  default: "", null: false
+    t.text     "co_20151225163928_9439",  default: "", null: false
+    t.text     "co_20151225163928_40831", default: "", null: false
+    t.text     "co_20151225170838_57969", default: "", null: false
+    t.text     "co_20151225170838_86398", default: "", null: false
+    t.text     "co_20151225170838_59411", default: "", null: false
+    t.text     "co_20160226144518_73806", default: "", null: false
+    t.text     "co_20160226144752_97838", default: "", null: false
   end
 
-  add_index "c_25_companies", ["co_20151109011323_18499"], name: "index_c_25_companies_on_co_20151109011323_18499"
-  add_index "c_25_companies", ["co_20151109011323_34577"], name: "index_c_25_companies_on_co_20151109011323_34577"
-  add_index "c_25_companies", ["co_20151109172317_5406"], name: "index_c_25_companies_on_co_20151109172317_5406"
-  add_index "c_25_companies", ["co_20151118164815_29932"], name: "index_c_25_companies_on_co_20151118164815_29932"
-  add_index "c_25_companies", ["co_20151118164815_48332"], name: "index_c_25_companies_on_co_20151118164815_48332"
-  add_index "c_25_companies", ["name"], name: "index_c_25_companies_on_name"
+  add_index "c15_companies", ["co_20151225163928_13156"], name: "index_c15_companies_on_co_20151225163928_13156", using: :btree
+  add_index "c15_companies", ["co_20151225163928_17737"], name: "index_c15_companies_on_co_20151225163928_17737", using: :btree
+  add_index "c15_companies", ["co_20151225163928_18218"], name: "index_c15_companies_on_co_20151225163928_18218", using: :btree
+  add_index "c15_companies", ["co_20151225163928_35669"], name: "index_c15_companies_on_co_20151225163928_35669", using: :btree
+  add_index "c15_companies", ["co_20151225163928_36354"], name: "index_c15_companies_on_co_20151225163928_36354", using: :btree
+  add_index "c15_companies", ["co_20151225163928_40831"], name: "index_c15_companies_on_co_20151225163928_40831", using: :btree
+  add_index "c15_companies", ["co_20151225163928_40939"], name: "index_c15_companies_on_co_20151225163928_40939", using: :btree
+  add_index "c15_companies", ["co_20151225163928_41514"], name: "index_c15_companies_on_co_20151225163928_41514", using: :btree
+  add_index "c15_companies", ["co_20151225163928_51066"], name: "index_c15_companies_on_co_20151225163928_51066", using: :btree
+  add_index "c15_companies", ["co_20151225163928_5840"], name: "index_c15_companies_on_co_20151225163928_5840", using: :btree
+  add_index "c15_companies", ["co_20151225163928_64029"], name: "index_c15_companies_on_co_20151225163928_64029", using: :btree
+  add_index "c15_companies", ["co_20151225163928_64328"], name: "index_c15_companies_on_co_20151225163928_64328", using: :btree
+  add_index "c15_companies", ["co_20151225163928_6457"], name: "index_c15_companies_on_co_20151225163928_6457", using: :btree
+  add_index "c15_companies", ["co_20151225163928_71061"], name: "index_c15_companies_on_co_20151225163928_71061", using: :btree
+  add_index "c15_companies", ["co_20151225163928_74804"], name: "index_c15_companies_on_co_20151225163928_74804", using: :btree
+  add_index "c15_companies", ["co_20151225163928_75089"], name: "index_c15_companies_on_co_20151225163928_75089", using: :btree
+  add_index "c15_companies", ["co_20151225163928_75316"], name: "index_c15_companies_on_co_20151225163928_75316", using: :btree
+  add_index "c15_companies", ["co_20151225163928_77386"], name: "index_c15_companies_on_co_20151225163928_77386", using: :btree
+  add_index "c15_companies", ["co_20151225163928_9439"], name: "index_c15_companies_on_co_20151225163928_9439", using: :btree
+  add_index "c15_companies", ["co_20151225164530_33323"], name: "index_c15_companies_on_co_20151225164530_33323", using: :btree
+  add_index "c15_companies", ["co_20151225170838_57969"], name: "index_c15_companies_on_co_20151225170838_57969", using: :btree
+  add_index "c15_companies", ["co_20151225170838_59411"], name: "index_c15_companies_on_co_20151225170838_59411", using: :btree
+  add_index "c15_companies", ["co_20151225170838_86398"], name: "index_c15_companies_on_co_20151225170838_86398", using: :btree
+  add_index "c15_companies", ["co_20160226144518_73806"], name: "index_c15_companies_on_co_20160226144518_73806", using: :btree
+  add_index "c15_companies", ["co_20160226144752_97838"], name: "index_c15_companies_on_co_20160226144752_97838", using: :btree
+  add_index "c15_companies", ["name"], name: "index_c15_companies_on_name", using: :btree
 
-  create_table "c_25_persons", force: :cascade do |t|
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
+  create_table "c15_people", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
     t.datetime "soft_destroyed_at"
-    t.string   "name"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151225184610_82649", default: "", null: false
+    t.text     "co_20151225184610_24757", default: "", null: false
+    t.text     "co_20151225184610_38856", default: "", null: false
+    t.text     "co_20151225184610_45139", default: "", null: false
+    t.text     "co_20151225184610_38284", default: "", null: false
+    t.text     "co_20151225184610_48782", default: "", null: false
+    t.text     "co_20151225184610_89963", default: "", null: false
+    t.text     "co_20151225184610_6044",  default: "", null: false
+    t.text     "co_20151225184610_70938", default: "", null: false
+    t.text     "co_20151225184610_37950", default: "", null: false
+    t.text     "co_20151225184723_43109", default: "", null: false
   end
 
-  add_index "c_25_persons", ["name"], name: "index_c_25_persons_on_name"
+  add_index "c15_people", ["co_20151225184610_24757"], name: "index_c15_people_on_co_20151225184610_24757", using: :btree
+  add_index "c15_people", ["co_20151225184610_37950"], name: "index_c15_people_on_co_20151225184610_37950", using: :btree
+  add_index "c15_people", ["co_20151225184610_38284"], name: "index_c15_people_on_co_20151225184610_38284", using: :btree
+  add_index "c15_people", ["co_20151225184610_38856"], name: "index_c15_people_on_co_20151225184610_38856", using: :btree
+  add_index "c15_people", ["co_20151225184610_45139"], name: "index_c15_people_on_co_20151225184610_45139", using: :btree
+  add_index "c15_people", ["co_20151225184610_48782"], name: "index_c15_people_on_co_20151225184610_48782", using: :btree
+  add_index "c15_people", ["co_20151225184610_6044"], name: "index_c15_people_on_co_20151225184610_6044", using: :btree
+  add_index "c15_people", ["co_20151225184610_70938"], name: "index_c15_people_on_co_20151225184610_70938", using: :btree
+  add_index "c15_people", ["co_20151225184610_82649"], name: "index_c15_people_on_co_20151225184610_82649", using: :btree
+  add_index "c15_people", ["co_20151225184610_89963"], name: "index_c15_people_on_co_20151225184610_89963", using: :btree
+  add_index "c15_people", ["co_20151225184723_43109"], name: "index_c15_people_on_co_20151225184723_43109", using: :btree
+  add_index "c15_people", ["name"], name: "index_c15_people_on_name", using: :btree
 
-  create_table "c_2_companies", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
+  create_table "c16_companies", force: :cascade do |t|
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                  default: "", null: false
+    t.text     "co_20160228033730_358", default: "", null: false
   end
 
-  create_table "c_2_persons", force: :cascade do |t|
-    t.string   "name\u2028"
-    t.integer  "company_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
+  add_index "c16_companies", ["co_20160228033730_358"], name: "index_c16_companies_on_co_20160228033730_358", using: :btree
+  add_index "c16_companies", ["name"], name: "index_c16_companies_on_name", using: :btree
+
+  create_table "c1_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151126024103_34241", default: "", null: false
   end
 
-  create_table "c__companies", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
+  add_index "c1_companies", ["co_20151126024103_34241"], name: "index_c1_companies_on_co_20151126024103_34241", using: :btree
+  add_index "c1_companies", ["name"], name: "index_c1_companies_on_name", using: :btree
+
+  create_table "c1_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
   end
 
-  create_table "c__persons", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at"
+  add_index "c1_people", ["name"], name: "index_c1_people_on_name", using: :btree
+
+  create_table "c2_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151126184116_33385", default: "", null: false
+    t.text     "co_20151126184116_96648", default: "", null: false
+    t.text     "co_20151126184116_57458", default: "", null: false
+    t.text     "co_20151126190011_57479", default: "", null: false
+    t.text     "co_20151201120352_53180", default: "", null: false
+    t.text     "co_20151207184657_87935", default: "", null: false
+    t.text     "co_20151207184657_674",   default: "", null: false
   end
+
+  add_index "c2_companies", ["co_20151126184116_33385"], name: "index_c2_companies_on_co_20151126184116_33385", using: :btree
+  add_index "c2_companies", ["co_20151126184116_57458"], name: "index_c2_companies_on_co_20151126184116_57458", using: :btree
+  add_index "c2_companies", ["co_20151126184116_96648"], name: "index_c2_companies_on_co_20151126184116_96648", using: :btree
+  add_index "c2_companies", ["co_20151126190011_57479"], name: "index_c2_companies_on_co_20151126190011_57479", using: :btree
+  add_index "c2_companies", ["co_20151201120352_53180"], name: "index_c2_companies_on_co_20151201120352_53180", using: :btree
+  add_index "c2_companies", ["co_20151207184657_674"], name: "index_c2_companies_on_co_20151207184657_674", using: :btree
+  add_index "c2_companies", ["co_20151207184657_87935"], name: "index_c2_companies_on_co_20151207184657_87935", using: :btree
+  add_index "c2_companies", ["name"], name: "index_c2_companies_on_name", using: :btree
+
+  create_table "c2_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c2_people", ["name"], name: "index_c2_people_on_name", using: :btree
+
+  create_table "c3_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151204154036_63020", default: "", null: false
+    t.text     "co_20151204154036_16968", default: "", null: false
+    t.text     "co_20151204154036_72273", default: "", null: false
+    t.text     "co_20151204154036_96451", default: "", null: false
+    t.text     "co_20151204154036_23353", default: "", null: false
+    t.text     "co_20151204154036_53098", default: "", null: false
+    t.text     "co_20151204154036_73574", default: "", null: false
+    t.text     "co_20151204154036_85384", default: "", null: false
+    t.text     "co_20151207165251_50159", default: "", null: false
+    t.text     "co_20151210165948_28656", default: "", null: false
+    t.text     "co_20151210165948_47855", default: "", null: false
+    t.text     "co_20151210165948_31073", default: "", null: false
+    t.text     "co_20151210165948_84992", default: "", null: false
+    t.text     "co_20151210165948_99200", default: "", null: false
+    t.text     "co_20151210174207_23246", default: "", null: false
+    t.text     "co_20151224181458_69764", default: "", null: false
+  end
+
+  add_index "c3_companies", ["co_20151204154036_16968"], name: "index_c3_companies_on_co_20151204154036_16968", using: :btree
+  add_index "c3_companies", ["co_20151204154036_23353"], name: "index_c3_companies_on_co_20151204154036_23353", using: :btree
+  add_index "c3_companies", ["co_20151204154036_53098"], name: "index_c3_companies_on_co_20151204154036_53098", using: :btree
+  add_index "c3_companies", ["co_20151204154036_63020"], name: "index_c3_companies_on_co_20151204154036_63020", using: :btree
+  add_index "c3_companies", ["co_20151204154036_72273"], name: "index_c3_companies_on_co_20151204154036_72273", using: :btree
+  add_index "c3_companies", ["co_20151204154036_73574"], name: "index_c3_companies_on_co_20151204154036_73574", using: :btree
+  add_index "c3_companies", ["co_20151204154036_85384"], name: "index_c3_companies_on_co_20151204154036_85384", using: :btree
+  add_index "c3_companies", ["co_20151204154036_96451"], name: "index_c3_companies_on_co_20151204154036_96451", using: :btree
+  add_index "c3_companies", ["co_20151207165251_50159"], name: "index_c3_companies_on_co_20151207165251_50159", using: :btree
+  add_index "c3_companies", ["co_20151210165948_28656"], name: "index_c3_companies_on_co_20151210165948_28656", using: :btree
+  add_index "c3_companies", ["co_20151210165948_31073"], name: "index_c3_companies_on_co_20151210165948_31073", using: :btree
+  add_index "c3_companies", ["co_20151210165948_47855"], name: "index_c3_companies_on_co_20151210165948_47855", using: :btree
+  add_index "c3_companies", ["co_20151210165948_84992"], name: "index_c3_companies_on_co_20151210165948_84992", using: :btree
+  add_index "c3_companies", ["co_20151210165948_99200"], name: "index_c3_companies_on_co_20151210165948_99200", using: :btree
+  add_index "c3_companies", ["co_20151210174207_23246"], name: "index_c3_companies_on_co_20151210174207_23246", using: :btree
+  add_index "c3_companies", ["co_20151224181458_69764"], name: "index_c3_companies_on_co_20151224181458_69764", using: :btree
+  add_index "c3_companies", ["name"], name: "index_c3_companies_on_name", using: :btree
+
+  create_table "c3_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c3_people", ["name"], name: "index_c3_people_on_name", using: :btree
+
+  create_table "c4_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151210174207_23246", default: "", null: false
+    t.text     "co_20151204154036_72273", default: "", null: false
+    t.text     "co_20151204154036_63020", default: "", null: false
+    t.text     "co_20151204154036_16968", default: "", null: false
+    t.text     "co_20151204154036_96451", default: "", null: false
+    t.text     "co_20151204154036_23353", default: "", null: false
+    t.text     "co_20151204154036_53098", default: "", null: false
+    t.text     "co_20151204154036_73574", default: "", null: false
+    t.text     "co_20151204154036_85384", default: "", null: false
+    t.text     "co_20151207165251_50159", default: "", null: false
+    t.text     "co_20151210165948_28656", default: "", null: false
+    t.text     "co_20151210165948_47855", default: "", null: false
+    t.text     "co_20151210165948_31073", default: "", null: false
+    t.text     "co_20151210165948_84992", default: "", null: false
+    t.text     "co_20151210165948_99200", default: "", null: false
+  end
+
+  add_index "c4_companies", ["co_20151204154036_16968"], name: "index_c4_companies_on_co_20151204154036_16968", using: :btree
+  add_index "c4_companies", ["co_20151204154036_23353"], name: "index_c4_companies_on_co_20151204154036_23353", using: :btree
+  add_index "c4_companies", ["co_20151204154036_53098"], name: "index_c4_companies_on_co_20151204154036_53098", using: :btree
+  add_index "c4_companies", ["co_20151204154036_63020"], name: "index_c4_companies_on_co_20151204154036_63020", using: :btree
+  add_index "c4_companies", ["co_20151204154036_72273"], name: "index_c4_companies_on_co_20151204154036_72273", using: :btree
+  add_index "c4_companies", ["co_20151204154036_73574"], name: "index_c4_companies_on_co_20151204154036_73574", using: :btree
+  add_index "c4_companies", ["co_20151204154036_85384"], name: "index_c4_companies_on_co_20151204154036_85384", using: :btree
+  add_index "c4_companies", ["co_20151204154036_96451"], name: "index_c4_companies_on_co_20151204154036_96451", using: :btree
+  add_index "c4_companies", ["co_20151207165251_50159"], name: "index_c4_companies_on_co_20151207165251_50159", using: :btree
+  add_index "c4_companies", ["co_20151210165948_28656"], name: "index_c4_companies_on_co_20151210165948_28656", using: :btree
+  add_index "c4_companies", ["co_20151210165948_31073"], name: "index_c4_companies_on_co_20151210165948_31073", using: :btree
+  add_index "c4_companies", ["co_20151210165948_47855"], name: "index_c4_companies_on_co_20151210165948_47855", using: :btree
+  add_index "c4_companies", ["co_20151210165948_84992"], name: "index_c4_companies_on_co_20151210165948_84992", using: :btree
+  add_index "c4_companies", ["co_20151210165948_99200"], name: "index_c4_companies_on_co_20151210165948_99200", using: :btree
+  add_index "c4_companies", ["co_20151210174207_23246"], name: "index_c4_companies_on_co_20151210174207_23246", using: :btree
+  add_index "c4_companies", ["name"], name: "index_c4_companies_on_name", using: :btree
+
+  create_table "c4_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c4_people", ["name"], name: "index_c4_people_on_name", using: :btree
+
+  create_table "c5_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151210174207_23246", default: "", null: false
+    t.text     "co_20151204154036_72273", default: "", null: false
+    t.text     "co_20151204154036_63020", default: "", null: false
+    t.text     "co_20151204154036_16968", default: "", null: false
+    t.text     "co_20151204154036_96451", default: "", null: false
+    t.text     "co_20151204154036_23353", default: "", null: false
+    t.text     "co_20151204154036_53098", default: "", null: false
+    t.text     "co_20151204154036_73574", default: "", null: false
+    t.text     "co_20151204154036_85384", default: "", null: false
+    t.text     "co_20151207165251_50159", default: "", null: false
+    t.text     "co_20151210165948_28656", default: "", null: false
+    t.text     "co_20151210165948_47855", default: "", null: false
+    t.text     "co_20151210165948_31073", default: "", null: false
+    t.text     "co_20151210165948_84992", default: "", null: false
+    t.text     "co_20151210165948_99200", default: "", null: false
+  end
+
+  add_index "c5_companies", ["co_20151204154036_16968"], name: "index_c5_companies_on_co_20151204154036_16968", using: :btree
+  add_index "c5_companies", ["co_20151204154036_23353"], name: "index_c5_companies_on_co_20151204154036_23353", using: :btree
+  add_index "c5_companies", ["co_20151204154036_53098"], name: "index_c5_companies_on_co_20151204154036_53098", using: :btree
+  add_index "c5_companies", ["co_20151204154036_63020"], name: "index_c5_companies_on_co_20151204154036_63020", using: :btree
+  add_index "c5_companies", ["co_20151204154036_72273"], name: "index_c5_companies_on_co_20151204154036_72273", using: :btree
+  add_index "c5_companies", ["co_20151204154036_73574"], name: "index_c5_companies_on_co_20151204154036_73574", using: :btree
+  add_index "c5_companies", ["co_20151204154036_85384"], name: "index_c5_companies_on_co_20151204154036_85384", using: :btree
+  add_index "c5_companies", ["co_20151204154036_96451"], name: "index_c5_companies_on_co_20151204154036_96451", using: :btree
+  add_index "c5_companies", ["co_20151207165251_50159"], name: "index_c5_companies_on_co_20151207165251_50159", using: :btree
+  add_index "c5_companies", ["co_20151210165948_28656"], name: "index_c5_companies_on_co_20151210165948_28656", using: :btree
+  add_index "c5_companies", ["co_20151210165948_31073"], name: "index_c5_companies_on_co_20151210165948_31073", using: :btree
+  add_index "c5_companies", ["co_20151210165948_47855"], name: "index_c5_companies_on_co_20151210165948_47855", using: :btree
+  add_index "c5_companies", ["co_20151210165948_84992"], name: "index_c5_companies_on_co_20151210165948_84992", using: :btree
+  add_index "c5_companies", ["co_20151210165948_99200"], name: "index_c5_companies_on_co_20151210165948_99200", using: :btree
+  add_index "c5_companies", ["co_20151210174207_23246"], name: "index_c5_companies_on_co_20151210174207_23246", using: :btree
+  add_index "c5_companies", ["name"], name: "index_c5_companies_on_name", using: :btree
+
+  create_table "c5_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c5_people", ["name"], name: "index_c5_people_on_name", using: :btree
+
+  create_table "c6_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151224195946_93323", default: "", null: false
+    t.text     "co_20151224200155_13527", default: "", null: false
+    t.text     "co_20151224200155_34132", default: "", null: false
+    t.text     "co_20151224200155_94227", default: "", null: false
+    t.text     "co_20151224200155_87029", default: "", null: false
+    t.text     "co_20151224200155_88689", default: "", null: false
+    t.text     "co_20151224200155_54596", default: "", null: false
+    t.text     "co_20151224200155_33996", default: "", null: false
+    t.text     "co_20151224200155_49027", default: "", null: false
+    t.text     "co_20151224201321_77856", default: "", null: false
+  end
+
+  add_index "c6_companies", ["co_20151224195946_93323"], name: "index_c6_companies_on_co_20151224195946_93323", using: :btree
+  add_index "c6_companies", ["co_20151224200155_13527"], name: "index_c6_companies_on_co_20151224200155_13527", using: :btree
+  add_index "c6_companies", ["co_20151224200155_33996"], name: "index_c6_companies_on_co_20151224200155_33996", using: :btree
+  add_index "c6_companies", ["co_20151224200155_34132"], name: "index_c6_companies_on_co_20151224200155_34132", using: :btree
+  add_index "c6_companies", ["co_20151224200155_49027"], name: "index_c6_companies_on_co_20151224200155_49027", using: :btree
+  add_index "c6_companies", ["co_20151224200155_54596"], name: "index_c6_companies_on_co_20151224200155_54596", using: :btree
+  add_index "c6_companies", ["co_20151224200155_87029"], name: "index_c6_companies_on_co_20151224200155_87029", using: :btree
+  add_index "c6_companies", ["co_20151224200155_88689"], name: "index_c6_companies_on_co_20151224200155_88689", using: :btree
+  add_index "c6_companies", ["co_20151224200155_94227"], name: "index_c6_companies_on_co_20151224200155_94227", using: :btree
+  add_index "c6_companies", ["co_20151224201321_77856"], name: "index_c6_companies_on_co_20151224201321_77856", using: :btree
+  add_index "c6_companies", ["name"], name: "index_c6_companies_on_name", using: :btree
+
+  create_table "c6_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c6_people", ["name"], name: "index_c6_people_on_name", using: :btree
+
+  create_table "c7_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151225163928_74804", default: "", null: false
+    t.text     "co_20151225163928_17737", default: "", null: false
+    t.text     "co_20151225163928_64328", default: "", null: false
+    t.text     "co_20151225163928_77386", default: "", null: false
+    t.text     "co_20151225163928_71061", default: "", null: false
+    t.text     "co_20151225163928_13156", default: "", null: false
+    t.text     "co_20151225163928_35669", default: "", null: false
+    t.text     "co_20151225163928_51066", default: "", null: false
+    t.text     "co_20151225163928_75316", default: "", null: false
+    t.text     "co_20151225163928_41514", default: "", null: false
+    t.text     "co_20151225163928_5840",  default: "", null: false
+    t.text     "co_20151225163928_64029", default: "", null: false
+    t.text     "co_20151225163928_36354", default: "", null: false
+    t.text     "co_20151225163928_75089", default: "", null: false
+    t.text     "co_20151225163928_18218", default: "", null: false
+    t.text     "co_20151225163928_6457",  default: "", null: false
+    t.text     "co_20151225163928_9439",  default: "", null: false
+    t.text     "co_20151225163928_40831", default: "", null: false
+    t.text     "co_20151225163928_40939", default: "", null: false
+    t.text     "co_20151225164530_33323", default: "", null: false
+    t.text     "co_20151225170838_57969", default: "", null: false
+    t.text     "co_20151225170838_86398", default: "", null: false
+    t.text     "co_20151225170838_59411", default: "", null: false
+  end
+
+  add_index "c7_companies", ["co_20151225163928_13156"], name: "index_c7_companies_on_co_20151225163928_13156", using: :btree
+  add_index "c7_companies", ["co_20151225163928_17737"], name: "index_c7_companies_on_co_20151225163928_17737", using: :btree
+  add_index "c7_companies", ["co_20151225163928_18218"], name: "index_c7_companies_on_co_20151225163928_18218", using: :btree
+  add_index "c7_companies", ["co_20151225163928_35669"], name: "index_c7_companies_on_co_20151225163928_35669", using: :btree
+  add_index "c7_companies", ["co_20151225163928_36354"], name: "index_c7_companies_on_co_20151225163928_36354", using: :btree
+  add_index "c7_companies", ["co_20151225163928_40831"], name: "index_c7_companies_on_co_20151225163928_40831", using: :btree
+  add_index "c7_companies", ["co_20151225163928_40939"], name: "index_c7_companies_on_co_20151225163928_40939", using: :btree
+  add_index "c7_companies", ["co_20151225163928_41514"], name: "index_c7_companies_on_co_20151225163928_41514", using: :btree
+  add_index "c7_companies", ["co_20151225163928_51066"], name: "index_c7_companies_on_co_20151225163928_51066", using: :btree
+  add_index "c7_companies", ["co_20151225163928_5840"], name: "index_c7_companies_on_co_20151225163928_5840", using: :btree
+  add_index "c7_companies", ["co_20151225163928_64029"], name: "index_c7_companies_on_co_20151225163928_64029", using: :btree
+  add_index "c7_companies", ["co_20151225163928_64328"], name: "index_c7_companies_on_co_20151225163928_64328", using: :btree
+  add_index "c7_companies", ["co_20151225163928_6457"], name: "index_c7_companies_on_co_20151225163928_6457", using: :btree
+  add_index "c7_companies", ["co_20151225163928_71061"], name: "index_c7_companies_on_co_20151225163928_71061", using: :btree
+  add_index "c7_companies", ["co_20151225163928_74804"], name: "index_c7_companies_on_co_20151225163928_74804", using: :btree
+  add_index "c7_companies", ["co_20151225163928_75089"], name: "index_c7_companies_on_co_20151225163928_75089", using: :btree
+  add_index "c7_companies", ["co_20151225163928_75316"], name: "index_c7_companies_on_co_20151225163928_75316", using: :btree
+  add_index "c7_companies", ["co_20151225163928_77386"], name: "index_c7_companies_on_co_20151225163928_77386", using: :btree
+  add_index "c7_companies", ["co_20151225163928_9439"], name: "index_c7_companies_on_co_20151225163928_9439", using: :btree
+  add_index "c7_companies", ["co_20151225164530_33323"], name: "index_c7_companies_on_co_20151225164530_33323", using: :btree
+  add_index "c7_companies", ["co_20151225170838_57969"], name: "index_c7_companies_on_co_20151225170838_57969", using: :btree
+  add_index "c7_companies", ["co_20151225170838_59411"], name: "index_c7_companies_on_co_20151225170838_59411", using: :btree
+  add_index "c7_companies", ["co_20151225170838_86398"], name: "index_c7_companies_on_co_20151225170838_86398", using: :btree
+  add_index "c7_companies", ["name"], name: "index_c7_companies_on_name", using: :btree
+
+  create_table "c7_people", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20151225184610_82649", default: "", null: false
+    t.text     "co_20151225184610_24757", default: "", null: false
+    t.text     "co_20151225184610_38856", default: "", null: false
+    t.text     "co_20151225184610_45139", default: "", null: false
+    t.text     "co_20151225184610_38284", default: "", null: false
+    t.text     "co_20151225184610_48782", default: "", null: false
+    t.text     "co_20151225184610_89963", default: "", null: false
+    t.text     "co_20151225184610_6044",  default: "", null: false
+    t.text     "co_20151225184610_70938", default: "", null: false
+    t.text     "co_20151225184610_37950", default: "", null: false
+    t.text     "co_20151225184723_43109", default: "", null: false
+  end
+
+  add_index "c7_people", ["co_20151225184610_24757"], name: "index_c7_people_on_co_20151225184610_24757", using: :btree
+  add_index "c7_people", ["co_20151225184610_37950"], name: "index_c7_people_on_co_20151225184610_37950", using: :btree
+  add_index "c7_people", ["co_20151225184610_38284"], name: "index_c7_people_on_co_20151225184610_38284", using: :btree
+  add_index "c7_people", ["co_20151225184610_38856"], name: "index_c7_people_on_co_20151225184610_38856", using: :btree
+  add_index "c7_people", ["co_20151225184610_45139"], name: "index_c7_people_on_co_20151225184610_45139", using: :btree
+  add_index "c7_people", ["co_20151225184610_48782"], name: "index_c7_people_on_co_20151225184610_48782", using: :btree
+  add_index "c7_people", ["co_20151225184610_6044"], name: "index_c7_people_on_co_20151225184610_6044", using: :btree
+  add_index "c7_people", ["co_20151225184610_70938"], name: "index_c7_people_on_co_20151225184610_70938", using: :btree
+  add_index "c7_people", ["co_20151225184610_82649"], name: "index_c7_people_on_co_20151225184610_82649", using: :btree
+  add_index "c7_people", ["co_20151225184610_89963"], name: "index_c7_people_on_co_20151225184610_89963", using: :btree
+  add_index "c7_people", ["co_20151225184723_43109"], name: "index_c7_people_on_co_20151225184723_43109", using: :btree
+  add_index "c7_people", ["name"], name: "index_c7_people_on_name", using: :btree
+
+  create_table "c8_companies", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c8_companies", ["name"], name: "index_c8_companies_on_name", using: :btree
+
+  create_table "c8_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c8_people", ["name"], name: "index_c8_people_on_name", using: :btree
+
+  create_table "c9_companies", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c9_companies", ["name"], name: "index_c9_companies_on_name", using: :btree
+
+  create_table "c9_people", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+  end
+
+  add_index "c9_people", ["name"], name: "index_c9_people_on_name", using: :btree
 
   create_table "client_columns", force: :cascade do |t|
     t.string   "name",              default: "",     null: false
@@ -531,9 +700,10 @@ ActiveRecord::Schema.define(version: 20160122072240) do
     t.datetime "soft_destroyed_at"
     t.integer  "order_no",          default: 999999, null: false
     t.boolean  "sumally",           default: false,  null: false
+    t.text     "ranges",            default: "",     null: false
   end
 
-  add_index "client_columns", ["soft_destroyed_at"], name: "index_client_columns_on_soft_destroyed_at"
+  add_index "client_columns", ["soft_destroyed_at"], name: "index_client_columns_on_soft_destroyed_at", using: :btree
 
   create_table "client_tables", force: :cascade do |t|
     t.string   "name",              default: "",     null: false
@@ -543,9 +713,10 @@ ActiveRecord::Schema.define(version: 20160122072240) do
     t.datetime "updated_at",                         null: false
     t.datetime "soft_destroyed_at"
     t.integer  "order_no",          default: 999999, null: false
+    t.boolean  "company",           default: false,  null: false
   end
 
-  add_index "client_tables", ["soft_destroyed_at"], name: "index_client_tables_on_soft_destroyed_at"
+  add_index "client_tables", ["soft_destroyed_at"], name: "index_client_tables_on_soft_destroyed_at", using: :btree
 
   create_table "clients", force: :cascade do |t|
     t.string   "name",                   default: "",     null: false
@@ -565,9 +736,9 @@ ActiveRecord::Schema.define(version: 20160122072240) do
     t.integer  "order_no",               default: 999999, null: false
   end
 
-  add_index "clients", ["email"], name: "index_clients_on_email", unique: true
-  add_index "clients", ["reset_password_token"], name: "index_clients_on_reset_password_token", unique: true
-  add_index "clients", ["soft_destroyed_at"], name: "index_clients_on_soft_destroyed_at"
+  add_index "clients", ["email"], name: "index_clients_on_email", unique: true, using: :btree
+  add_index "clients", ["reset_password_token"], name: "index_clients_on_reset_password_token", unique: true, using: :btree
+  add_index "clients", ["soft_destroyed_at"], name: "index_clients_on_soft_destroyed_at", using: :btree
 
   create_table "sessions", force: :cascade do |t|
     t.string   "session_id", null: false
@@ -576,7 +747,7 @@ ActiveRecord::Schema.define(version: 20160122072240) do
     t.datetime "updated_at"
   end
 
-  add_index "sessions", ["session_id"], name: "index_sessions_on_session_id", unique: true
-  add_index "sessions", ["updated_at"], name: "index_sessions_on_updated_at"
+  add_index "sessions", ["session_id"], name: "index_sessions_on_session_id", unique: true, using: :btree
+  add_index "sessions", ["updated_at"], name: "index_sessions_on_updated_at", using: :btree
 
 end

@@ -1,0 +1,39 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} マッチング"
+- breadcrumb  :clients_table_csv_matching, @table
+  
+.col-md-8.col-md-offset-2
+  .panel.panel-default
+    .panel-body
+      dl.dl-horizontal
+        dt データ総数
+        dd #{number_with_delimiter(@table.klass.count)} 件
+        hr
+        dt リレーション済
+        dd #{number_with_delimiter(@table.klass.where("#{ActiveRecord::Base.connection.quote_column_name(@company_id_column)} > 0").count)} 件
+        dt 未処理
+        dd #{number_with_delimiter(@table.klass.where("#{ActiveRecord::Base.connection.quote_column_name(@company_id_column)} <= 0").count)} 件
+        hr
+        dt 新規リレーション
+        dd #{number_with_delimiter(@res.count{|i| i[:count] == 1 })} 件
+        dt 重複(処理しない)
+        dd #{number_with_delimiter(@res.count{|i| i[:count] > 1 })} 件
+        
+  = form_tag({action: :relation_do}, method: :patch, class: 'form-horizontal') do
+    table.table.table-striped.table-hover.table-responsive
+      caption リレーション項目設定
+      tr
+        th #{@company_table.name}テーブル項目
+        th ⇔
+        th #{@table.name}テーブル項目
+      tr
+        td = select_tag(:company_column,
+          options_for_select([["ID", :id]] + @company_table.client_columns.map { |v| [v.name, v.column_name] }, params[:company_column]),
+          class: "form-control company_column")
+        td ⇔
+        td = select_tag(:child_column,
+          options_for_select(@table.client_columns.map { |v| [v.name, v.column_name] }, params[:child_column]),
+          class: "form-control child_column")
+        
+    = button_tag data: { "disable-with" => "リレーション中..." }, class: "btn btn-success center-block" do
+      span.glyphicon.glyphicon-check
+      =< "リレーションを保存"

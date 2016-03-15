@@ -1,20 +1,20 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} test_01"
 - breadcrumb  :clients_search, @table
 
-- cols = @x_sepa + ["more"]
-- rows = (@y_sepa + ["more"]).reverse
+/ - targets = {"件数" => :count, "注文日時(日) : 最長" => :order__day__max, "注文日時(日) : 最短" => :order__day__max, "注文日時(月) : 最長" => :order__month__max, "注文日時(月) : 最短" => :order__month__min, "注文日時(年) : 最長" => :order__year__max, "注文日時(年) : 最短" => :order__year__min, }
 
-- sum_res = {}
-- @sums.each do |s|
-  - sum_res[[s.y, s.x]] = { count: s.count || 0, company_ids: s.company_ids }
+- targets = {"件数" => :count}
+- @table.client_columns.where(column_type: [:datetime]).each do |co|
+  - targets.merge!({"#{co.name}(日) : 最長" => "#{co.column_name}__day__max", "#{co.name}(日) : 最短" => "#{co.column_name}__day__max", "#{co.name}(月) : 最長" => "#{co.column_name}__month__max", "#{co.name}(月) : 最短" => "#{co.column_name}__month__min", "#{co.name}(年) : 最長" => "#{co.column_name}__year__max", "#{co.name}(年) : 最短" => "#{co.column_name}__year__min"})
 
-- sum_count = sum_res.inject(0) { |sum, (key, s)| sum + s[:count] }
-
-- targets = {"件数" => :count, "注文日時(日) : 最長" => :order__day__max, "注文日時(日) : 最短" => :order__day__max, "注文日時(月) : 最長" => :order__month__max, "注文日時(月) : 最短" => :order__month__min, "注文日時(年) : 最長" => :order__year__max, "注文日時(年) : 最短" => :order__year__min, }
-
+- if @x == "count" && @y == "count"
+  coffee:
+    $ ->
+      $('button.btn.option').click
+  
 h1 RFMサンプル
 
-= button_tag  "設定", type: :button, class: "btn btn-primary", data: { toggle: :modal, target: "#RFMForm" }
+= button_tag  "設定", type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#RFMForm" }
 #RFMForm.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog
     .modal-content
@@ -27,16 +27,15 @@ h1 RFMサンプル
           .form-group
             .col-sm-3 = label_tag  :x, "X軸項目", class: "control-label"
             .col-sm-9 = select_tag :x, options_for_select(targets, @x), class: "form-control"
-
           .form-group
             .col-sm-3 = label_tag  :y, "Y軸項目", class: "control-label"
             .col-sm-9 = select_tag :y, options_for_select(targets, @y), class: "form-control"
           .form-group
             .col-sm-3 = label_tag  :x_separater, "X軸セパレート", class: "control-label"
-            .col-sm-9 = text_field_tag :x_separater, @x_sepa.join(","), class: "form-control", placeholder: ",区切り"
+            .col-sm-9 = text_field_tag :x_separater, @x_sepa, class: "form-control", placeholder: ",区切り"
           .form-group
             .col-sm-3 = label_tag  :y_separater, "Y軸セパレート", class: "control-label"
-            .col-sm-9 = text_field_tag :y_separater, @y_sepa.join(","), class: "form-control", placeholder: ",区切り"
+            .col-sm-9 = text_field_tag :y_separater, @y_sepa, class: "form-control", placeholder: ",区切り"
             
           .form-group.has-error
             .col-sm-3 = label_tag  "hotspots_0_0", "ホットスポット1", class: "control-label"
@@ -62,6 +61,15 @@ h1 RFMサンプル
   .modal-dialog.modal-lg
     .modal-content#modal-main
 
+- cols = @x_sepa.split(',').map(&:to_i).sort.map(&:to_s) + ["more"]
+- rows = (@y_sepa.split(',').map(&:to_i).sort.map(&:to_s) + ["more"]).reverse
+
+- sum_res = {}
+- @sums.each do |s|
+  - sum_res[[s.y, s.x]] = { count: s.count || 0, company_ids: s.company_ids }
+
+- sum_count = sum_res.inject(0) { |sum, (key, s)| sum + s[:count] }
+    
 .table-responsive
   table.table.table-bordered.table-striped.table-hover.table-condensed
     - rows.each.with_index do |row, i|
@@ -83,7 +91,7 @@ h1 RFMサンプル
             - if sum_res[[row, col]].blank?
               | 0
             - else
-              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, id: @company_table.id, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}, remote: true
+              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, child_table_id: @table.id, id: @company_table.id, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}, remote: true
               .percent = "#{(sum_res[[row, col]][:count].to_f * 100 / sum_count).round(2)}%"
               
         th.integer = sum_res.select { |key, v| key[0] == row }.inject(0) { |sum, (key, s)| sum + s[:count] }

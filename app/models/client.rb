@@ -9,9 +9,7 @@ class Client < ActiveRecord::Base
 
   has_many :client_tables
 
-  def companies
-    client_tables.where("table_name LIKE '%companies%'").first
-  rescue
-    nil
+  def company_table
+    client_tables.find_by(company: true)
   end
 end
