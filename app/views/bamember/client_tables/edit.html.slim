@@ -9,20 +9,10 @@ coffee:
       if $(@).val().match /selector/ then $_sel.show() else $_sel.hide()
       
     $('select.column_type').trigger('change')
-
-sass:
-  table td
-    input[type=text]
-      width: 150px
-    textarea.selector
-      width: 120px
-      height: 150px
-    select.column_type
-      width: 150px
-    input.order_no
-      width: 76px
-      text-align: right
     
+    $('.btn.backup').click ->
+      $('.btn.submit').prop("disabled", false)
+
 .col-md-12
   - if @table.errors.any?
     .alert.alert-danger
@@ -37,7 +27,7 @@ sass:
       = f.text_field :name, class: 'form-control', placeholder: "テーブル名(必須)", required: "required"
       | テーブル
       
-    table#client_columns.table.table-striped.table-hover.table-responsive
+    table#client_columns.table.table-striped.table-hover.table-responsive.edit
       caption テーブル項目
       tr
         th 名称
@@ -49,7 +39,7 @@ sass:
         th 非表
         th サマリ
         th 並び順
-        / th 削除
+        th 削除
       tr
         td ID (変更不可)
         td 整数
@@ -60,7 +50,7 @@ sass:
         td = check_box_tag :dummy, 1, false,  disabled: true
         td = check_box_tag :dummy, 1, false,  disabled: true
         td
-        / td 変更不可
+        td 変更不可
 
       = f.fields_for :client_columns, wrapper: false do |co|
         = render "client_column_fields", f: co
@@ -69,7 +59,12 @@ sass:
       span.glyphicon.glyphicon-plus
       =< "項目を追加"
     
-    - message = "変更内容を反映してよろしいでしょうか\r・ 型を変更した場合、データ変更時に、既に入っているデータに影響が出る場合があります\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
-    = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
-      span.glyphicon.glyphicon-save
-      =< "項目変更を反映"
+    .buttons
+      = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning backup" do
+        span.glyphicon.glyphicon-save-file
+        =< "バックアップCSVをダウンロード"
+        
+      - message = "変更内容を反映してよろしいでしょうか\r・ 型を変更した場合、データ変更時に、既に入っているデータに影響が出る場合があります\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
+      = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success submit", disabled: :true do
+        span.glyphicon.glyphicon-save
+        =< "項目変更を反映"

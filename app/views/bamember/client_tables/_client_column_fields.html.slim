@@ -1,6 +1,6 @@
 tr.fields
   td = f.text_field :name, class: "form-control"
-  td = f.select :column_type, ClientColumn::COLUMN_TYPES.map { |key, c| [c[:name], key] }, { prompt: "▼選択▼"}, class: "form-control column_type"
+  td = f.select :column_type, ClientColumn.column_types_selector(f.object.name.present? ? f.object.type.db_type : nil), {}, class: "form-control column_type"
 
   / td = f.text_area  :selector, class: "form-control selector"
   td = f.text_field :default, class: "form-control"
@@ -8,12 +8,5 @@ tr.fields
   td = f.check_box  :presence
   td = f.check_box  :hidden
   td = f.check_box  :sumally
-  td
-    / = button_tag type: :button, class: "btn btn-default order_up" do
-    /   span.glyphicon.glyphicon-arrow-up
-    / = button_tag type: :button, class: "btn btn-default order_down" do
-    /   span.glyphicon.glyphicon-arrow-down
-    / = f.hidden_field :order_no, class: "order_no"
-    = f.text_field :order_no, class: "form-control order_no"
-    
-  / td = f.link_to_remove  "削除"
+  td = f.text_field :order_no, class: "form-control order_no"
+  td = f.link_to_remove  "削除"

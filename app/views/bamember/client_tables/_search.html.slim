@@ -7,7 +7,7 @@
   h4 #{@table.name}一覧
 
 .modal-body
-  .
+  .menu
     = link_to params.merge(id: @client.company_table.id), class: "btn btn-success", remote: true do
       span.glyphicon.glyphicon-save-file
       =< "会社一覧"
@@ -18,8 +18,6 @@
       span.glyphicon.glyphicon-save-file
       =< "CSV出力"
   .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
-    / iframe.detail_frame.embed-responsive-item src=""
-
     table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
       tr
         th ID
@@ -34,7 +32,7 @@
           td.id
             = link_to d[:id], "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
           - @show_columns.each do |co|
-            td class="#{co.db_column_type[:type]} #{co.column_type} #{co.column_name}"
+            td class="#{co.type.db_type} #{co.column_type} #{co.column_name}"
               - if co.column_name == "name"
                 = link_to d[co.column_name].presence || "(UNKNOWN)", "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
               - elsif ['integer', 'float'].include? co.column_type

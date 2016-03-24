@@ -3,13 +3,14 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_table, except: [:new, :create]
   before_action :find_company_table, only: [:test_01, :relation, :relation_confirm, :relation_do]
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
+  before_action :check_company_id, only: [:relation, :relation_confirm, :relation_do]
 
   def new
     @table = @client.client_tables.new
   end
 
   def create
-    if ClientTable.create(client_id: @client.id, name: params[:client_table][:name], table_name: "c#{@client.id}_#{Time.now.strftime('%Y%m%d%H%M%S')}_#{rand(99999)}")
+    if ClientTable.create(client_id: @client.id, name: params[:client_table][:name], table_name: "c#{@client.id}_#{Time.now.strftime('%Y%m%d%H%M%S')}_#{rand(999)}")
       redirect_to "/bamember/clients/#{@client.id}/", notice: "#{client_table_params[:name]}テーブルを追加しました"
     else
       render :new
@@ -17,12 +18,20 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def search
-    @datas, @s, @order, @sum, @sum_res = @table.klass.table_search(params)
+    @datas, @s, @order, @sum, @sum_res = @klass.table_search(params)
 
     # 表示項目
     @show_columns = params[:all].present? ? @table.client_columns : @table.client_columns.show
 
     @sums = @datas.group("")
+
+    # if company?
+    #   client.company_table.pluck(:id, :name).to_h
+    # else
+    #   client.child_tables.each do |ct|
+    #     ct.pluck(:company_id, :name).to_h
+    #   end
+    # end
 
     # CSV出力
     respond_to do |format|
@@ -131,7 +140,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(#{@company_id}, ' ') as company_ids FROM (#{companies_sql}) cs
     GROUP BY x, y ORDER BY x, y;"
 
-    @sums = @table.klass.find_by_sql(sql)
+    @sums = @klass.find_by_sql(sql)
   # rescue => e
   #   @alert = e.message
   end
@@ -207,7 +216,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     tf = Tempfile.create(['csv-']) # 一時保存ファイル
 
-    klass = @table.klass
     CSV.foreach(@csv[:body_path]) do |d|
       if matchings.present?
         values = @table.filter(matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h)
@@ -217,17 +225,17 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         else
           # AND条件マッチング
           if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
-            res = klass.where(values)
+            res = @klass.where(values)
           end
 
           # OR条件マッチング
           if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
             cond = nil
             values.each do |k, v|
-              cond = cond ? cond.or(klass.arel_table[k].eq(v)) : klass.arel_table[k].eq(v)
+              cond = cond ? cond.or(@klass.arel_table[k].eq(v)) : @klass.arel_table[k].eq(v)
             end
 
-            res = klass.where(cond)
+            res = @klass.where(cond)
           end
 
           count              = res.count
@@ -242,14 +250,14 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         when 0
           counts[:none] += 1
           if @csv[:option][:unmatch] == "new"
-            data = klass.new # 新規登録
+            data = @klass.new # 新規登録
           else
             d[error_key] = "マッチしませんでした"
           end
         when :skip
           counts[:skip] += 1
           if @csv[:option][:unmatch] == "new"
-            data = klass.new # 新規登録
+            data = @klass.new # 新規登録
           else
             d[error_key] = "マッチング項目が空白なのでスキップ"
           end
@@ -260,7 +268,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
       else
         counts[:skip] += 1
-        data = klass.new
+        data = @klass.new
       end
 
       # バリデーション
@@ -306,8 +314,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     error_key       = @csv[:header].length + 1
 
     # トランザクション
-    klass = @table.klass
-    klass.transaction do
+    @klass.transaction do
       CSV.foreach(@csv[:body_path]) do |d|
         next if d[error_key].present?
 
@@ -315,9 +322,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
         # データ取り出し、新規作成
         if matching_ids.blank? && @csv[:option][:unmatch] == "new"
-          data = klass.new
+          data = @klass.new
         elsif matching_ids.length == 1
-          data = klass.find(matching_ids.first)
+          data = @klass.find(matching_ids.first)
         else
           next
         end
@@ -374,11 +381,11 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   ### data table ###
   def data_new
-    @data = @table.klass.new
+    @data = @klass.new
   end
 
   def data_create
-    @data = @table.klass.create(data_params)
+    @data = @klass.create(data_params)
 
     if @data.save
       redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を新規作成しました"
@@ -389,15 +396,15 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
 
   def data_show
-    @data = @table.datas.find(params[:data_id])
+    @data = @klass.find(params[:data_id])
   end
 
   def data_edit
-    @data = @table.datas.find(params[:data_id])
+    @data = @klass.find(params[:data_id])
   end
 
   def data_update
-    @data = @table.datas.find(params[:data_id])
+    @data = @klass.find(params[:data_id])
 
     if @data.update(data_params)
       redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を保存しました"
@@ -407,36 +414,29 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def data_destroy
-    @data = @table.datas.find(params[:data_id])
+    @data = @klass.find(params[:data_id])
     @data.soft_destroy
 
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を削除しました"
   end
 
   def relation
-    @company_id_column = @table.client_columns.find_by(:name => "会社ID").column_name
   end
 
   def relation_confirm
-    @company_id_column = @table.client_columns.find_by(:name => "会社ID").column_name
-
-    ch = @table.klass.arel_table
-    co = @company_table.klass.arel_table
-
-    child = ch.project(ch[:id].count.as("count"), ch[:id]).group(ch[:id]).join(co).on(ch[params[:child_column]].eq(co[params[:company_column]])).where(ch[params[:child_column]].not_eq("")).where(ch[@company_id_column].eq(""))
-
-    # raise @table.klass.find_by_sql(child)[1][:id]
-
-    @res = @table.klass.find_by_sql(child)
+    @res = @klass.relation_matching(params)
   end
 
   def relation_do
-    ch = @table.klass.arel_table
-    co = @company_table.klass.arel_table
+    @res = @klass.relation_matching(params)
+    @res.each do |id, c|
+      @klass.update(id, {company_id: c[0][1]}) if c.count == 1
+    end
 
-    child = ch.join(co).on(ch[params[:child_column]].eq(co[params[:company_column]])).where(ch[params[:child_column]].not_eq(""))
-
-
+    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのリレーションを更新しました"
+  rescue => e
+    @alert = e.message
+    render :relation_confirm
   end
 
   private
@@ -446,8 +446,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def find_table
-    raise "テーブル情報が取得できません" unless @table = ClientTable.find(params[:id])
-    raise "このテーブルはクライアント所有ではありません" if @table.client_id != @client.id
+    raise "テーブル情報が取得できません"                 unless @table = ClientTable.find(params[:id])
+    raise "このテーブルはクライアント所有ではありません" if     @table.client_id != @client.id
+    raise "テーブルデータ情報が取得できません"           unless @klass = @table.klass
   end
 
   def find_company_table
@@ -468,6 +469,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def data_params
-    params.require(:client_table_data).permit(@table.show_client_columns.map(&:column_name))
+    params.require(@klass.name.underscore).permit(@table.show_client_columns.map(&:column_name))
+  end
+
+  def check_company_id
+    raise "会社IDがありません" unless @table.client_columns.find_by(column_name: :company_id)
   end
 end

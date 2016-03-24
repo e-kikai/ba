@@ -4,7 +4,7 @@ class ClientTableData < ActiveRecord::Base
 
   #フィルタ・デフォルト値
   before_validation do |data|
-    client_table = self.class.get_client_table
+    client_table = self.class.client_table
 
     # フィルタ
     data = client_table.filter(data)
@@ -19,39 +19,39 @@ class ClientTableData < ActiveRecord::Base
 
   # 手動バリデータ
   validate do |data|
-    client_table = self.class.get_client_table
+    client_table = self.class.client_table
 
     client_table.client_columns.each do |co|
       # 必須チェック
       if co[:presence].present?
-        errors.add(co.name, "(#{co.db_column_type[:name]}型)必須") if data[co.column_name].blank?
+        errors.add(co.name, "(#{co.type.label}型)必須") if data[co.column_name].blank?
       end
 
       # ユニーク(空白とデフォルト値は除外)
       if co[:unique].present? && data[co.column_name].present? && data[co.column_name] != co[:default]
         if self.class.where(co.column_name => data[co.column_name]).where.not(id: data[:id]).exists?
-          errors.add(co.name, "(#{co.db_column_type[:name]}型)重複")
+          errors.add(co.name, "(#{co.type.label}型)重複")
         end
       end
 
       # 型バリデーション
-      if co.db_column_type[:valid].present? && data[co.column_name].present?
-        unless co.db_column_type[:valid].call(data[co.column_name])
-          errors.add(co.name, "(#{co.db_column_type[:name]}型)不正な値")
+      if data[co.column_name].present?
+        unless co.type.valid(data[co.column_name])
+          errors.add(co.name, "(#{co.type.label}型)不正な値")
         end
       end
     end
   end
 
   def client_column(column_name)
-    self.get_client_table.client_columns.find_by(column_name: column_name)
+    self.client_table.client_columns.find_by(column_name: column_name)
   end
 
-  def self.get_client_table
+  def self.client_table
     ClientTable.find_by(table_name: self.table_name)
   end
 
-  def self.get_klass(client_table_name)
+  def self.klass(client_table_name)
     self.table_name = client_table_name
     reset_column_information
     self
@@ -119,7 +119,7 @@ class ClientTableData < ActiveRecord::Base
 
     # res = res.order("CASE WHEN #{order[:column]} IS NULL OR #{order[:column]} = '' THEN 1 ELSE 0 END")
 
-    # if oc = self.get_client_table.client_columns.find_by(column_name: order[:column])
+    # if oc = self.client_table.client_columns.find_by(column_name: order[:column])
     #   res = res.order("CAST(#{order[:column]} as #{oc.db_column_type[:type]}) #{order[:type]}")
     # end
 

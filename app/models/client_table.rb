@@ -62,7 +62,6 @@ class ClientTable < ActiveRecord::Base
     ture
   end
 
-
   # 他のclientのテーブル構成を複製
   #
   # @param [Integer] 複製先のclient_id
@@ -84,17 +83,35 @@ class ClientTable < ActiveRecord::Base
 
   # client_table_dataクラスを取得
   def klass
-    ClientTableData.get_klass(table_name)
+    # if Object.const_defined? table_name.singularize.camelcase
+    #   k = Object.const_get(table_name.singularize.camelcase)
+    # end
+
+    client_table = self
+    Object.const_set(table_name.singularize.camelcase, Class.new(ActiveRecord::Base) do |klass|
+      include ClientTableDataModule
+      klass.table_name = client_table.table_name
+
+      # if client_table.company?
+      #   client_table.client.child_tables.each do |t|
+      #     has_many t.table_name.pluralize.intern, primary_key: :company_id
+      #   end
+      # else
+      #   belongs_to client_table.client.company_table.table_name.singularize.intern, foreign_key: :company_id
+      # end
+
+      klass.reset_column_information
+    end)
   end
 
   def datas
-    ClientTableData.get_klass(table_name).all
+    klass.all
   end
 
   def filter(data)
     client_columns.each do |co|
-      if co.db_column_type[:filter].present? && data[co.column_name].present?
-        data[co.column_name] = co.db_column_type[:filter].call(data[co.column_name])
+      if data[co.column_name].present?
+        data[co.column_name] = co.type.filter(data[co.column_name])
       end
     end
 
@@ -122,16 +139,16 @@ class ClientTable < ActiveRecord::Base
   def create_client_table_after
     if company?
       client_columns.create(name: "会社名",         column_name: :name,    column_type: :company, order_no: 100)
-      client_columns.create(name: "都道府県",       column_name: :pref,    column_type: :string,  order_no: 200)
+      client_columns.create(name: "都道府県",       column_name: :pref,    column_type: :pref,    order_no: 200)
       client_columns.create(name: "TEL",            column_name: :tel,     column_type: :tel,     order_no: 300)
       client_columns.create(name: "FAX",            column_name: :fax,     column_type: :tel,     order_no: 400)
       client_columns.create(name: "〒",             column_name: :zip,     column_type: :zip,     order_no: 500)
       client_columns.create(name: "住所",           column_name: :address, column_type: :address, order_no: 600)
       client_columns.create(name: "メールアドレス", column_name: :mail,    column_type: :mail,    order_no: 700)
       client_columns.create(name: "URL",            column_name: :url,     column_type: :url,     order_no: 800)
-      client_columns.create(name: "ステータス",     column_name: :status,  column_type: :select,  order_no: 900)
-      client_columns.create(name: "ターゲット",     column_name: :target,  column_type: :select,  order_no: 1000)
-      client_columns.create(name: "流入経路",       column_name: :influx,  column_type: :select,  order_no: 1100)
+      client_columns.create(name: "ステータス",     column_name: :status,  column_type: :status,  order_no: 900)
+      client_columns.create(name: "ターゲット",     column_name: :target,  column_type: :target,  order_no: 1000)
+      client_columns.create(name: "流入経路",       column_name: :influx,  column_type: :influx,  order_no: 1100)
     else
       client_columns.create(name: "#{name}名", column_name: :name,       column_type: :string, order_no: 100)
       client_columns.create(name: "会社ID",    column_name: :company_id, column_type: :id,     order_no: 200)

@@ -6,17 +6,17 @@
     .panel-body
       dl.dl-horizontal
         dt データ総数
-        dd #{number_with_delimiter(@table.klass.count)} 件
+        dd #{number_with_delimiter(@klass.count)} 件
         hr
         dt リレーション済
-        dd #{number_with_delimiter(@table.klass.where("#{ActiveRecord::Base.connection.quote_column_name(@company_id_column)} > 0").count)} 件
+        dd #{number_with_delimiter(@klass.where.not(company_id: nil).count)} 件
         dt 未処理
-        dd #{number_with_delimiter(@table.klass.where("#{ActiveRecord::Base.connection.quote_column_name(@company_id_column)} <= 0").count)} 件
+        dd #{number_with_delimiter(@klass.where(company_id: nil).count)} 件
         hr
         dt 新規リレーション
-        dd #{number_with_delimiter(@res.count{|i| i[:count] == 1 })} 件
+        dd #{number_with_delimiter(@res.count{|k, v| v.count == 1 })} 件
         dt 重複(処理しない)
-        dd #{number_with_delimiter(@res.count{|i| i[:count] > 1 })} 件
+        dd #{number_with_delimiter(@res.count{|k, v| v.count > 1 })} 件
         
   = form_tag({action: :relation_do}, method: :patch, class: 'form-horizontal') do
     table.table.table-striped.table-hover.table-responsive
@@ -26,13 +26,13 @@
         th ⇔
         th #{@table.name}テーブル項目
       tr
-        td = select_tag(:company_column,
-          options_for_select([["ID", :id]] + @company_table.client_columns.map { |v| [v.name, v.column_name] }, params[:company_column]),
-          class: "form-control company_column")
+        td
+          = hidden_field_tag(:company_column, params[:company_column])
+          = @company_table.client_columns.find_by(column_name: params[:company_column])[:name]
         td ⇔
-        td = select_tag(:child_column,
-          options_for_select(@table.client_columns.map { |v| [v.name, v.column_name] }, params[:child_column]),
-          class: "form-control child_column")
+        td
+          = hidden_field_tag(:child_column, params[:child_column])
+          = @table.client_columns.find_by(column_name: params[:child_column])[:name]
         
     = button_tag data: { "disable-with" => "リレーション中..." }, class: "btn btn-success center-block" do
       span.glyphicon.glyphicon-check

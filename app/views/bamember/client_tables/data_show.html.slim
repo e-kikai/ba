@@ -1,23 +1,6 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} #{@data.name}"
 - breadcrumb  :clients_data, @table, @data
 
-sass:
-  hr
-    border-top-color: #666
-    
-  nav.affix-nav
-    background: #EEE
-    padding: 8px
-    
-  td
-    &.icon
-      text-align: center
-
-  .buttons
-    text-align: center
-    a, button
-      margin: 0 4px
-        
 .col-md-offset-3.col-md-6
   table.table.table-hover.table-condensed
     tr
@@ -25,23 +8,8 @@ sass:
       td.id = @data[:id]
     - @table.show_client_columns.each do |co|
       tr
-        th class="#{co.db_column_type[:type]} #{co.column_name}" = co.name
-        td class="#{co.db_column_type[:type]} #{co.column_name}"
-          - if @data[co.column_name].present?
-            - if co.column_type == "url"
-              =< link_to @data[co.column_name], @data[co.column_name], target: "_blank"
-            - elsif co.column_type == "mail"
-              =< link_to @data[co.column_name], "mailto:#{@data[co.column_name]}", target: "_blank"
-            - elsif ['integer', 'float'].include? co.column_type
-              = number_with_delimiter @data[co.column_name]
-            - else
-              = @data[co.column_name]
-            
-              - if co.column_type == "address"
-                =< link_to "https://maps.google.co.jp/maps?f=q&q=#{@data[co.column_name]}&source=embed&hl=ja&geocode=&ie=UTF8&t=m&z=14", target: "_blank" do
-                  span.glyphicon.glyphicon-map-marker
-                  =< "MAP"
-
+        th class="#{co.column_name}" = co.name
+        td class="#{co.column_name}" = co.type.detail_format(@data[co.column_name])
     tr
       th 登録日時
       td.id = @data[:created_at]

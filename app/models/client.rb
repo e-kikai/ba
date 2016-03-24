@@ -12,4 +12,8 @@ class Client < ActiveRecord::Base
   def company_table
     client_tables.find_by(company: true)
   end
+
+  def child_tables
+    client_tables.where(company: false)
+  end
 end

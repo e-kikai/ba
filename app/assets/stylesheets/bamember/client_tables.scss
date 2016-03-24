@@ -50,5 +50,33 @@ nav.affix-nav {
 }
 
 #modal_company {
-  overflow: scroll
+  overflow: scroll;
+}
+
+.buttons {
+  text-align: center;
+
+  a, button {
+    margin: 0 4px;
+  }
+}
+
+table.edit td {
+  input[type=text] {
+    width: 150px;
+  }
+
+  textarea.selector {
+    width: 120px;
+    height: 150px;
+  }
+
+  select.column_type {
+    width: 150px;
+  }
+
+  input.order_no {
+    width: 76px;
+    text-align: right;
+  }
 }
