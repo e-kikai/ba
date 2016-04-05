@@ -31,7 +31,8 @@ nav.affix-nav.col-md-2
   
   = label_tag "", "検索条件"
   = form_tag({}, method: :get) do
-    - @s.each.with_index do |s|
+    - Array(params[:s]).each.with_index do |s|
+      - next if s[:column_name].blank? || s[:cond].blank?
       .form-group
         = select_tag     "s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control"
         = text_field_tag "s[][value]", s[:value], class: "form-control"
@@ -48,22 +49,22 @@ nav.affix-nav.col-md-2
       
     = label_tag :order_column, "集計"
     .form-group
-      = select_tag "sum[methods]", options_for_select(sum_methods, @sum[:methods]), class: "form-control"
-      = select_tag "sum[group][]", options_for_select((client_columns), @sum[:group].try(:at, 0)), class: "form-control"
-      = select_tag "sum[group][]", options_for_select((client_columns), @sum[:group].try(:at, 1)), class: "form-control"
+      = select_tag "sum[methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
+      = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
+      = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
       
     = label_tag :order_column, "ソート"
     .form-group
       .col-md-7 style="padding:0;"
-        = select_tag "order[column]", options_for_select(client_columns, @order[:column]), class: "form-control"
+        = select_tag "order[column]", options_for_select(client_columns, params.dig(:order, :column)), class: "form-control"
       .col-md-5 style="padding:0;"
-        = select_tag "order[type]", options_for_select({"昇順" => "asc", "降順" => "desc"}, @order[:type]), class: "form-control"
+        = select_tag "order[type]", options_for_select({"昇順" => "asc", "降順" => "desc"}, params.dig(:order, :type)), class: "form-control"
     .form-group
       = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
         span.glyphicon.glyphicon-search
         =< "検索"
     
-    - if @datas.present?
+    - if @pdatas.present?
       hr
       = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success center-block" do
         span.glyphicon.glyphicon-save-file
@@ -75,11 +76,13 @@ nav.affix-nav.col-md-2
       =< "検索条件をリセット"
     
 .col-md-10
+  / = @pdatas.to_sql
   h4
-    - if @s.length == 0
+    - if Array(params[:s]).length == 0
       span 全件取得
     - else
-      - @s.each.with_index do |s, i|
+      - Array(params[:s]).each.with_index do |s, i|
+        - next if s[:column_name].blank? || s[:cond].blank?
         span #{i > 0 ? "かつ、" : ""}#{client_columns.invert[s[:column_name]]}が「#{s[:value]}」#{conditions.invert[s[:cond]]}
     | : 
     
@@ -172,7 +175,6 @@ nav.affix-nav.col-md-2
                         span.glyphicon.glyphicon-sort-by-alphabet-alt
                         =< "降順でソート"
                     li.divider
-                    / li = link_to "すべて", params.merge("s[][column_name]" => co.column_name, "s[#{co.column_name}][cond]" => "")
                     li = link_to "空白", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "", "s[][cond]" => :blank)
                     li = link_to "空白でない", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :present)
                     li = link_to "重複している", params.merge("s[][column_name]" => co.column_name, "s[][value]" => "",  "s[][cond]" => :overlap)
@@ -186,7 +188,10 @@ nav.affix-nav.col-md-2
                     /   = text_field_tag "s[s[#{co.column_name}][value]", "", class: "form-control center-block"
                     /   
                     /   = button_tag "検索", type: :submit, name: "s[s[#{co.column_name}][column_name]", value: co.column_name, class: "btn btn-primary btn-sm center-block"
-
+            - if @table.company?
+              - @client.child_tables.each do |ch|
+                th.id = ch.name
+              
             th.datetime
               | 登録日時
               .dropdown style="display:inline-block;"
@@ -219,12 +224,22 @@ nav.affix-nav.col-md-2
               td.icon.edit = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}/edit" do
                 span.glyphicon.glyphicon-edit
               - @show_columns.each do |co|
-                td class="#{co.type.db_type} #{co.column_type} #{co.column_name}"
+                td class="#{co.db_type} #{co.column_type} #{co.column_name}"
                   - if co.column_name == "name"
-                    = link_to co.type.format(d[co.column_name].presence), "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+                    / = link_to co.std_format(d[co.column_name].presence), "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+                    = link_to column_format(d[co.column_name], co.column_type), "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}"
+                  - elsif co.column_name == "company_id" && d.company_id.present?
+                    = link_to "#{d.company_id} : #{d.company_name}", "/bamember/clients/#{@table.client_id}/table/#{@client.company_table.id}/#{d.company_id}"
                   - elsif d[co.column_name].present?
-                    = co.type.format(d[co.column_name])
+                    / = co.std_format(d[co.column_name])
+                    = column_format(d[co.column_name], co.column_type)
                     
+              - if @table.company?
+                - @client.child_tables.each do |ch|
+                  td.id
+                    - if d["#{ch.table_name}_count"].present?
+                      = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[][column_name]" => :company_id, "s[][value]" => d[:id], "s[][cond]" => :eq})
+
               td.datetime = d[:created_at]
               td.datetime = d[:updated_at]
               / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do

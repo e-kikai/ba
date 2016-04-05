@@ -41,6 +41,7 @@ Rails.application.routes.draw do
     get    'clients/:client_id/table/:id/csv_error'    => 'client_tables#csv_error'
 
     get    'clients/:client_id/table/:id/relation'          => 'client_tables#relation'
+    get    'clients/:client_id/table/:id/relation_error'    => 'client_tables#relation_error'
     post   'clients/:client_id/table/:id/relation_confirm'  => 'client_tables#relation_confirm'
     patch  'clients/:client_id/table/:id/relation_do'       => 'client_tables#relation_do'
 

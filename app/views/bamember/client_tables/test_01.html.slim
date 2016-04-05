@@ -1,19 +1,26 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} test_01"
-- breadcrumb  :clients_search, @table
-
-/ - targets = {"件数" => :count, "注文日時(日) : 最長" => :order__day__max, "注文日時(日) : 最短" => :order__day__max, "注文日時(月) : 最長" => :order__month__max, "注文日時(月) : 最短" => :order__month__min, "注文日時(年) : 最長" => :order__year__max, "注文日時(年) : 最短" => :order__year__min, }
+- breadcrumb  :clients_something, "#{@table.name} RFM", @client
 
 - targets = {"件数" => :count}
-- @table.client_columns.where(column_type: [:datetime]).each do |co|
-  - targets.merge!({"#{co.name}(日) : 最長" => "#{co.column_name}__day__max", "#{co.name}(日) : 最短" => "#{co.column_name}__day__max", "#{co.name}(月) : 最長" => "#{co.column_name}__month__max", "#{co.name}(月) : 最短" => "#{co.column_name}__month__min", "#{co.name}(年) : 最長" => "#{co.column_name}__year__max", "#{co.name}(年) : 最短" => "#{co.column_name}__year__min"})
+- @table.client_columns.each do |co|
+  - case co.column_type
+  - when "datetime"
+    - targets.merge!({"#{co.name}(日) : 最長" => "#{co.column_name}__day__max", "#{co.name}(日) : 最短" => "#{co.column_name}__day__max",
+      "#{co.name}(月) : 最長" => "#{co.column_name}__month__max", "#{co.name}(月) : 最短" => "#{co.column_name}__month__min",
+      "#{co.name}(年) : 最長" => "#{co.column_name}__year__max", "#{co.name}(年) : 最短" => "#{co.column_name}__year__min"})
+  - when "integer", "float", "yen"
+    - targets.merge!({"#{co.name} : 最大" => "#{co.column_name}__1__max", "#{co.name} : 最小" => "#{co.column_name}__1__min",
+      "#{co.name} : 平均" => "#{co.column_name}__1__avg", "#{co.name} : 合計" => "#{co.column_name}__1__sum"})
 
-- if @x == "count" && @y == "count"
-  coffee:
-    $ ->
-      $('button.btn.option').click
+coffee:
+  $ ->
+    if $('select#x').val() == 'count' && $('select#y').val() == 'count'
+      $('button.btn.option').click()
+
+sass:
+  .hotspots .form-control
+    width: 48%
   
-h1 RFMサンプル
-
 = button_tag  "設定", type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#RFMForm" }
 #RFMForm.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog
@@ -26,33 +33,42 @@ h1 RFMサンプル
         .modal-body
           .form-group
             .col-sm-3 = label_tag  :x, "X軸項目", class: "control-label"
-            .col-sm-9 = select_tag :x, options_for_select(targets, @x), class: "form-control"
+            .col-sm-9 = select_tag :x, options_for_select(targets, params[:x]), class: "form-control"
           .form-group
             .col-sm-3 = label_tag  :y, "Y軸項目", class: "control-label"
-            .col-sm-9 = select_tag :y, options_for_select(targets, @y), class: "form-control"
+            .col-sm-9 = select_tag :y, options_for_select(targets, params[:y]), class: "form-control"
           .form-group
-            .col-sm-3 = label_tag  :x_separater, "X軸セパレート", class: "control-label"
-            .col-sm-9 = text_field_tag :x_separater, @x_sepa, class: "form-control", placeholder: ",区切り"
+            .col-sm-3 = label_tag  :x_sepa, "X軸セパレート", class: "control-label"
+            .col-sm-9 = text_field_tag :x_sepa, params[:x_sepa], class: "form-control", placeholder: ",区切り"
           .form-group
-            .col-sm-3 = label_tag  :y_separater, "Y軸セパレート", class: "control-label"
-            .col-sm-9 = text_field_tag :y_separater, @y_sepa, class: "form-control", placeholder: ",区切り"
+            .col-sm-3 = label_tag  :y_sepa, "Y軸セパレート", class: "control-label"
+            .col-sm-9 = text_field_tag :y_sepa, params[:y_sepa], class: "form-control", placeholder: ",区切り"
             
-          .form-group.has-error
-            .col-sm-3 = label_tag  "hotspots_0_0", "ホットスポット1", class: "control-label"
-            .col-sm-3 = text_field_tag "hotspots_0_0", params[:hotspots_0_0], class: "form-control", placeholder: "Xコマ数"
-            .col-sm-3 = text_field_tag "hotspots_0_1", params[:hotspots_0_1], class: "form-control", placeholder: "Yコマ数"
-          .form-group.has-warning
-            .col-sm-3 = label_tag  "hotspots_1_0", "ホットスポット2", class: "control-label"
-            .col-sm-3 = text_field_tag "hotspots_1_0", params[:hotspots_1_0], class: "form-control", placeholder: "Xコマ数"
-            .col-sm-3 = text_field_tag "hotspots_1_1", params[:hotspots_1_1], class: "form-control", placeholder: "Yコマ数"
-          .form-group.has-success
-            .col-sm-3 = label_tag  "hotspots_2_0", "ホットスポット3", class: "control-label"
-            .col-sm-3 = text_field_tag "hotspots_2_0", params[:hotspots_2_0], class: "form-control", placeholder: "Xコマ数"
-            .col-sm-3 = text_field_tag "hotspots_2_1", params[:hotspots_2_1], class: "form-control", placeholder: "Yコマ数"
-          .form-group.has-info
-            .col-sm-3 = label_tag  "hotspots_3_0", "ホットスポット4", class: "control-label"
-            .col-sm-3 = text_field_tag "hotspots_3_0", params[:hotspots_3_0], class: "form-control", placeholder: "Xコマ数"
-            .col-sm-3 = text_field_tag "hotspots_3_1", params[:hotspots_3_1], class: "form-control", placeholder: "Yコマ数"
+          .hotspots
+            .form-group
+              .col-sm-3 = label_tag  "hotspots_0_0", "ホットスポット", class: "control-label"
+              .col-sm-3
+                .input-group.has-error
+                  span.input-group-addon 1
+                  = text_field_tag "hotspots_0_0", params[:hotspots_0_0], class: "form-control", placeholder: "X"
+                  = text_field_tag "hotspots_0_1", params[:hotspots_0_1], class: "form-control", placeholder: "Y"
+              .col-sm-3
+                .input-group.has-warning
+                  span.input-group-addon 2
+                  = text_field_tag "hotspots_1_0", params[:hotspots_1_0], class: "form-control", placeholder: "X"
+                  = text_field_tag "hotspots_1_1", params[:hotspots_1_1], class: "form-control", placeholder: "Y"
+            .form-group
+              .col-sm-3
+              .col-sm-3
+                .input-group.has-success
+                  span.input-group-addon 3
+                  = text_field_tag "hotspots_2_0", params[:hotspots_2_0], class: "form-control", placeholder: "X"
+                  = text_field_tag "hotspots_2_1", params[:hotspots_2_1], class: "form-control", placeholder: "Y"
+              .col-sm-3
+                .input-group
+                  span.input-group-addon 4
+                  = text_field_tag "hotspots_3_0", params[:hotspots_3_0], class: "form-control", placeholder: "X"
+                  = text_field_tag "hotspots_3_1", params[:hotspots_3_1], class: "form-control", placeholder: "Y"
 
         .modal-footer
           = button_tag "Σ 集計", type: :submit, class: "btn btn-primary"
@@ -60,9 +76,9 @@ h1 RFMサンプル
 #detail.modal.fade abindex="-1" role="dialog" aria-labelledby="detail" aria-hidden="true"
   .modal-dialog.modal-lg
     .modal-content#modal-main
-
-- cols = @x_sepa.split(',').map(&:to_i).sort.map(&:to_s) + ["more"]
-- rows = (@y_sepa.split(',').map(&:to_i).sort.map(&:to_s) + ["more"]).reverse
+    
+- cols = params[:x_sepa].split(',') + ["more"]
+- rows = (params[:y_sepa].split(',') + ["more"]).reverse
 
 - sum_res = {}
 - @sums.each do |s|
@@ -105,3 +121,4 @@ h1 RFMサンプル
       - cols.each do |col|
         th = col == "more" ? "それ以上" : "〜 #{col}#{@x_unit}"
       th 合計(人)
+  = select_tag :x, options_for_select(targets, params[:x]), class: "form-control"

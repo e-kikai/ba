@@ -13,6 +13,10 @@ coffee:
     $('.btn.backup').click ->
       $('.btn.submit').prop("disabled", false)
 
+sass:
+  textarea.selector
+    display: none
+
 .col-md-12
   - if @table.errors.any?
     .alert.alert-danger
@@ -21,7 +25,6 @@ coffee:
           li = msg
             
   = nested_form_for(@table, class: 'form-horizontal', role: 'form', url: {action: 'update'}, method: :patch)  do |f|
-  
     .form-group.form-inline
       = f.label :name, "テーブル名"
       = f.text_field :name, class: 'form-control', placeholder: "テーブル名(必須)", required: "required"
@@ -32,7 +35,7 @@ coffee:
       tr
         th 名称
         th 型
-        / th 選択肢(改行区切り)<br/ >選択型のみ
+        th 選択肢(改行区切り)<br/ >選択型のみ
         th デフォルト値
         th 一意
         th 必須
@@ -63,7 +66,9 @@ coffee:
       = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning backup" do
         span.glyphicon.glyphicon-save-file
         =< "バックアップCSVをダウンロード"
-        
+    . style="text-align:center;"
+      span.glyphicon.glyphicon-arrow-down
+    .buttons
       - message = "変更内容を反映してよろしいでしょうか\r・ 型を変更した場合、データ変更時に、既に入っているデータに影響が出る場合があります\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
       = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success submit", disabled: :true do
         span.glyphicon.glyphicon-save

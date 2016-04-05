@@ -1,6 +1,21 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} 確認"
 - breadcrumb  :clients_table_csv_confirm, @table
 
+coffee:
+  $ ->
+    backup_click = false
+    error_click  = false
+    
+    $('.btn.backup').click ->
+      backup_click = true
+      if backup_click && error_click
+        $('.btn.submit').prop("disabled", false)
+      
+    $('.btn.error').click ->
+      error_click = true
+      if backup_click && error_click
+        $('.btn.submit').prop("disabled", false)
+
 .col-md-8.col-md-offset-2
   .panel.panel-default
     .panel-body 
@@ -28,14 +43,16 @@
   .panel.panel-default
     .panel-heading 事前作業
     .panel-body style="text-align:center;"
-      = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning" do
+      = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning backup" do
         span.glyphicon.glyphicon-save-file
         =< "バックアップCSVをダウンロード"
-      =< link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_error.csv", class: "btn btn-danger" do
+      =< link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_error.csv", class: "btn btn-danger error" do
         span.glyphicon.glyphicon-save-file
         =< "エラーCSVをダウンロード"
-  
+  div style="text-align:center;"
+    span.glyphicon.glyphicon-arrow-down
+    
   = form_tag({action: :csv_update}, method: :patch, class: 'form-horizontal') do
-    = button_tag data: { confirm: "データを反映してよろしいでしょうか\r事前にバックアップとエラー分のCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block" do
+    = button_tag data: { confirm: "データを反映してよろしいでしょうか\r事前にバックアップとエラー分のCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block submit", disabled: :true do
       span.glyphicon.glyphicon-save
       =< "内容を反映"

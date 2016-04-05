@@ -18,20 +18,12 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def search
-    @datas, @s, @order, @sum, @sum_res = @klass.table_search(params)
+    @datas = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
 
     # 表示項目
     @show_columns = params[:all].present? ? @table.client_columns : @table.client_columns.show
 
     @sums = @datas.group("")
-
-    # if company?
-    #   client.company_table.pluck(:id, :name).to_h
-    # else
-    #   client.child_tables.each do |ct|
-    #     ct.pluck(:company_id, :name).to_h
-    #   end
-    # end
 
     # CSV出力
     respond_to do |format|
@@ -49,22 +41,19 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def test_01
-    begin
-      @company_id = @table.client_columns.find_by(name: "会社ID").column_name
-    rescue
+    unless @table.client_columns.find_by(column_name: "company_id")
       redirect_to "/bamember/clients/#{@table.client.id}/", alert: "RFMに必要な情報(会社ID)がありません"
     end
 
-    @x = params[:x]
-    @y = params[:y]
-    @x_sepa = params[:x_separater].presence || "3, 6, 9, 12, 15, 18, 21, 24"
-    @y_sepa = params[:y_separater].presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
+    params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
+    params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
 
-    @x_unit, x_date, x_select, x_column = case @x
+    @x_unit, x_date, x_select, x_column = case params[:x]
     when /^(.*)__(.*)__(.*)$/
       co = @table.client_columns.find_by(column_name: $1)
 
-      if co.type == "datetime"
+      case co.column_type
+      when "datetime"
         x_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
         case $2
         when "day"
@@ -74,30 +63,21 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         else
           ["ヶ月", "MONTH", x_select, $1]
         end
-      elsif co.type == "integer" || co.type == "float"
-        case $2
-        when "sum"
-          ["", "", "SUM(#{$1})", $1]
-        when "max"
-          ["", "", "MAX(#{$1})", $1]
-        when "min"
-          ["", "", "MIN(#{$1})", $1]
-        when "avg"
-          ["", "", "AVG(#{$1})", $1]
-        else
-          ["", "", "MAX(#{$1})", $1]
-        end
+      when "integer", "float", "yen"
+        func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
+        [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
       end
     else
-      @x = :count
-      ["回", "", " count(*) ", @company_id]
+      params[:x] = :count
+      ["回", "", " count(*) ", "company_id"]
     end
 
-    @y_unit, y_date, y_select, y_column = case @y
+    @y_unit, y_date, y_select, y_column = case params[:y]
     when /^(.*)__(.*)__(.*)$/
       co = @table.client_columns.find_by(column_name: $1)
 
-      if co.column_type == "datetime"
+      case co.column_type
+      when "datetime"
         y_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
         case $2
         when "day"
@@ -107,42 +87,34 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         else
           ["ヶ月", "MONTH", y_select, $1]
         end
-      elsif co.column_type == "integer" || co.column_type == "float"
-        case $2
-        when "sum"
-          ["", "", "SUM(#{$1})", $1]
-        when "max"
-          ["", "", "MAX(#{$1})", $1]
-        when "min"
-          ["", "", "MIN(#{$1})", $1]
-        when "avg"
-          ["", "", "AVG(#{$1})", $1]
-        else
-          ["", "", "MAX(#{$1})", $1]
-        end
+      when "integer", "float", "yen"
+        func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
+        [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
       end
     else
-      @y = "count"
-      ["回", "", " count(*) ", @company_id]
+      params[:y] = "count"
+      ["回", "", " count(*) ", "company_id"]
     end
 
-    companies_sql = "SELECT #{@company_id}, #{x_select} as ax, #{y_select} as ay FROM #{@table.table_name} WHERE #{@company_id} <> ''  AND #{x_column} <> '' AND #{y_column} <> '' GROUP BY #{@company_id} ORDER BY ax, ay"
+    # companies_sql = "SELECT company_id, #{x_select} as ax, #{y_select} as ay FROM #{@table.table_name} WHERE company_id IS NOT NULL AND #{x_column} IS NOT NULL AND #{y_column} IS NOT NULL GROUP BY company_id"
 
+    companies_sql = @klass.select("company_id, #{x_select} as ax, #{y_select} as ay")
+      .where.not(company_id: nil, x_column => nil, y_column => nil).group(:company_id).to_sql
 
-    x_case = @x_sepa.split(",").map(&:to_i).sort.map(&:to_s).inject(" CASE ") do |s, i|
+    x_case = params[:x_sepa].split(",").inject(" CASE ") do |s, i|
       s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ax <= ? THEN ? ", "#{i} #{x_date}", "#{i}"])
     end + " ELSE 'more' END "
 
-    y_case = @y_sepa.split(",").map(&:to_i).sort.map(&:to_s).inject(" CASE ") do |s, i|
+    y_case = params[:y_sepa].split(",").inject(" CASE ") do |s, i|
       s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ay <= ? THEN ? ", "#{i} #{y_date}", "#{i}"])
     end + " ELSE 'more' END "
 
-    sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(#{@company_id}, ' ') as company_ids FROM (#{companies_sql}) cs
-    GROUP BY x, y ORDER BY x, y;"
+    sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(CAST(company_id AS TEXT), ' ') as company_ids
+      FROM (#{companies_sql}) cs GROUP BY x, y ORDER BY x, y;"
 
     @sums = @klass.find_by_sql(sql)
-  # rescue => e
-  #   @alert = e.message
+  rescue => e
+    @alert = e.message
   end
 
   def csv
@@ -396,7 +368,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
 
   def data_show
-    @data = @klass.find(params[:data_id])
+    @data = @klass.company_relation.find(params[:data_id])
   end
 
   def data_edit
@@ -421,21 +393,42 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def relation
+    params[:relations] = 3.times.map { |i| { company_column: "", child_column: "" } }
   end
 
   def relation_confirm
-    @res = @klass.relation_matching(params)
+    @res = @klass.relation_matching(params[:relations])
+  rescue => e
+    flash[:alert] = e.message
+    render :relation
+  end
+
+  def relation_error
+    @res = @klass.relation_matching(params[:relations])
+
+    @overlap = @klass.where(id: (@res.select { |k, v| v.count > 1 }.keys))
+    @nodata  = @klass.where(id: (@res.select { |k, v| v.count == 1 && v[0][1].blank? }.keys))
+
+    respond_to do |format|
+      format.csv { send_data render_to_string,
+        content_type: 'text/csv;charset=shift_jis',
+        filename: "error_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+      }
+    end
+  rescue => e
+    flash[:alert] = e.message
+    render :relation
   end
 
   def relation_do
-    @res = @klass.relation_matching(params)
-    @res.each do |id, c|
-      @klass.update(id, {company_id: c[0][1]}) if c.count == 1
+    @res = @klass.relation_matching(params[:relations])
+    @res.select { |k, v| v.count == 1 && v[0][1].present? }.each do |id, c|
+      @klass.update(id, {company_id: c[0][1]})
     end
 
     redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのリレーションを更新しました"
   rescue => e
-    @alert = e.message
+    flash[:alert] = e.message
     render :relation_confirm
   end
 

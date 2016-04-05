@@ -1,5 +1,5 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} マッチング"
-- breadcrumb  :clients_table_csv_matching, @table
+- breadcrumb  :clients_table_relation, @table
   
 .col-md-8.col-md-offset-2
   .panel.panel-default
@@ -20,14 +20,16 @@
         th #{@company_table.name}テーブル項目
         th ⇔
         th #{@table.name}テーブル項目
-      tr
-        td = select_tag(:company_column,
-          options_for_select([["ID", :id]] + @company_table.client_columns.pluck(:name, :column_name), params[:company_column]),
-          class: "form-control company_column")
-        td ⇔
-        td = select_tag(:child_column,
-          options_for_select(@table.client_columns.pluck(:name, :column_name), params[:child_column]),
-          class: "form-control child_column")
+      
+      - company_options = [["▼選択▼", ""], ["ID", :id]] + @company_table.client_columns.pluck(:name, :column_name)
+      - child_options   = [["▼選択▼", ""]] + @table.client_columns.pluck(:name, :column_name)
+      - params[:relations].each do |r|
+        tr
+          td = select_tag("relations[][company_column]", options_for_select(company_options, r[:company_column]), 
+            class: "form-control company_column")
+          td ⇔
+          td = select_tag("relations[][child_column]", options_for_select(child_options, r[:child_column]),
+            class: "form-control child_column")
         
     = button_tag data: { "disable-with" => "リレーション中..." }, class: "btn btn-success center-block" do
       span.glyphicon.glyphicon-check

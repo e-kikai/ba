@@ -67,3 +67,13 @@ crumb :clients_table_csv_confirm do |table|
   link   "確認", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv_confirm"
   parent :clients_table_csv_matching, table
 end
+
+crumb :clients_table_relation do |table|
+  link   "#{table.name}テーブル リレーション", "/bamember/clients/#{table.client.id}/table/#{table.id}/relation"
+  parent :clients_show, table.client
+end
+
+crumb :clients_table_relation_confirm do |table|
+  link   "確認", "/bamember/clients/#{table.client.id}/table/#{table.id}/relation_confirm"
+  parent :clients_table_relation, table
+end

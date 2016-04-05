@@ -27,24 +27,119 @@ module ClientTableDataModule
       client_table.client_columns.each do |co|
         # 必須チェック
         if co[:presence].present?
-          errors.add(co.name, "(#{co.type.label}型)必須") if data[co.column_name].blank?
+          errors.add(co.name, "(#{co.label}型)必須") if data[co.column_name].blank?
         end
 
         # ユニーク(空白とデフォルト値は除外)
         if co[:unique].present? && data[co.column_name].present? && data[co.column_name] != co[:default]
           if self.class.where(co.column_name => data[co.column_name]).where.not(id: data[:id]).exists?
-            errors.add(co.name, "(#{co.type.label}型)重複")
+            errors.add(co.name, "(#{co.label}型)重複")
           end
         end
 
         # 型バリデーション
         if data[co.column_name].present?
-          unless co.type.valid(data[co.column_name])
-            errors.add(co.name, "(#{co.type.label}型)不正な値")
+          unless co.valid(data[co.column_name])
+            errors.add(co.name, "(#{co.label}型)不正な値")
           end
         end
       end
     end
+
+    # リレーション結果取得
+    scope :company_relation, -> {
+      if client_table.company?
+        co = arel_table
+
+        tmp = select(co[Arel.star])
+        client_table.client.child_tables.each.with_index do |child_table, i|
+
+          child_column = "#{child_table.table_name}_count"
+          child_as     = "r_#{i.to_s}"
+          ch = child_table.klass.arel_table
+
+          ch_count = ch.project(ch[:id].count.as(child_column), ch[:company_id]).group(ch[:company_id]).as(child_as)
+          tmp = tmp.joins(co.join(ch_count, Arel::Nodes::OuterJoin).on(co[:id].eq(ch_count[:company_id])).join_sources)
+            .select(ch_count[child_column])
+        end
+        tmp
+      else
+        ch = arel_table
+        co = company_table.klass.arel_table.alias('company')
+
+        joins(ch.join(co, Arel::Nodes::OuterJoin).on(ch[:company_id].eq(co[:id])).join_sources)
+          .select(ch[Arel.star], co[:name].as("company_name"))
+      end
+    }
+
+    # ransackによる検索
+    scope :table_search, -> (search_params) {
+      search_query = {}
+      Array(search_params).each do |s|
+        next if s[:column_name].blank? || s[:cond].blank? || ["overlap", "unique"].include?(s[:cond])
+
+        ### 値の整形 ###
+        value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
+        value = value.split(" ") if %w(in not_in cont_any not_cont_any).include? s[:cond]
+
+        if co = client_table.client_columns.find_by(column_name: s[:column_name])
+          value = if %w(in not_in cont_any not_cont_any).include? s[:cond]
+            value.map { |v| co.filter(v) }
+          else
+            co.filter(value)
+          end
+        end
+
+        if (["present", "blank"].include? s[:cond]) || value.present?
+          search_query["#{s[:column_name]}_#{s[:cond]}"] = value
+        end
+      end
+
+      ### 重複検索(検索フィルタリング後に行う) ###
+      Array(search_params).each do |s|
+        if ["overlap", "unique"].include? s[:cond]
+          temp_in = search(search_query).result.select(s[:column_name])
+          .where.not(s[:column_name] => "")
+          .group(s[:column_name]).having("count(*) > 1")
+          .pluck(s[:column_name])
+
+          search_query["#{s[:column_name]}_#{s[:cond] == "overlap" ? "in" : "not_in"}"] = temp_in.presence || "xxxnoaxxx"
+        end
+      end
+
+      search(search_query).result
+    }
+
+    scope :table_order, -> (order_params) {
+      if order_params.present?
+        column = order_params[:column].presence || :id
+        type   = order_params[:type] == "desc" ? :desc : :asc
+
+        order(column => type)
+      end
+    }
+
+    scope :table_sum, -> (sum_params = {}) {
+      if sum[:methods].present?
+        sum[:group].each do |g|
+          sums = sums.group(g) if g.present?
+        end
+
+        sum_method = sum_params[:methods].split('__')
+        try(sum_method[1], sum_method[0])
+      end
+    }
+
+    scope :cast, -> (str, type) {
+      Arel::Nodes::NamedFunction.new(
+        'CAST', [
+          Arel::Nodes::As.new(
+            Arel::Nodes.build_quoted(str),
+            Arel::Nodes::SqlLiteral.new(type)
+          )
+        ]
+      )
+    }
   end
 
   def client_column(column_name)
@@ -56,85 +151,30 @@ module ClientTableDataModule
       ClientTable.find_by(table_name: self.table_name)
     end
 
-    def table_search(params)
-      # 検索条件
-      sparam       = []
-      search_query = {}
-
-      if params[:s].present?
-        params[:s].each do |s|
-          next if s[:column_name].blank?
-
-          ### 値の整形 ###
-          tmp = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
-
-          value = case s[:cond]
-          when "present", "blank", "overlap", "unique"
-            1
-          when "in", "not_in" ,"cont_any", "not_cont_any"
-            tmp.split(" ")
-          else
-            tmp
-          end
-
-          next if value.blank?
-
-          unless ["overlap", "unique"].include? s[:cond]
-            search_query["#{s[:column_name]}_#{s[:cond]}"] = value
-          end
-
-          sparam << { column_name: s[:column_name], cond: s[:cond], value: value }
-        end
-
-        ### 検索条件の整形(overlap, unique用)
-        params[:s].each do |s|
-          if ["overlap", "unique"].include? s[:cond]
-            temp_in = search(search_query).result.select(s[:column_name]).where.not(s[:column_name] => "").group(s[:column_name]).having("count(*) > 1").pluck(s[:column_name]) || "XXXXXXXDDEFEFEFGBSRDHJHhdft"
-
-            search_query["#{s[:column_name]}_#{s[:cond] == "overlap" ? "in" : "not_in"}"] = temp_in
-          end
-        end
-      end
-
-      res = search(search_query).result
-
-      # 集計
-      sum     = params[:sum] || {}
-      sum_res = {}
-      sums    = res
-      if sum[:methods].present?
-        sum[:group].each do |g|
-          sums = sums.group(g) if g.present?
-        end
-
-        sum_method = sum[:methods].split('__')
-        sum_res    = sums.try(sum_method[1], sum_method[0])
-      end
-
-      ### 並び順 ###
-      order = params[:order] || {}
-      order[:column] = order[:column].presence || :id
-      order[:type]   = order[:type] == "desc" ? :desc : :asc
-
-      # res = res.order("CASE WHEN #{order[:column]} IS NULL OR #{order[:column]} = '' THEN 1 ELSE 0 END")
-
-      # if oc = self.client_table.client_columns.find_by(column_name: order[:column])
-      #   res = res.order("CAST(#{order[:column]} as #{oc.db_column_type[:type]}) #{order[:type]}")
-      # end
-
-      res = res.order(order[:column] => order[:type]).order(:id)
-
-      [res, sparam, order, sum, sum_res]
+    def company_table
+      client_table.client.company_table
     end
 
-    def relation_matching(params)
-      company_table = client_table.client.company_table
-      ch            = arel_table
-      co            = company_table.klass.arel_table
+    # リレーション
+    def relation_matching(relations = {})
+      raise "リレーション対象を選択して下さい1" if relations.blank?
 
-      joins(ch.join(co).on(ch[params[:child_column]].eq(co[params[:company_column]])).join_sources)
-        .where(ch[params[:child_column]].not_eq("")).where(ch[:company_id].eq(nil))
-        .pluck(:id, company_table.table_name + ".id").group_by{|i| i[0]}
+      ch = arel_table
+      co = company_table.klass.arel_table
+
+      jo = nil
+      relations.each do |r|
+        next if r[:child_column].blank? || r[:company_column].blank?
+        tmp = cast(ch[r[:child_column]], "TEXT").eq(cast(co[r[:company_column]], "TEXT"))
+        jo = jo.blank? ? tmp : jo.and(tmp)
+        jo = jo.and(cast(co[r[:company_column]], "TEXT").not_eq(""))
+      end
+
+      raise "リレーション対象を選択して下さい2" if jo.blank?
+
+      res = joins(ch.join(co, Arel::Nodes::OuterJoin).on(jo).join_sources).where(ch[:company_id].eq(nil)).where(co[:soft_destroyed_at].eq(nil))
+      res.pluck(:id, company_table.table_name + ".id").group_by{|i| i[0]}
     end
+
   end
 end

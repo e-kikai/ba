@@ -24,9 +24,25 @@ table.search-table {
     &.company {
       min-width: 200px;
     }
+
+    &.address {
+      min-width: 300px;
+    }
+
+    &.company_id {
+      text-align: left;
+    }
   }
 
   th.datetime, td.datetime {
+    white-space: nowrap;
+  }
+
+  .zip {
+    white-space: nowrap;
+  }
+
+  .zip {
     white-space: nowrap;
   }
 }

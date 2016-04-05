@@ -111,7 +111,7 @@ class ClientTable < ActiveRecord::Base
   def filter(data)
     client_columns.each do |co|
       if data[co.column_name].present?
-        data[co.column_name] = co.type.filter(data[co.column_name])
+        data[co.column_name] = co.filter(data[co.column_name])
       end
     end
 

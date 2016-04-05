@@ -17,12 +17,12 @@
         tr
           th class="#{co.column_name}" = co.name
           td class="#{co.column_name}"
-            - if co.type.db_type == :text
+            - if co.db_type == :text
               = f.text_area co.column_name, class: "form-control"
-            - elsif co.type.db_type  == :integer
+            - elsif co.db_type  == :integer
               = f.number_field co.column_name, class: "form-control"
-            - elsif co.type.default_selector.present?
-              = f.select co.column_name, [["▼#{co.type.label}を選択▼", ""]] + co.type.default_selector, {}, class: "form-control"
+            - elsif co.def_selector.present?
+              = f.select co.column_name, [["▼#{co.label}を選択▼", ""]] + co.def_selector, {}, class: "form-control"
             - else 
               = f.text_field co.column_name, class: "form-control"
         

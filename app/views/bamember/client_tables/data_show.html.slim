@@ -9,7 +9,11 @@
     - @table.show_client_columns.each do |co|
       tr
         th class="#{co.column_name}" = co.name
-        td class="#{co.column_name}" = co.type.detail_format(@data[co.column_name])
+        td class="#{co.column_name}"
+          - if co.column_name == "company_id"
+            = link_to "#{@data.company_id} : #{@data.company_name}", "/bamember/clients/#{@table.client_id}/table/#{@table.client.company_table.id}/#{@data.company_id}"
+          - else
+            = column_format(@data[co.column_name], co.column_type, :show)
     tr
       th 登録日時
       td.id = @data[:created_at]
