@@ -53,6 +53,7 @@ module ClientTableDataModule
 
         tmp = select(co[Arel.star])
         client_table.client.child_tables.each.with_index do |child_table, i|
+          next unless child_table.company_id_column
 
           child_column = "#{child_table.table_name}_count"
           child_as     = "r_#{i.to_s}"
@@ -64,11 +65,15 @@ module ClientTableDataModule
         end
         tmp
       else
-        ch = arel_table
-        co = company_table.klass.arel_table.alias('company')
+        if client_table.company_id_column
+          ch = arel_table
+          co = company_table.klass.arel_table.alias('company')
 
-        joins(ch.join(co, Arel::Nodes::OuterJoin).on(ch[:company_id].eq(co[:id])).join_sources)
-          .select(ch[Arel.star], co[:name].as("company_name"))
+          joins(ch.join(co, Arel::Nodes::OuterJoin).on(ch[:company_id].eq(co[:id])).join_sources)
+            .select(ch[Arel.star], co[:name].as("company_name"))
+        else
+          self
+        end
       end
     }
 

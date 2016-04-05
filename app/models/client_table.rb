@@ -125,6 +125,10 @@ class ClientTable < ActiveRecord::Base
     company ? true : false
   end
 
+  def company_id_column
+    client_columns.find_by(column_name: :company_id)
+  end
+
   private
 
   def create_client_table_before

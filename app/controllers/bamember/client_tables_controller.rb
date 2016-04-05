@@ -3,7 +3,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_table, except: [:new, :create]
   before_action :find_company_table, only: [:test_01, :relation, :relation_confirm, :relation_do]
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
-  before_action :check_company_id, only: [:relation, :relation_confirm, :relation_do]
+  before_action :check_company_id, only: [:relation, :relation_confirm, :relation_do, :test_01]
 
   def new
     @table = @client.client_tables.new
@@ -41,10 +41,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def test_01
-    unless @table.client_columns.find_by(column_name: "company_id")
-      redirect_to "/bamember/clients/#{@table.client.id}/", alert: "RFMに必要な情報(会社ID)がありません"
-    end
-
     params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
     params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
 
@@ -466,6 +462,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def check_company_id
-    raise "会社IDがありません" unless @table.client_columns.find_by(column_name: :company_id)
+    unless @table.company_id_column
+      redirect_to "/bamember/clients/#{@table.client.id}/", alert: "会社IDがありません"
+    end
   end
 end
