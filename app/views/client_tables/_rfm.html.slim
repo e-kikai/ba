@@ -1,5 +1,3 @@
-- set_meta_tags title: "#{@table.client.name}/#{@table.name} test_01"
-- breadcrumb  :clients_something, "#{@table.name} RFM", @client
 
 - targets = {"件数" => :count}
 - @table.client_columns.each do |co|
@@ -102,12 +100,13 @@ sass:
             - c = :info
           - else
             - c = ""
-            
+          
           td.integer class=c
             - if sum_res[[row, col]].blank?
               | 0
             - else
               .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, child_table_id: @table.id, id: @company_table.id, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}, remote: true
+              
               .percent = "#{(sum_res[[row, col]][:count].to_f * 100 / sum_count).round(2)}%"
               
         th.integer = sum_res.select { |key, v| key[0] == row }.inject(0) { |sum, (key, s)| sum + s[:count] }

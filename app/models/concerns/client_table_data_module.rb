@@ -145,6 +145,8 @@ module ClientTableDataModule
         ]
       )
     }
+
+    scope :presents, -> (column_name) { where(cast(arel_table[column_name], "TEXT").not_eq("")) }
   end
 
   def client_column(column_name)

@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   patch 'client/edit_password' => 'client#update_password'
 
   get 'client_tables/:id/search'   => 'client_tables#search'
+  get 'client_tables/:id/rfm'      => 'client_tables#rfm'
   get 'client_tables/:id/:data_id' => 'client_tables#data_show'
 
   # BA member pages
@@ -45,7 +46,7 @@ Rails.application.routes.draw do
     post   'clients/:client_id/table/:id/relation_confirm'  => 'client_tables#relation_confirm'
     patch  'clients/:client_id/table/:id/relation_do'       => 'client_tables#relation_do'
 
-    get    'clients/:client_id/table/:id/test_01'       => 'client_tables#test_01'
+    get    'clients/:client_id/table/:id/rfm'          => 'client_tables#rfm'
 
     get    'clients/:client_id/table/:id/edit'         => 'client_tables#edit'
     patch  'clients/:client_id/table/:id/'             => 'client_tables#update'

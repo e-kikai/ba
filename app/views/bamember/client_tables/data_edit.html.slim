@@ -14,18 +14,10 @@
       tr
         th ID
         td.id = @data[:id]
-      - @table.show_client_columns.each do |co|
+      - @table.show_columns.each do |co|
         tr
           th class="#{co.column_name}" = co.name
           td class="#{co.column_name}" = f.column_field co
-            / - if co.db_type == :text
-            /   = f.text_area co.column_name, class: "form-control"
-            / - elsif co.db_type == :integer
-            /   = f.number_field co.column_name, class: "form-control"
-            / - elsif co.def_selector.present?
-            /   = f.select co.column_name, [["▼#{co.label}を選択▼", ""]] + co.def_selector, {}, class: "form-control"
-            / - else 
-            /   = f.text_field co.column_name, class: "form-control"
       tr
         th 登録日時
         td.id = @data[:created_at]

@@ -77,8 +77,8 @@ class ClientTable < ActiveRecord::Base
   end
 
   # 表示用のカラム一覧
-  def show_client_columns
-    client_columns.where(hidden: false)
+  def show_columns
+    client_columns.show
   end
 
   # client_table_dataクラスを取得

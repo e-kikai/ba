@@ -6,11 +6,6 @@ module ColumnTypes
       define_method(m) do |v = nil|
         type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
         type.send(m, v, self)
-        # if type.method(m).parameters.blank?
-        #   type.send(m)
-        # else
-        #   type.send(m, v)
-        # end
       end
     end
   end
@@ -109,12 +104,12 @@ module ColumnTypes
 
   class Mail < ColumnTypes::String
     NAME = "メールアドレス"
-    def self.valid(v, *args)      v =~ /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i end
+    def self.valid(v, *args) v =~ /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i end
   end
 
   class Url < ColumnTypes::String
     NAME = "URL"
-    def self.valid(v, *args)      v =~ /\A#{URI::regexp}\z/ end
+    def self.valid(v, *args) v =~ /\A#{URI::regexp}\z/ end
   end
 
   class Selector < ColumnTypes::String

@@ -1,9 +1,8 @@
 class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_client
   before_action :find_table, except: [:new, :create]
-  before_action :find_company_table, only: [:test_01, :relation, :relation_confirm, :relation_do]
+  before_action :find_company_table, only: [:rfm, :relation, :relation_confirm, :relation_do]
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
-  before_action :check_company_id, only: [:relation, :relation_confirm, :relation_do, :test_01]
 
   def new
     @table = @client.client_tables.new
@@ -18,29 +17,23 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def search
-    @datas = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
-
-    # 表示項目
-    @show_columns = params[:all].present? ? @table.client_columns : @table.client_columns.show
-
-    @sums = @datas.group("")
+    @datas        = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
+    @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
+    @sums         = @datas.group("")
 
     # CSV出力
     respond_to do |format|
-      format.html do
-        @pdatas = @datas.page(params[:page])
-      end
-
-      format.csv { send_data render_to_string,
-        content_type: 'text/csv;charset=shift_jis',
-        filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+      format.html { @pdatas = @datas.page(params[:page]) }
+      format.js   { render "client_tables/search" }
+      format.csv  {
+        send_data render_to_string("client_tables/search.csv.ruby"),
+          content_type: 'text/csv;charset=shift_jis',
+          filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
       }
-
-      format.js {}
     end
   end
 
-  def test_01
+  def rfm
     params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
     params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
 
@@ -91,8 +84,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       params[:y] = "count"
       ["回", "", " count(*) ", "company_id"]
     end
-
-    # companies_sql = "SELECT company_id, #{x_select} as ax, #{y_select} as ay FROM #{@table.table_name} WHERE company_id IS NOT NULL AND #{x_column} IS NOT NULL AND #{y_column} IS NOT NULL GROUP BY company_id"
 
     companies_sql = @klass.select("company_id, #{x_select} as ax, #{y_select} as ay")
       .where.not(company_id: nil, x_column => nil, y_column => nil).group(:company_id).to_sql
@@ -432,17 +423,25 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def find_client
     raise "クライアント情報が取得できません" unless @client = Client.find(params[:client_id])
+  rescue => e
+    redirect_to "/bamember/clients/#{@table.client.id}/", alert: e.message
   end
 
   def find_table
     raise "テーブル情報が取得できません"                 unless @table = ClientTable.find(params[:id])
     raise "このテーブルはクライアント所有ではありません" if     @table.client_id != @client.id
     raise "テーブルデータ情報が取得できません"           unless @klass = @table.klass
+  rescue => e
+    redirect_to "/bamember/clients/#{@table.client.id}/", alert: e.message
   end
 
   def find_company_table
     raise "このテーブルは会社テーブルです" if @table.company?
+    raise "会社IDカラムがありません"       unless @table.company_id_column
+
     @company_table = @client.company_table
+  rescue => e
+    redirect_to "/bamember/clients/#{@table.client.id}/", alert: e.message
   end
 
   def check_session_spreadseet
@@ -459,11 +458,5 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def data_params
     params.require(@klass.name.underscore).permit(@table.show_client_columns.map(&:column_name))
-  end
-
-  def check_company_id
-    unless @table.company_id_column
-      redirect_to "/bamember/clients/#{@table.client.id}/", alert: "会社IDがありません"
-    end
   end
 end

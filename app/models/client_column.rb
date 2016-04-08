@@ -7,8 +7,6 @@ class ClientColumn < ActiveRecord::Base
   validates :column_name,     presence: true
   validates :column_type,     presence: true
 
-  # validate :type_missmatch
-
   belongs_to :client_table
 
   default_scope -> { order(:order_no) }
@@ -37,17 +35,7 @@ class ClientColumn < ActiveRecord::Base
     end.compact
   end
 
-  # def type
-  #   ColumnTypes.const_get(column_type.classify)
-  # rescue
-  #   ColumnTypes::String
-  # end
-
   private
-
-  # def type_missmatch
-  #   errors.add(:column_type, ": 型が不正です(#{column_type})") unless type
-  # end
 
   def default_column_name
    self[:column_name] = column_name.presence || "co_#{Time.now.strftime('%Y%m%d%H%M%S')}_#{rand(999)}"

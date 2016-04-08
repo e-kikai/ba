@@ -13,7 +13,7 @@
       tr
         th ID
         td.id 新規登録
-      - @table.show_client_columns.each do |co|
+      - @table.show_columns.each do |co|
         tr
           th class="#{co.column_name}" = co.name
           td class="#{co.column_name}"

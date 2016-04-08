@@ -1,17 +1,25 @@
-- set_meta_tags title: "#{@client.name} メニュー"
+- set_meta_tags title: "メニュー"
 - breadcrumb    :client_root, @client
 
-.col-md-10.col-md-offset-1
+.col-md-6.col-md-offset-1
   table.table.table-striped.table-hover.table-responsive
     caption テーブル管理
-    - @client.client_tables.each do |t|
+    tr
+      td #{@client.company_table.name}テーブル
+      td.integer #{@client.company_table.klass.count}件
+      td = link_to "検索",         "/client_tables/#{@client.company_table.id}/search/"
+      td
+      td = link_to "バックアップ", "/client_tables/#{@client.company_table.id}/search.csv"
+
+    - @client.child_tables.each do |t|
       tr
         td #{t.name}テーブル
-        td #{t.klass.count}件
-        td = link_to "検索",            "/client_tables/#{t.id}/search/"
-        td = link_to "バックアップ",    "/client_tables/#{t.id}/search.csv"
+        td.integer #{t.klass.count}件
+        td = link_to "検索",         "/client_tables/#{t.id}/search/"
+        td = link_to "RFM",          "/client_tables/#{t.id}/rfm/"
+        td = link_to "バックアップ", "/client_tables/#{t.id}/search.csv"
         
   ul.nav.nav-stacked
     / li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
     li = link_to "パスワード変更", "/client/edit_password"
-    li = link_to "ログアウト", "/client/logout", method: :delete
+    li = link_to "ログアウト",     "/client/logout", method: :delete

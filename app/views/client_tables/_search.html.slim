@@ -1,0 +1,196 @@
+- client_columns = ([["-- 項目を選択 --", nil], ["ID", "id"]] + @show_columns.map { |co| [co.name, co.column_name] } + [["登録日時", "created_at"], ["変更日時", "updated_at"]]).to_h
+
+- conditions     = { "を含む" => "cont", "を含まない" => "not_cont", "で一致" => "eq", "で一致しない" => "not_eq", 
+    "から始まる" => "start", "から始まらない" => "not_start", "で終わる" => "end", "で終わらない" => "not_end",
+    "空白" => "blank", "空白でない" => "present",
+    "のいずれかを含む(空白区切り)" => "cont_any", "のいずれかを含まない(空白区切り)" => "not_cont_any",
+    "のいずれかに一致(空白区切り)" => "in", "のいずれか一致しない(空白区切り)" => "not_in",
+    "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt",
+    "重複している" => "overlap", "重複していない" => "unique",
+  }
+  
+- sum_methods = {"-- 集計内容 --" => "", "件数" => "id__count"}
+
+- @show_columns.each do |co|
+  - if ["integer", "float"].include? co.column_type
+    - sum_methods = sum_methods.merge({"#{co.name} : 合計" => "#{co.column_name}__sum", "#{co.name} : 平均" => "#{co.column_name}__average", "#{co.name} : 最大" => "#{co.column_name}__maximum", "#{co.name} : 最小" => "#{co.column_name}__minimum"})
+
+coffee:
+  $ ->
+    $_blank = $('.form-group.blank').clone()
+    
+    $(document).on 'click', 'button.add', ->
+      $(this).before($_blank.clone())
+    
+nav.affix-nav.col-md-2
+  - if ba
+    = link_to({action: "data_new"}, class: "btn btn-success center-block") do
+      span.glyphicon.glyphicon-plus
+      =< "データを新規登録"
+  
+  = label_tag "", "検索条件"
+  = form_tag({}, method: :get) do
+    - Array(params[:s]).each.with_index do |s|
+      - next if s[:column_name].blank? || s[:cond].blank?
+      .form-group
+        = select_tag     "s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control"
+        = text_field_tag "s[][value]", s[:value], class: "form-control"
+        = select_tag     "s[][cond]", options_for_select(conditions, s[:cond]), class: "form-control"
+      
+    .form-group.blank
+      = select_tag     "s[][column_name]", options_for_select(client_columns), class: "form-control"
+      = text_field_tag "s[][value]", "", class: "form-control"
+      = select_tag     "s[][cond]", options_for_select(conditions), class: "form-control"
+    .form-group
+      = button_tag type: "button", class: "btn btn-default add" do
+        span.glyphicon.glyphicon-plus
+        =< "検索条件を追加"
+      
+    = label_tag :order_column, "集計"
+    .form-group
+      = select_tag "sum[methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
+      = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
+      = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
+      
+    = label_tag :order_column, "ソート"
+    .form-group
+      .col-md-7 style="padding:0;"
+        = select_tag "order[column]", options_for_select(client_columns, params.dig(:order, :column)), class: "form-control"
+      .col-md-5 style="padding:0;"
+        = select_tag "order[type]", options_for_select({"昇順" => "asc", "降順" => "desc"}, params.dig(:order, :type)), class: "form-control"
+    .form-group
+      = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
+        span.glyphicon.glyphicon-search
+        =< "検索"
+    
+    - if @pdatas.present?
+      hr
+      = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success center-block" do
+        span.glyphicon.glyphicon-save-file
+        =< "検索結果をCSV出力"
+    
+    hr
+    = link_to "#{request.path_info}", class: "btn btn-warning center-block" do
+      span.glyphicon.glyphicon-remove
+      =< "検索条件をリセット"
+    
+.col-md-10
+  / = @pdatas.to_sql
+  h4
+    - if Array(params[:s]).length == 0
+      span 全件取得
+    - else
+      - Array(params[:s]).each.with_index do |s, i|
+        - next if s[:column_name].blank? || s[:cond].blank?
+        span #{i > 0 ? "かつ、" : ""}#{client_columns.invert[s[:column_name]]}が「#{s[:value]}」#{conditions.invert[s[:cond]]}
+    | : 
+    
+    - if @pdatas.present?
+      | #{number_with_delimiter(@pdatas.total_count)}件 
+    - else
+      | 検索結果がありませんでした
+      
+  - if @pdatas.blank?
+    
+  - elsif @sum_res.present?
+    - groups = (@sum[:group].reject(&:blank?) rescue {})
+    - if groups.length == 0
+      table.table.table-bordered.table-hover.table-condensed style="width:40%;"
+        tr
+          th = sum_methods.invert[@sum[:methods]]
+          td.integer = link_to number_with_delimiter(@sum_res), params.merge("sum[methods]" => "") 
+    - elsif groups.length == 1
+      table.table.table-bordered.table-striped.table-hover.table-condensed style="width:40%;"
+        tr
+          th = client_columns.invert[groups[0]]
+          th = sum_methods.invert[@sum[:methods]]
+        - @sum_res.each do |key, v|
+          tr
+            td = key
+            td.integer = link_to number_with_delimiter(v), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: key, cond: :eq}]})
+    - else
+      - rows = @sum_res.map { |k, v| k[0] }.uniq
+      - cols = @sum_res.map { |k, v| k[1] }.uniq
+      .table-responsive
+        table.table.table-bordered.table-striped.table-hover.table-condensed
+          tr
+            th #{client_columns.invert[groups[0]]} / #{client_columns.invert[groups[1]]}
+            - cols.each do |col|
+              th = col
+          - rows.each do |row|
+            tr
+              th = row
+              - cols.each do |col|
+                td.integer
+                  - if @sum_res[[row, col]].blank?
+                    | 0
+                  - else
+                    = link_to number_with_delimiter(@sum_res[[row, col]]), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: row, cond: :eq}, {column_name: groups[1], value: col, cond: :eq}]})
+              
+  - else
+    - sumally = @show_columns.select { |co| co.sumally }.inject('') do |res, co|
+      - res += "、#{co.name}ありが#{number_with_delimiter(@datas.presents(co.column_name).count(:id))}件"
+
+    div
+      - if sumally.present?
+        | うち#{sumally}
+      | (#{number_with_delimiter(@pdatas.offset_value + 1)}件 〜 
+      | #{number_with_delimiter(@pdatas.offset_value + @pdatas.length)}件を表示中)
+      
+    = paginate @pdatas
+    
+    .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
+      .table-responsive
+        table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
+          tr
+            th
+              | ID
+              =< column_sorter :id
+
+            - if ba
+              th 変更
+            - @show_columns.each do |co|
+              th
+                = co.name
+                =< column_sorter co.column_name
+            - if @table.company?
+              - @client.child_tables.each do |ch|
+                th.id = ch.name
+              
+            th.datetime
+              | 登録日時
+              =< column_sorter :created_at
+
+            th.datetime
+              | 変更日時
+              =< column_sorter :updated_at
+
+            / th 削除
+          - @pdatas.each do |d|
+            tr
+              td.id
+                = link_to d[:id], {action: :data_show, data_id: d[:id]}
+              - if ba
+                td.icon.edit = link_to({action: :data_edit, data_id: d[:id]}) do
+                  span.glyphicon.glyphicon-edit
+              - @show_columns.each do |co|
+                td class="#{co.db_type} #{co.column_type} #{co.column_name}"
+                  - if co.column_name == "name"
+                    = link_to column_format(d[co.column_name], co.column_type), {action: :data_show, data_id: d[:id]}
+                  - elsif co.column_name == "company_id" && d.company_id.present?
+                    = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
+                  - elsif d[co.column_name].present?
+                    = column_format(d[co.column_name], co.column_type)
+                    
+              - if @table.company?
+                - @client.child_tables.each do |ch|
+                  td.id
+                    - if d["#{ch.table_name}_count"].present?
+                      = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[][column_name]" => :company_id, "s[][value]" => d[:id], "s[][cond]" => :eq})
+
+              td.datetime = d[:created_at]
+              td.datetime = d[:updated_at]
+              / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
+                span.glyphicon.glyphicon-remove
+            
+    = paginate @pdatas
