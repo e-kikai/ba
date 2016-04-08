@@ -1,7 +1,7 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} マッチング"
 - breadcrumb  :clients_table_csv_matching, @table
 
-- select_client_columns = [["--使用しない--", ""], ["ID", :id]] + @table.show_client_columns.pluck(:name, :column_name)
+- select_client_columns = [["--使用しない--", ""], ["ID", :id]] + @table.show_columns.pluck(:name, :column_name)
 - select_methods        = {"空欄に保存" => :save, "上書き" => :update, "マッチング" => :matching}
 
 coffee:
