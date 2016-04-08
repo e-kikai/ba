@@ -305,8 +305,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     # 保存済のCSV情報をクリア
     session[:csv] = nil
-    ActiveRecord::Base.connection.execute("VACUUM;")
-    ActiveRecord::Base.connection.execute("REINDEX;")
+    # ActiveRecord::Base.connection.execute("VACUUM;")
+    # ActiveRecord::Base.connection.execute("REINDEX;")
 
     redirect_to "/bamember/clients/#{@table.client.id}/", notice: "データをテーブルに反映しました"
   rescue => e
