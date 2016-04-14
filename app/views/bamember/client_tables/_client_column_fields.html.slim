@@ -1,6 +1,9 @@
 tr.fields
   td = f.text_field :name, class: "form-control"
-  td = f.select     :column_type, ClientColumn.column_types_selector(f.object.db_type.presence || nil), {}, class: "form-control column_type"
+  td
+   = f.select(:column_type,
+     ClientColumn.column_types_selector(f.object.new_record? ? nil : f.object.db_type.presence),
+     {}, class: "form-control column_type")
   td = f.text_area  :selector, class: "form-control selector"
   td = f.text_field :default, class: "form-control"
   td = f.check_box  :unique

@@ -9,7 +9,7 @@ crumb :client_root do
 end
 
 crumb :search do |table|
-  link   "#{table.name} 検索", "/client_tables/#{table.id}/search"
+  link   "#{table.name}テーブル 検索", "/client_tables/#{table.id}/search"
   parent :client_root, table.client
 end
 
@@ -44,7 +44,7 @@ crumb :clients_something do |title, client|
 end
 
 crumb :clients_search do |table|
-  link   "#{table.name} 検索", "/bamember/clients/#{table.client.id}/table/#{table.id}/search"
+  link   "#{table.name}テーブル 検索", "/bamember/clients/#{table.client.id}/table/#{table.id}/search"
   parent :clients_show, table.client
 end
 

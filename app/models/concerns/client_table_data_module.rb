@@ -124,17 +124,19 @@ module ClientTableDataModule
       end
     }
 
-    scope :table_sum, -> (sum_params = {}) {
-      if sum[:methods].present?
-        sum[:group].each do |g|
-          sums = sums.group(g) if g.present?
-        end
+    # scope :table_sum, -> (sum_params = {}) {
+    #   tmp = self
+    #   if sum_params[:methods].present?
+    #     sum_params[:group].each do |g|
+    #       tmp = tmp.group(g) if g.present?
+    #     end
+    #
+    #     sum_method = sum_params[:methods].split('__')
+    #     tmp.try(sum_method[1], sum_method[0])
+    #   end
+    # }
 
-        sum_method = sum_params[:methods].split('__')
-        try(sum_method[1], sum_method[0])
-      end
-    }
-
+    # PostgreSQLでの型キャスト
     scope :cast, -> (str, type) {
       Arel::Nodes::NamedFunction.new(
         'CAST', [

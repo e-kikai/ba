@@ -20,61 +20,136 @@ coffee:
     $_blank = $('.form-group.blank').clone()
     
     $(document).on 'click', 'button.add', ->
-      $(this).before($_blank.clone())
+      $('.add-group').before($_blank.clone())
     
-nav.affix-nav.col-md-2
-  - if ba
-    = link_to({action: "data_new"}, class: "btn btn-success center-block") do
-      span.glyphicon.glyphicon-plus
-      =< "データを新規登録"
-  
-  = label_tag "", "検索条件"
-  = form_tag({}, method: :get) do
-    - Array(params[:s]).each.with_index do |s|
-      - next if s[:column_name].blank? || s[:cond].blank?
-      .form-group
-        = select_tag     "s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control"
-        = text_field_tag "s[][value]", s[:value], class: "form-control"
-        = select_tag     "s[][cond]", options_for_select(conditions, s[:cond]), class: "form-control"
+sass:
+  .search-menu .btn
+    margin-right: 4px
+    
+  #serach_form
+    .my-group
+      margin: 2px 0
+    .col-md-4, .col-md-5, .col-md-7
+      padding: 0 4px 4px 0
+    
+  .page-area
+    margin-bottom: 2px
+    
+    .pagination
+      margin: 0
+      vertical-align: bottom
+      margin-right: 4px
+    .btn
+      margin-right: 4px
       
-    .form-group.blank
-      = select_tag     "s[][column_name]", options_for_select(client_columns), class: "form-control"
-      = text_field_tag "s[][value]", "", class: "form-control"
-      = select_tag     "s[][cond]", options_for_select(conditions), class: "form-control"
-    .form-group
-      = button_tag type: "button", class: "btn btn-default add" do
-        span.glyphicon.glyphicon-plus
-        =< "検索条件を追加"
-      
-    = label_tag :order_column, "集計"
-    .form-group
-      = select_tag "sum[methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
-      = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
-      = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
-      
-    = label_tag :order_column, "ソート"
-    .form-group
-      .col-md-7 style="padding:0;"
-        = select_tag "order[column]", options_for_select(client_columns, params.dig(:order, :column)), class: "form-control"
-      .col-md-5 style="padding:0;"
-        = select_tag "order[type]", options_for_select({"昇順" => "asc", "降順" => "desc"}, params.dig(:order, :type)), class: "form-control"
-    .form-group
-      = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
-        span.glyphicon.glyphicon-search
-        =< "検索"
+/ nav.affix-nav.col-md-2
+/   - if ba
+/     = link_to({action: "data_new"}, class: "btn btn-success center-block") do
+/       span.glyphicon.glyphicon-plus
+/       =< "データを新規登録"
+/   
+/   = label_tag "", "検索条件"
+/   = form_tag({}, method: :get) do
+/     - Array(params[:s]).each.with_index do |s|
+/       - next if s[:column_name].blank? || s[:cond].blank?
+/       .form-group
+/         = select_tag     "s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control"
+/         = text_field_tag "s[][value]", s[:value], class: "form-control"
+/         = select_tag     "s[][cond]", options_for_select(conditions, s[:cond]), class: "form-control"
+/       
+/     .form-group.blank
+/       = select_tag     "s[][column_name]", options_for_select(client_columns), class: "form-control"
+/       = text_field_tag "s[][value]", "", class: "form-control"
+/       = select_tag     "s[][cond]", options_for_select(conditions), class: "form-control"
+/     .form-group
+/       = button_tag type: "button", class: "btn btn-default add" do
+/         span.glyphicon.glyphicon-plus
+/         =< "検索条件を追加"
+/       
+/     = label_tag :order_column, "集計"
+/     .form-group
+/       = select_tag "sum[methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
+/       = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
+/       = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
+/       
+/     = label_tag :order_column, "ソート"
+/     .form-group
+/       .col-md-7 style="padding:0;"
+/         = select_tag "order[column]", options_for_select(client_columns, params.dig(:order, :column)), class: "form-control"
+/       .col-md-5 style="padding:0;"
+/         = select_tag "order[type]", options_for_select({"昇順" => "asc", "降順" => "desc"}, params.dig(:order, :type)), class: "form-control"
+/     .form-group
+/       = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
+/         span.glyphicon.glyphicon-search
+/         =< "検索"
+/     
+/     - if @pdatas.present?
+/       hr
+/       = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success center-block" do
+/         span.glyphicon.glyphicon-save-file
+/         =< "検索結果をCSV出力"
+/     
+/     hr
+/     = link_to "#{request.path_info}", class: "btn btn-warning center-block" do
+/       span.glyphicon.glyphicon-remove
+/       =< "検索条件をリセット"
     
-    - if @pdatas.present?
-      hr
-      = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success center-block" do
-        span.glyphicon.glyphicon-save-file
-        =< "検索結果をCSV出力"
+
+.container-fluid.search-menu
+  = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
+    span.glyphicon.glyphicon-menu-hamburger
+    =< "検索・集計フォーム"
+  = link_to({action: "data_new"}, class: "btn btn-success") do
+    span.glyphicon.glyphicon-plus
+    =< "データを新規登録"
+  = link_to "#{request.path_info}", class: "btn btn-warning" do
+    span.glyphicon.glyphicon-remove
+    =< "検索条件をリセット"
     
-    hr
-    = link_to "#{request.path_info}", class: "btn btn-warning center-block" do
-      span.glyphicon.glyphicon-remove
-      =< "検索条件をリセット"
-    
-.col-md-10
+#serach_form.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+  .modal-dialog
+    .modal-content
+      .modal-header
+        = button_tag type: :button, class: :close, data: { dismiss: :modal } do
+          span.glyphicon.glyphicon-remove
+        h4 検索・集計フォーム
+      .modal-body
+        = label_tag "", "検索条件"
+        = form_tag({}, method: :get) do
+          - Array(params[:s]).each.with_index do |s|
+            - next if s[:column_name].blank? || s[:cond].blank?
+            .form-group
+              .col-md-4 = select_tag     "s[][column_name]", options_for_select(client_columns, s[:column_name]), class: "form-control"
+              .col-md-4 = text_field_tag "s[][value]", s[:value], class: "form-control"
+              .col-md-4 = select_tag     "s[][cond]", options_for_select(conditions, s[:cond]), class: "form-control"
+            
+          .form-group.blank
+            .col-md-4 = select_tag     "s[][column_name]", options_for_select(client_columns), class: "form-control"
+            .col-md-4 = text_field_tag "s[][value]", "", class: "form-control"
+            .col-md-4 = select_tag     "s[][cond]", options_for_select(conditions), class: "form-control"
+          .form-group.add-group
+            = button_tag type: "button", class: "btn btn-default add" do
+              span.glyphicon.glyphicon-plus
+              =< "検索条件を追加"
+            
+          / = label_tag :order_column, "集計"
+          / .form-group
+          /   .col-md-4 = select_tag "sum[group][methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
+          /   .col-md-4 = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
+          /   .col-md-4 = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
+            
+          = label_tag :order_column, "ソート"
+          .form-group
+            .col-md-7
+              = select_tag "order[column]", options_for_select(client_columns, params.dig(:order, :column)), class: "form-control"
+            .col-md-5
+              = select_tag "order[type]", options_for_select({"昇順" => "asc", "降順" => "desc"}, params.dig(:order, :type)), class: "form-control"
+          .form-group
+            = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
+              span.glyphicon.glyphicon-search
+              =< "検索"
+
+.col-md-12
   / = @pdatas.to_sql
   h4
     - if Array(params[:s]).length == 0
@@ -134,10 +209,15 @@ nav.affix-nav.col-md-2
     div
       - if sumally.present?
         | うち#{sumally}
-      | (#{number_with_delimiter(@pdatas.offset_value + 1)}件 〜 
-      | #{number_with_delimiter(@pdatas.offset_value + @pdatas.length)}件を表示中)
-      
-    = paginate @pdatas
+    
+    .page-area
+      | #{number_with_delimiter(@pdatas.offset_value + 1)}件 〜 
+      | #{number_with_delimiter(@pdatas.offset_value + @pdatas.length)}件を表示中
+
+      = paginate @pdatas
+      = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success" do
+        span.glyphicon.glyphicon-save-file
+        =< "検索結果をCSV出力"
     
     .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
       .table-responsive

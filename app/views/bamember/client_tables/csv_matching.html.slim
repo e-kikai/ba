@@ -38,7 +38,7 @@ sass:
     .panel-body
       dl.dl-horizontal
         dt アップロードデータ
-        dd #{number_with_delimiter(@csv[:counts][:all])} 件 (先頭行、空行を除く)
+        dd #{number_with_delimiter(@csv[:count])} 件 (先頭行、空行を除く)
     
   = form_tag({action: :csv_matching_check}, method: :post, class: 'form-horizontal') do
     table.table.table-striped.table-hover.table-responsive
@@ -70,10 +70,10 @@ sass:
     .form-group
       .col-sm-3 = label_tag  "option[unmatch]", "マッチしなかったデータ", class: "control-label"
       .col-sm-6 = select_tag "option[unmatch]", options_for_select({"エラーCSVに出力" => nil, "新規登録" => :new}, @csv[:option][:unmatch]), class: "form-control"
-    .form-group
-      .col-sm-3 = label_tag      "option[action_tag]", "アクション(未実装)", class: "control-label"
-      .col-sm-3 = text_field_tag "option[action_tag]", params[:option_action], class: "form-control", placehodler: "タグ"
-      .col-sm-6 = text_field_tag "option[action_body]", params[:option_action], class: "form-control", placehodler: "内容"
+    / .form-group
+    /   .col-sm-3 = label_tag      "option[action_tag]", "アクション(未実装)", class: "control-label"
+    /   .col-sm-3 = text_field_tag "option[action_tag]", params[:option_action], class: "form-control", placehodler: "タグ"
+    /   .col-sm-6 = text_field_tag "option[action_body]", params[:option_action], class: "form-control", placehodler: "内容"
     = button_tag data: { "disable-with" => "マッチング中..." }, class: "btn btn-success center-block" do
       span.glyphicon.glyphicon-check
       =< "項目をマッチング"

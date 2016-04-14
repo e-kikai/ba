@@ -6,4 +6,14 @@ class Bamember::ApplicationController < ActionController::Base
   before_action :authenticate_bamember!
 
   layout 'layouts/application'
+
+  rescue_from RuntimeError, with: :runtime_error
+
+  private
+
+  def runtime_error(e = nil)
+    logger.error e
+    logger.error e.backtrace.join("\n")
+    redirect_to "/bamember/", alert: e.message
+  end
 end
