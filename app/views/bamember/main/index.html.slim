@@ -1,16 +1,26 @@
 - set_meta_tags title: "BAメニュー"
 
+- message = "クライアントを削除いたします。よろしいでしょうか\r\r※ 事前にテーブルをエクスポートしておくことをお勧めいたします"
+
+sass:
+  table.clients tr td
+    vertical-align: middle
+    
 .col-md-10.col-md-offset-1
   .table-responsive
-    table.table.table-bordered.table-striped.table-hover.table-condensed
+    table.table.table-striped.table-hover.table-condensed.clients
       caption クライアント一覧
       tr
         th クライアント名
         th メールアドレス
+        th 削除
       - @clients.each do |c|
         tr
           td = link_to c.name, "/bamember/clients/#{c.id}/"
           td = mail_to c.email
+          td = link_to "/bamember/clients/#{c.id}/", method: :delete, data: { confirm: message, "disable-with" => "削除中..."}, class: "btn btn-danger" do
+            span.glyphicon.glyphicon-remove
+            =< "削除"
   
   / table.table.table-striped.table-hover.table-responsive
   /   caption BAテーブル

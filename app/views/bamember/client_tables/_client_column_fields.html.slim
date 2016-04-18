@@ -11,4 +11,6 @@ tr.fields
   td = f.check_box  :hidden
   td = f.check_box  :sumally
   td = f.text_field :order_no, class: "form-control order_no"
-  td = f.link_to_remove  "削除"
+  td = f.link_to_remove class: "btn btn-danger" do
+    span.glyphicon.glyphicon-remove
+    =< "削除"

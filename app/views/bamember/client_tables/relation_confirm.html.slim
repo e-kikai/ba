@@ -62,7 +62,7 @@ coffee:
       .panel-body style="text-align:center;"
         = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning backup" do
           span.glyphicon.glyphicon-save-file
-          =< "バックアップCSVをダウンロード"
+          =< "エクスポート"
         =< link_to params.merge({action: :relation_error, format: :csv}), class: "btn btn-danger error" do
           span.glyphicon.glyphicon-save-file
           =< "エラーCSVをダウンロード"

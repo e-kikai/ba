@@ -33,15 +33,15 @@ class Bamember::ClientsController < Bamember::ApplicationController
 
   def update
     if @client.update(client_params)
-      redirect_to "/bamember/clients/#{params[:id]}/", notice: 'クライアント情報を変更しました'
+      redirect_to "/bamember/clients/#{params[:id]}/", notice: "#{@client.name}を変更しました"
     else
       render :edit
     end
   end
 
   def destroy
-    @client.destroy!
-    redirect_to "/bamember/clients/#{params[:id]}/", notice: 'クライアント情報を削除しました'
+    @client.soft_destroy!
+    redirect_to "/bamember/", notice: "#{@client.name}を削除しました"
   end
 
   def edit_password
@@ -49,7 +49,7 @@ class Bamember::ClientsController < Bamember::ApplicationController
 
   def update_password
     if @client.update(password_params)
-      redirect_to "/bamember/clients/#{params[:id]}/", notice: 'クライアントのパスワードを変更しました'
+      redirect_to "/bamember/clients/#{params[:id]}/", notice: "#{@client.name}のパスワードを変更しました"
     else
       render :edit_password
     end

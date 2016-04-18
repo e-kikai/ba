@@ -48,7 +48,7 @@ coffee:
     .panel-body style="text-align:center;"
       = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning backup" do
         span.glyphicon.glyphicon-save-file
-        =< "バックアップCSVをダウンロード"
+        =< "エクスポート"
       =< link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_error.csv", class: "btn btn-danger error" do
         span.glyphicon.glyphicon-save-file
         =< "エラーCSVをダウンロード"
@@ -56,6 +56,6 @@ coffee:
     span.glyphicon.glyphicon-arrow-down
     
   = form_tag({action: :csv_update}, method: :patch, class: 'form-horizontal') do
-    = button_tag data: { confirm: "データを反映してよろしいでしょうか\r事前にバックアップとエラー分のCSVファイルをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block submit", disabled: :true do
+    = button_tag data: { confirm: "データを反映してよろしいでしょうか\r事前にエクスポートとエラーCSVをダウンロードをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-success center-block submit", disabled: :true do
       span.glyphicon.glyphicon-save
       =< "内容を反映"

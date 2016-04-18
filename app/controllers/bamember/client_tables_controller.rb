@@ -18,6 +18,11 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     end
   end
 
+  def destroy
+    @table.soft_destroy!
+    redirect_to "/bamember/clients/#{@client.id}/", notice: "#{@table.name}テーブルを削除しました"
+  end
+
   def search
     @datas        = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
     @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show

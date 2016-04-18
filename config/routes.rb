@@ -27,8 +27,8 @@ Rails.application.routes.draw do
   namespace :bamember do
     root      to: "main#index"
     resources :clients, expect: :index
-    get   'clients/:id/edit_password' => 'clients#edit_password'
-    patch 'clients/:id/edit_password' => 'clients#update_password'
+    get    'clients/:id/edit_password' => 'clients#edit_password'
+    patch  'clients/:id/edit_password' => 'clients#update_password'
 
     get    'clients/:client_id/table/new'              => 'client_tables#new'
     post   'clients/:client_id/table/'                 => 'client_tables#create'
@@ -50,6 +50,7 @@ Rails.application.routes.draw do
 
     get    'clients/:client_id/table/:id/edit'         => 'client_tables#edit'
     patch  'clients/:client_id/table/:id/'             => 'client_tables#update'
+    delete 'clients/:client_id/table/:id/'             => 'client_tables#destroy'
 
     get    'clients/:client_id/table/:id/new'           => 'client_tables#data_new'
     post   'clients/:client_id/table/:id/'              => 'client_tables#data_create'

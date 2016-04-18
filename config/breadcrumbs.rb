@@ -54,7 +54,7 @@ crumb :clients_data do |table, data|
 end
 
 crumb :clients_table_csv do |table|
-  link   "#{table.name}テーブル ファイルアップロード", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv"
+  link   "#{table.name}テーブル インポート", "/bamember/clients/#{table.client.id}/table/#{table.id}/csv"
   parent :clients_show, table.client
 end
 

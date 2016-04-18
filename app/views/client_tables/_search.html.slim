@@ -217,7 +217,7 @@ sass:
       = paginate @pdatas
       = link_to "#{request.path_info}.csv?#{request.query_string}", class: "btn btn-success" do
         span.glyphicon.glyphicon-save-file
-        =< "検索結果をCSV出力"
+        =< "検索結果をエクスポート"
     
     .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
       .table-responsive
