@@ -11,8 +11,23 @@ class ClientTable < ActiveRecord::Base
   accepts_nested_attributes_for :client_columns, allow_destroy: true, reject_if: :check_name
 
   before_create :create_client_table_before
-  # after_create  :create_client_table_after
 
+  CONDITIONS = { "を含む" => "cont", "を含まない" => "not_cont", "で一致" => "eq", "で一致しない" => "not_eq",
+    "から始まる" => "start", "から始まらない" => "not_start", "で終わる" => "end", "で終わらない" => "not_end",
+    "空白" => "blank", "空白でない" => "present",
+    "のいずれかを含む(空白区切り)" => "cont_any", "のいずれかを含まない(空白区切り)" => "not_cont_any",
+    "のいずれかに一致(空白区切り)" => "in", "のいずれか一致しない(空白区切り)" => "not_in",
+    "以下" => "lteq", "以上" => "gteq", "より小さい" => "lt", "より大きい" => "gt",
+    "重複している" => "overlap", "重複していない" => "unique",
+  }
+
+  NUM_CONDITIONS = %w(eq not_eq blank present in not_in lteq gteq lt gt overlap unique).map { |v| self::CONDITIONS.rassoc(v) }.compact.to_h
+
+  COND_ARRAYS   = %w(in not_in cont_any not_cont_any)
+  COND_PRESENTS = %w(present blank)
+  COND_UNIQUES  = %w(overlap unique)
+  COND_NOVALS   = self::COND_PRESENTS + self::COND_UNIQUES
+  
   # 会社テーブルとデフォルトカラム生成
   #
   # @param [Iinteger]     client_id クライアントID
@@ -83,6 +98,10 @@ class ClientTable < ActiveRecord::Base
     client_columns.show
   end
 
+  def columns_options
+    ([["ID", "id"]] + show_columns.pluck(:name, :column_name) + [["登録日時", "created_at"], ["変更日時", "updated_at"]]).to_h
+  end
+
   # client_table_dataクラスを取得
   def klass
     client_table = self
@@ -144,25 +163,6 @@ class ClientTable < ActiveRecord::Base
       t.datetime   :soft_destroyed_at
     end
   end
-
-  # def create_client_table_after
-  #   if company?
-  #     client_columns.create(name: "会社名",         column_name: :name,    column_type: :company, order_no: 100)
-  #     client_columns.create(name: "都道府県",       column_name: :pref,    column_type: :pref,    order_no: 200)
-  #     client_columns.create(name: "TEL",            column_name: :tel,     column_type: :tel,     order_no: 300)
-  #     client_columns.create(name: "FAX",            column_name: :fax,     column_type: :tel,     order_no: 400)
-  #     client_columns.create(name: "〒",             column_name: :zip,     column_type: :zip,     order_no: 500)
-  #     client_columns.create(name: "住所",           column_name: :address, column_type: :address, order_no: 600)
-  #     client_columns.create(name: "メールアドレス", column_name: :mail,    column_type: :mail,    order_no: 700)
-  #     client_columns.create(name: "URL",            column_name: :url,     column_type: :url,     order_no: 800)
-  #     client_columns.create(name: "ステータス",     column_name: :status,  column_type: :status,  order_no: 900)
-  #     client_columns.create(name: "ターゲット",     column_name: :target,  column_type: :target,  order_no: 1000)
-  #     client_columns.create(name: "流入経路",       column_name: :influx,  column_type: :influx,  order_no: 1100)
-  #   else
-  #     client_columns.create(name: "#{name}名", column_name: :name,       column_type: :string, order_no: 100)
-  #     client_columns.create(name: "会社ID",    column_name: :company_id, column_type: :id,     order_no: 200)
-  #   end
-  # end
 
   def check_name(attributed)
     attributed[:name].blank? || attributed[:column_type].blank?

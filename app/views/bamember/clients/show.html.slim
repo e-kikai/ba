@@ -14,11 +14,13 @@ sass:
       td #{@client.company_table.name}テーブル
       td.integer #{number_with_delimiter(@client.company_table.klass.count)}件
       td = link_to "検索",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search/"
+      td = link_to "集計",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/sum/"
       td
       td
       td = link_to "インポート", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/csv/"
+      td = link_to "一括削除",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/bulk_delete/"
       td = link_to "項目管理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/edit/"
-      td = link_to "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search.csv?all=1", class: "btn btn-success" do
+      td = link_to "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search.csv?all=1", class: "btn btn-warning" do
         span.glyphicon.glyphicon-save-file
         =< "エクスポート"
       td
@@ -27,12 +29,14 @@ sass:
       tr
         td #{t.name}テーブル
         td.integer #{number_with_delimiter(t.klass.count)}件
-        td = link_to "検索",          "/bamember/clients/#{@client.id}/table/#{t.id}/search/"
+        td = link_to "検索",         "/bamember/clients/#{@client.id}/table/#{t.id}/search/"
+        td = link_to "集計",         "/bamember/clients/#{@client.id}/table/#{t.id}/sum/"
         td = link_to "RFM",          "/bamember/clients/#{@client.id}/table/#{t.id}/rfm/"
         td = link_to "リレーション", "/bamember/clients/#{@client.id}/table/#{t.id}/relation/"
         td = link_to "インポート",   "/bamember/clients/#{@client.id}/table/#{t.id}/csv/"
+        td = link_to "一括削除",     "/bamember/clients/#{@client.id}/table/#{t.id}/bulk_delete/"
         td = link_to "項目管理",     "/bamember/clients/#{@client.id}/table/#{t.id}/edit/"
-        td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/search.csv?all=1", class: "btn btn-success" do
+        td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/search.csv?all=1", class: "btn btn-warning" do
           span.glyphicon.glyphicon-save-file
           =< "エクスポート"
         td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/", method: :delete, data: { confirm: message, "disable-with" => "削除中..."}, class: "btn btn-danger" do

@@ -124,17 +124,33 @@ module ClientTableDataModule
       end
     }
 
-    # scope :table_sum, -> (sum_params = {}) {
-    #   tmp = self
-    #   if sum_params[:methods].present?
-    #     sum_params[:group].each do |g|
-    #       tmp = tmp.group(g) if g.present?
-    #     end
-    #
-    #     sum_method = sum_params[:methods].split('__')
-    #     tmp.try(sum_method[1], sum_method[0])
-    #   end
-    # }
+    scope :table_sum, -> (sum_params = {}) do
+      tmp = self
+
+      Array(sum_params).each do |s|
+        next if s[:column].blank?
+
+        next unless co = client_table.client_columns.find_by(column_name: s[:column])
+
+        if ["integer", "float", "yen"].include?(co.column_type)
+          sepa = s[:sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s)
+
+          casewhen = if sepa.blank?
+            s[:column]
+          else
+            sepa.inject(" CASE ") do |s, i|
+              s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN #{co.column_name} <= ? THEN ? ", "#{i}", "〜 #{i}"])
+            end + " ELSE 'それ以上' END "
+          end
+
+          tmp = tmp.group(casewhen).where("#{co.column_name} IS NOT NULL")
+        else
+          tmp = tmp.group(s[:column]).where.not(s[:column] => "")
+        end
+      end
+
+      tmp
+    end
 
     # PostgreSQLでの型キャスト
     scope :cast, -> (str, type) {

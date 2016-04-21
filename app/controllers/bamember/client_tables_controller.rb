@@ -28,7 +28,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
     @sums         = @datas.group("")
 
-    # CSV出力
     respond_to do |format|
       format.html { @pdatas = @datas.page(params[:page]) }
       format.js   { render "client_tables/search" }
@@ -38,6 +37,30 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
           filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
       }
     end
+  end
+
+  def data_bulk_delete
+    @datas = @klass.table_search(params[:s])
+  end
+
+  def data_bulk_destroy
+    data = @klass.table_search(params[:s])
+
+    @klass.transaction do
+      data.each do |d|
+        d.soft_destroy!
+      end
+    end
+
+    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのデータ#{data.count}件を一括削除しました"
+  rescue => e
+    flash[:alert] = "データの一括削除に失敗しました"
+    render :relation
+  end
+
+  def sum
+    @datas = @klass.table_search(params[:s])
+    @sums  = @datas.table_sum(params[:sum]).count
   end
 
   def rfm

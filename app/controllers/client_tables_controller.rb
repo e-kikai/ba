@@ -18,6 +18,11 @@ class ClientTablesController < ApplicationController
     end
   end
 
+  def sum
+    @datas = @klass.table_search(params[:s])
+    @sums  = @datas.table_sum(params[:sum]).count
+  end
+
   def rfm
     params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
     params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"

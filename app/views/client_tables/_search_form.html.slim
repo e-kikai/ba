@@ -1,0 +1,41 @@
+coffee:
+  $ ->
+    $_blank = $('.form-group.blank').clone()
+    
+    $(document).on 'click', 'button.add', ->
+      $('.add-group').before($_blank.clone())
+
+h4 検索条件
+- Array(status).each.with_index do |s|
+  - next if s[:column_name].blank? || s[:cond].blank?
+  .form-group
+    .col-md-4 = select_tag     "s[][column_name]", options_for_select(table.columns_options, s[:column_name]), include_blank: "-- 検索する項目 --", class: "form-control"
+    .col-md-4 = text_field_tag "s[][value]", s[:value], class: "form-control"
+    .col-md-4 = select_tag     "s[][cond]", options_for_select(ClientTable::CONDITIONS, s[:cond]), class: "form-control"
+  
+.form-group.blank
+  .col-md-4 = select_tag     "s[][column_name]", options_for_select(table.columns_options), include_blank: "-- 検索する項目 --", class: "form-control"
+  .col-md-4 = text_field_tag "s[][value]", "", class: "form-control"
+  .col-md-4 = select_tag     "s[][cond]", options_for_select(ClientTable::CONDITIONS), class: "form-control"
+.form-group.add-group
+  = button_tag type: "button", class: "btn btn-default add" do
+    span.glyphicon.glyphicon-plus
+    =< "検索条件を追加"
+    
+  / h4 集計
+  / .form-group
+  /   .col-md-3 = label_tag "sum[methods]", "集計値"
+  /   .col-md-4 = select_tag "sum[methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
+  /   .col-md-5 = label_tag "sum[methods]", "集計値"
+  / .form-group
+  /   .col-md-3 = label_tag "sum[methods]", "Y軸"
+  /   .col-md-9 = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
+  / .form-group
+  /   .col-md-3 = label_tag "sum[methods]", "Y軸セパレータ"
+  /   .col-md-4 = text_field_tag "sum[sepa][]", params.dig(:sum, :sepa, 0), class: "form-control"
+  /   .col-md-5 
+  / .form-group
+  /   .col-md-2 = label_tag "sum[methods]", "X軸"
+  /   .col-md-3 = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
+  /   .col-md-7 = text_field_tag "sum[sepa][]", params.dig(:sum, :sepa, 1), class: "form-control"
+    
