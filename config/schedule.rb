@@ -8,7 +8,7 @@
 # set :output, "/path/to/my/cron_log.log"
 #
 
-if ENV['RAILS_ENV'] == :staging
+if ENV['RAILS_ENV'] == "staging"
   every 1.day, at: '2:00 am' do
     command "sudo /etc/init.d/unicorn_ba restart"
   end
