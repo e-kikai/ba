@@ -110,3 +110,6 @@ gem 'activerecord-session_store'
 gem 'roo'
 
 gem 'bullet', :group => :development
+
+# cron管理
+gem 'whenever', require: false
