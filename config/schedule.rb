@@ -7,6 +7,13 @@
 #
 # set :output, "/path/to/my/cron_log.log"
 #
-every 1.day, at: '2:00 am' do
-  command "sudo systemctl stop unicorn_ba;sudo systemctl start unicorn_ba"
+
+if ENV['RAILS_ENV'] == :staging
+  every 1.day, at: '2:00 am' do
+    command "sudo /etc/init.d/unicorn_ba restart"
+  end
+else
+  every 1.day, at: '2:00 am' do
+    command "sudo systemctl stop unicorn_ba;sudo systemctl start unicorn_ba"
+  end
 end

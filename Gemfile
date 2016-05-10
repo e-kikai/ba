@@ -111,5 +111,5 @@ gem 'roo'
 
 gem 'bullet', :group => :development
 
-# cron管理
+# cron
 gem 'whenever', require: false
