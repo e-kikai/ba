@@ -137,7 +137,8 @@ sass:
                 = co.name
                 =< column_sorter co.column_name
             - if @table.company?
-              - @client.child_tables.each do |ch|
+              - child_tables = @client.child_tables
+              - child_tables.each do |ch|
                 th.id = ch.name
               
             th.datetime
@@ -166,7 +167,7 @@ sass:
                     = column_format(d[co.column_name], co.column_type)
                     
               - if @table.company?
-                - @client.child_tables.each do |ch|
+                - child_tables.each do |ch|
                   td.id
                     - if d["#{ch.table_name}_count"].present?
                       = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[][column_name]" => :company_id, "s[][value]" => d[:id], "s[][cond]" => :eq})

@@ -2,8 +2,11 @@ module ClientTableDataModule
   extend ActiveSupport::Concern
 
   included do
+    @@client_table = nil
+
     soft_deletable
     default_scope { without_soft_destroyed }
+
 
     #フィルタ・デフォルト値
     before_validation do |data|
@@ -11,7 +14,7 @@ module ClientTableDataModule
 
       # フィルタ
       data = client_table.filter(data)
-
+      
       # デフォルト値
       client_table.client_columns.each do |co|
         if co[:default].present?
@@ -173,7 +176,7 @@ module ClientTableDataModule
 
   class_methods do
     def client_table
-      ClientTable.find_by(table_name: self.table_name)
+      @@client_table ||= ClientTable.find_by(table_name: self.table_name)
     end
 
     def company_table

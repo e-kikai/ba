@@ -5,7 +5,7 @@ module ColumnTypes
     (ColumnTypes::String.methods - Object.methods).each do |m|
       define_method(m) do |v = nil|
         type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
-        type.send(m, v, self)
+        type.send(m, v.to_s, self)
       end
     end
   end
@@ -23,6 +23,10 @@ module ColumnTypes
     def self.def_selector(*args) [] end
   end
 
+  class SumString < ColumnTypes::String
+    NAME = "文字列(集計対象)"
+  end
+
   class Text < ColumnTypes::String
     NAME    = "テキスト"
     DB_TYPE = :text
@@ -32,21 +36,23 @@ module ColumnTypes
     NAME    = "整数"
     DB_TYPE = :integer
 
-    # def self.filter(v, *args)    v.gsub(/[,、]/, "") end
-    # def self.filter(v, *args)    v.to_i end
-    def self.valid(v, *args)     Integer(v)rescue false end
+    def self.filter(v, *args) v.gsub(/[,、]/, "") end
+    def self.valid(v, *args)  Integer(v) rescue false end
   end
 
   class Float < ColumnTypes::Integer
     NAME    = "小数"
     DB_TYPE = :float
 
-    # def self.filter(v, *args)    v.to_f end
-    def self.valid(v, *args)     Float(v)rescue false end
+    def self.filter(v, *args) v.gsub(/[,、]/, "") end
+    def self.valid(v, *args)  Float(v) rescue false end
   end
 
   class Yen < ColumnTypes::Integer
-    NAME    = "金額(円)"
+    NAME = "金額(円)"
+  end
+  class SenYen < ColumnTypes::Yen
+    NAME = "金額(千円)"
   end
 
   class Datetime < ColumnTypes::String
@@ -89,8 +95,8 @@ module ColumnTypes
   class Zip < ColumnTypes::String
     NAME = "〒"
 
-    def self.filter(v, *args)v.match(/\A([0-9]{3})\-?([0-9]{4})/) { |m| "#{m[1]}-#{m[2]}" } end
-    def self.valid(v, *args) v =~ /\A[0-9]{3}\-[0-9]{4}\z/ end
+    def self.filter(v, *args) v.match(/\A([0-9]{3})\-?([0-9]{4})/) { |m| "#{m[1]}-#{m[2]}" } end
+    def self.valid(v, *args)  v =~ /\A[0-9]{3}\-[0-9]{4}\z/ end
   end
 
   class Address < ColumnTypes::String
@@ -99,7 +105,7 @@ module ColumnTypes
 
   class Tel < ColumnTypes::String
     NAME = "TEL"
-    def self.filter(v, *args)v.gsub(/[^0-9]/, '').sub(/^[^0]/, '0\0') end
+    def self.filter(v, *args) v.gsub(/[^0-9]/, '').sub(/^[^0]/, '0\0') end
   end
 
   class Mail < ColumnTypes::String

@@ -9,8 +9,8 @@
 #
 every 1.day, at: '2:00 am' do
   if ENV['RAILS_ENV'] == "development"
-    command "sudo systemctl stop unicorn_ba;sudo systemctl start unicorn_ba"
+    command "/usr/bin/sudo systemctl stop unicorn_ba;/usr/bin/sudo systemctl start unicorn_ba"
   else
-    command "sudo /etc/init.d/unicorn_ba restart"
+    command "/usr/bin/sudo /etc/init.d/unicorn_ba restart"
   end
 end

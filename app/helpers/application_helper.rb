@@ -14,6 +14,8 @@ module ApplicationHelper
       v.to_f.to_s(:delimited)
     when "yen"
       v.to_i.to_s(:delimited) + "円"
+    when "sen_yen"
+      v.to_i.to_s(:delimited) + "千円"
     when "company"
       ColumnTypes::Company.replace_kabu(v).presence || "(UNKNOWN)"
     when "zip"

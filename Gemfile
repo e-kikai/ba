@@ -113,3 +113,7 @@ gem 'bullet', :group => :development
 
 # cron
 gem 'whenever', require: false
+
+# バックグラウンドジョブ
+gem 'sidekiq'
+gem 'sinatra', require: false

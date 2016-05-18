@@ -42,6 +42,11 @@ Rails.application.routes.draw do
     patch  'clients/:client_id/table/:id/csv_confirm'  => 'client_tables#csv_update'
     get    'clients/:client_id/table/:id/csv_error'    => 'client_tables#csv_error'
 
+    get    'clients/:client_id/table/:id/import_file'     => 'client_tables#import_file'
+    post   'clients/:client_id/table/:id/import_upload'   => 'client_tables#import_upload'
+    get    'clients/:client_id/table/:id/import_matching' => 'client_tables#import_matching'
+    post   'clients/:client_id/table/:id/import_matching' => 'client_tables#import_do'
+
     get    'clients/:client_id/table/:id/relation'          => 'client_tables#relation'
     get    'clients/:client_id/table/:id/relation_error'    => 'client_tables#relation_error'
     post   'clients/:client_id/table/:id/relation_confirm'  => 'client_tables#relation_confirm'
@@ -64,5 +69,8 @@ Rails.application.routes.draw do
     get    'clients/:client_id/table/:id/:data_id/edit' => 'client_tables#data_edit'
     patch  'clients/:client_id/table/:id/:data_id'      => 'client_tables#data_update'
     delete 'clients/:client_id/table/:id/:data_id'      => 'client_tables#data_destroy'
+
+    require 'sidekiq/web'
+    mount Sidekiq::Web, at: "/sidekiq"
   end
 end
