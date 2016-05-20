@@ -155,16 +155,6 @@ class ClientTable < ActiveRecord::Base
     end
   end
 
-  # # アップロードされたファイルを一時ファイルに情報を格納
-  # #
-  # # @param  [file]   file アップロードファイルオブジェクト
-  # # @return [string] アップロードしたファイルのパス
-  # def import_file(file)
-  #   temp = Tempfile.open('csv_').binmode
-  #   temp.write(File.new(file.path, "rb").read)
-  #   temp.path
-  # end
-
   # 項目設定の整理し、設定がされているかチェック
   #
   # @param [Hash] params 入力パラメータ
@@ -252,14 +242,14 @@ class ClientTable < ActiveRecord::Base
         # end
       end
 
-      ### エラー出力処理 ###
-      if data.blank?
-
-      elsif data.errors.present?
-        error = data.errors.messages.map do |k, v|
-          v.map { |mes| "#{k} #{mes}" }.join("\n")
-        end.join("\n")
-      end
+      # ### エラー出力処理 ###
+      # if data.blank?
+      #
+      # elsif data.errors.present?
+      #   error = data.errors.messages.map do |k, v|
+      #     v.map { |mes| "#{k} #{mes}" }.join("\n")
+      #   end.join("\n")
+      # end
 
 
     #

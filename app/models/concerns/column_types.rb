@@ -5,7 +5,7 @@ module ColumnTypes
     (ColumnTypes::String.methods - Object.methods).each do |m|
       define_method(m) do |v = nil|
         type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
-        type.send(m, v.to_s, self)
+        type.send(m, v.to_s.normalize_charwidth.strip, self)
       end
     end
   end
@@ -66,7 +66,7 @@ module ColumnTypes
   class Company < ColumnTypes::String
     NAME = "会社名"
 
-    def self.filter(v, *args)replace_kabu(v)end
+    def self.filter(v, *args) replace_kabu(v) end
 
     def self.replace_kabu(str)
       str = str.to_s

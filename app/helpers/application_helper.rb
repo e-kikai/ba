@@ -29,9 +29,9 @@ module ApplicationHelper
         v
       end
     when "mail"
-      page == :show ? mail_to(v) : v
+      page == :show ? mail_to(v) : v if v.present?
     when "url"
-      page == :show ? link_to(v, v, target: "_blank"): v
+      page == :show ? link_to(v, v, target: "_blank") : v if v.present?
     else
       v
     end
