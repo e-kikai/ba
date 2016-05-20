@@ -14,7 +14,7 @@ module ClientTableDataModule
 
       # フィルタ
       data = client_table.filter(data)
-      
+
       # デフォルト値
       client_table.client_columns.each do |co|
         if co[:default].present?
@@ -84,7 +84,7 @@ module ClientTableDataModule
     scope :table_search, -> (search_params) {
       search_query = {}
       Array(search_params).each do |s|
-        next if s[:column_name].blank? || s[:cond].blank? || ["overlap", "unique"].include?(s[:cond])
+        next if s[:column_name].blank? || s[:cond].blank? || ["overlap", "unique", "present", "blank"].include?(s[:cond])
 
         ### 値の整形 ###
         value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
@@ -98,13 +98,17 @@ module ClientTableDataModule
           end
         end
 
-        if (["present", "blank"].include? s[:cond]) || value.present?
+        if value.present?
           search_query["#{s[:column_name]}_#{s[:cond]}"] = value
         end
       end
 
       ### 重複検索(検索フィルタリング後に行う) ###
       Array(search_params).each do |s|
+        if (["present", "blank"].include? s[:cond])
+          search_query["#{s[:column_name]}_#{s[:cond]}"] = true
+        end
+
         if ["overlap", "unique"].include? s[:cond]
           temp_in = search(search_query).result.select(s[:column_name])
           .where.not(s[:column_name] => "")

@@ -2,9 +2,9 @@ module ColumnTypes
   extend ActiveSupport::Concern
 
   included do
+    type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
     (ColumnTypes::String.methods - Object.methods).each do |m|
       define_method(m) do |v = nil|
-        type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
         type.send(m, v.to_s.normalize_charwidth.strip, self)
       end
     end

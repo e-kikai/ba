@@ -15,6 +15,7 @@ set :unicorn_rack_env, :staging
 set :unicorn_options,  " -p 3000 "
 
 ask :branch, 'master'
+set :pty, false
 
 # set :whenever_environment, :staging
 
