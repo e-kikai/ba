@@ -7,6 +7,8 @@ module ApplicationHelper
   # @param  [String]   page        表示させるページ
   # @return [String]   HTMLタグ
   def column_format(v, column_type, page = :search)
+    v = v.to_s
+
     case column_type
     when "integer"
       v.to_i.to_s(:delimited)
