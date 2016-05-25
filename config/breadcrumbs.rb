@@ -68,6 +68,17 @@ crumb :clients_table_csv_confirm do |table|
   parent :clients_table_csv_matching, table
 end
 
+crumb :clients_table_import do |table|
+  link   "#{table.name}テーブル インポート", "/bamember/clients/#{table.client.id}/table/#{table.id}/import_file"
+  parent :clients_show, table.client
+end
+
+crumb :clients_table_import_matching do |csvfile|
+  link   "マッチング", "/bamember/clients/#{csvfile.client_table.client_id}/table/#{csvfile.client_table_id}/import_matching/#{csvfile.id}"
+  parent :clients_table_import, csvfile.client_table
+end
+
+
 crumb :clients_table_relation do |table|
   link   "#{table.name}テーブル リレーション", "/bamember/clients/#{table.client.id}/table/#{table.id}/relation"
   parent :clients_show, table.client

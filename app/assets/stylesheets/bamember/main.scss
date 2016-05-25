@@ -1,3 +1,7 @@
 // Place all the styles related to the bamember/main controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+table.clients tbody tr td {
+  vertical-align: middle;
+}

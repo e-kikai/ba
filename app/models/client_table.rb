@@ -8,6 +8,9 @@ class ClientTable < ActiveRecord::Base
 
   belongs_to :client
   has_many   :client_columns
+  has_many   :csvfiles
+  has_many   :imports,       through: :csvfiles
+
   accepts_nested_attributes_for :client_columns, allow_destroy: true, reject_if: :check_name
 
   before_create :create_client_table_before
@@ -104,7 +107,7 @@ class ClientTable < ActiveRecord::Base
 
   # client_table_dataクラスを取得
   #
-  # @param  [Boolean] refresh クラスを更新するかどうか
+  # @param  [Boolean]        refresh クラスを更新するかどうか
   # @return [ClentTableData] このclient_tableのclient_table_dataクラス
   def klass(refresh = false)
     if refresh || !Object.const_defined?(table_name.singularize.camelcase)
@@ -140,132 +143,104 @@ class ClientTable < ActiveRecord::Base
     client_columns.find_by(column_name: :company_id)
   end
 
-  # アップロードされたファイルをスプレッドシート展開
+  # # マッチングして保存
+  # #
+  # # @param [Hash]  params 入力パラメータ
+  # # @param [Array] matchings 整理した項目設定
+  # # @return self
+  # def import(params, import_file)
+  #   errors    = []
+  #   ctd       = klass.arel_table
   #
-  # @param  [string] path              tmpファイルパス
-  # @param  [string] original_filename 元ファイル名
-  # @return [Spreadseet]               スプレッドシートオブジェクト
-  def spreadsheet(path, original_filename)
-    case File.extname(original_filename)
-    when '.csv'  then Roo::CSV.new(path, csv_options: {encoding: Encoding::SJIS})
-    when '.xls'  then Roo::Excel.new(path)
-    when '.xlsx' then Roo::Excelx.new(path)
-    when '.ods'  then Roo::OpenOffice.new(path)
-    else raise "不明なファイルタイプです: #{original_filename}"
-    end
-  end
-
-  # 項目設定の整理し、設定がされているかチェック
+  #   matchings = import_check(params)
   #
-  # @param [Hash] params 入力パラメータ
-  # @return [Hash] 整理した項目設定
-  def import_check(params)
-    matchings = []
-    params[:table_header].each do |i, h|
-      matchings << {table_header: h, i: i.to_i } if h.present? && params[:method][i] == "matching"
-    end
-
-    matchings
-  end
-
-  # マッチングして保存
+  #   # ss        = spreadsheet(import_file[:path], import_file[:original_filename])
+  #   # (2..ss.last_row).each do |r|
+  #     # row = ss.row(r)
+  #   CSV.foreach(import_file[:path], { :headers => true, encoding: Encoding::SJIS }) do |row|
+  #     next if row.all?(&:blank?) # すべて空白の列は無視
   #
-  # @param [Hash]  params 入力パラメータ
-  # @param [Array] matchings 整理した項目設定
-  # @return self
-  def import(params, import_file)
-    errors    = []
-    ctd       = klass.arel_table
-
-    matchings = import_check(params)
-
-    # ss        = spreadsheet(import_file[:path], import_file[:original_filename])
-    # (2..ss.last_row).each do |r|
-      # row = ss.row(r)
-    CSV.foreach(import_file[:path], { :headers => true, encoding: Encoding::SJIS }) do |row|
-      next if row.all?(&:blank?) # すべて空白の列は無視
-
-      ### マッチング処理 ###
-      match_ids = if matchings.present?
-        # マッチングするためのフィルタリング
-        values = filter(matchings.map { |m| [ m[:table_header], row[m[:i]] ] }.to_h)
-
-        if values.has_value? ""
-          [] # マッチング条件の値がない(スキップする)
-        else
-          # AND条件マッチング
-          if params[:option][:if] == "and" || params[:option][:if].blank?
-            res = klass.where(values)
-          end
-
-          # OR条件マッチング
-          if params[:option][:if] == "or" || (params[:option][:if].blank? && res.exists? && matchings.length > 1)
-            cond = nil
-            values.each do |k, v|
-              cond = cond ? cond.or(ctd[k].eq(v)) : ctd[k].eq(v)
-            end
-            res = klass.where(cond)
-          end
-
-          res.limit(10).pluck(:id)
-        end
-      else
-        []
-      end
-
-      ### マッチング結果 ###
-      data = if match_ids.count == 1
-        klass.find(match_ids.first)
-      elsif match_ids.count == 0 && params[:option][:unmatch] == "new"
-        klass.new
-      else
-        nil
-      end
-
-      ### 保存 ###
-      if data.present?
-        # begin
-          params[:table_header].each do |i, h|
-            next if params[:table_header][i].blank?
-
-            # データ(バリデーション用に)格納
-            if params[:method][i] == "update" \
-               || (params[:method][i] == "save" && data[params[:table_header][i]].blank?) \
-               || (params[:method][i] == "matching" && data.new_record? && params[:table_header][i] != "id")
-              data[h] = row[i.to_i]
-            end
-          end
-
-          data.save!
-        # rescue ActiveRecord::RecordInvalid => e
-        #
-        # end
-      end
-
-      # ### エラー出力処理 ###
-      # if data.blank?
-      #
-      # elsif data.errors.present?
-      #   error = data.errors.messages.map do |k, v|
-      #     v.map { |mes| "#{k} #{mes}" }.join("\n")
-      #   end.join("\n")
-      # end
-
-
-    #
-    #     if data.errors.messages.present?
-    #       title = :notvalid
-    #       error = data.errors.messages.map do |k, v|
-    #         v.map { |mes| "#{k} #{mes}" }.join("\n")
-    #       end.join("\n")
-    #     end
-    #   end
-    #
-    #   session[:csv][:result][r] = [title, match_ids, error]
-    end
-
-    ActiveRecord::Base.connection.execute("VACUUM;")
-  end
+  #     ### マッチング処理 ###
+  #     match_ids = if matchings.present?
+  #       # マッチングするためのフィルタリング
+  #       values = filter(matchings.map { |m| [ m[:table_header], row[m[:i]] ] }.to_h)
+  #
+  #       if values.has_value? ""
+  #         [] # マッチング条件の値がない(スキップする)
+  #       else
+  #         # AND条件マッチング
+  #         if params[:option][:if] == "and" || params[:option][:if].blank?
+  #           res = klass.where(values)
+  #         end
+  #
+  #         # OR条件マッチング
+  #         if params[:option][:if] == "or" || (params[:option][:if].blank? && res.exists? && matchings.length > 1)
+  #           cond = nil
+  #           values.each do |k, v|
+  #             cond = cond ? cond.or(ctd[k].eq(v)) : ctd[k].eq(v)
+  #           end
+  #           res = klass.where(cond)
+  #         end
+  #
+  #         res.limit(10).pluck(:id)
+  #       end
+  #     else
+  #       []
+  #     end
+  #
+  #     ### マッチング結果 ###
+  #     data = if match_ids.count == 1
+  #       klass.find(match_ids.first)
+  #     elsif match_ids.count == 0 && params[:option][:unmatch] == "new"
+  #       klass.new
+  #     else
+  #       nil
+  #     end
+  #
+  #     ### 保存 ###
+  #     if data.present?
+  #       # begin
+  #         params[:table_header].each do |i, h|
+  #           next if params[:table_header][i].blank?
+  #
+  #           # データ(バリデーション用に)格納
+  #           if params[:method][i] == "update" \
+  #              || (params[:method][i] == "save" && data[params[:table_header][i]].blank?) \
+  #              || (params[:method][i] == "matching" && data.new_record? && params[:table_header][i] != "id")
+  #             data[h] = row[i.to_i]
+  #           end
+  #         end
+  #
+  #         data.save!
+  #       # rescue ActiveRecord::RecordInvalid => e
+  #       #
+  #       # end
+  #     end
+  #
+  #     # ### エラー出力処理 ###
+  #     # if data.blank?
+  #     #
+  #     # elsif data.errors.present?
+  #     #   error = data.errors.messages.map do |k, v|
+  #     #     v.map { |mes| "#{k} #{mes}" }.join("\n")
+  #     #   end.join("\n")
+  #     # end
+  #
+  #
+  #   #
+  #   #     if data.errors.messages.present?
+  #   #       title = :notvalid
+  #   #       error = data.errors.messages.map do |k, v|
+  #   #         v.map { |mes| "#{k} #{mes}" }.join("\n")
+  #   #       end.join("\n")
+  #   #     end
+  #   #   end
+  #   #
+  #   #   session[:csv][:result][r] = [title, match_ids, error]
+  #   end
+  #
+  #   ActiveRecord::Base.connection.execute("VACUUM;")
+  # end
 
   private
 

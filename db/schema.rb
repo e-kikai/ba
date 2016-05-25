@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160307075017) do
+ActiveRecord::Schema.define(version: 20160524074949) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -314,16 +314,158 @@ ActiveRecord::Schema.define(version: 20160307075017) do
   add_index "c15_people", ["co_20151225184723_43109"], name: "index_c15_people_on_co_20151225184723_43109", using: :btree
   add_index "c15_people", ["name"], name: "index_c15_people_on_name", using: :btree
 
-  create_table "c16_companies", force: :cascade do |t|
-    t.datetime "created_at",                         null: false
-    t.datetime "updated_at",                         null: false
+  create_table "c16_20160311031446_31251", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
     t.datetime "soft_destroyed_at"
-    t.text     "name",                  default: "", null: false
-    t.text     "co_20160228033730_358", default: "", null: false
+    t.text     "name",              default: "", null: false
+    t.text     "company_id",        default: "", null: false
+  end
+
+  add_index "c16_20160311031446_31251", ["company_id"], name: "index_c16_20160311031446_31251_on_company_id", using: :btree
+  add_index "c16_20160311031446_31251", ["name"], name: "index_c16_20160311031446_31251_on_name", using: :btree
+
+  create_table "c16_companies", force: :cascade do |t|
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",                    default: "", null: false
+    t.text     "co_20160228033730_358",   default: "", null: false
+    t.text     "co_20160321104315_76018", default: "", null: false
+    t.string   "co_20160321105803_268",   default: "", null: false
+    t.text     "co_20160321114900_662",   default: "", null: false
+    t.text     "co_20160321152353_473",   default: "", null: false
+    t.text     "co_20160321163159_191",   default: "", null: false
+    t.text     "co_20160321163159_153",   default: "", null: false
+    t.string   "co_20160321182724_208"
+    t.string   "co_20160321182900_409"
+    t.float    "co_20160322001141_58"
+    t.datetime "co_20160322001141_591"
+    t.integer  "co_20160322001859_451"
   end
 
   add_index "c16_companies", ["co_20160228033730_358"], name: "index_c16_companies_on_co_20160228033730_358", using: :btree
+  add_index "c16_companies", ["co_20160321104315_76018"], name: "index_c16_companies_on_co_20160321104315_76018", using: :btree
+  add_index "c16_companies", ["co_20160321105803_268"], name: "index_c16_companies_on_co_20160321105803_268", using: :btree
+  add_index "c16_companies", ["co_20160321114900_662"], name: "index_c16_companies_on_co_20160321114900_662", using: :btree
+  add_index "c16_companies", ["co_20160321152353_473"], name: "index_c16_companies_on_co_20160321152353_473", using: :btree
+  add_index "c16_companies", ["co_20160321163159_153"], name: "index_c16_companies_on_co_20160321163159_153", using: :btree
+  add_index "c16_companies", ["co_20160321163159_191"], name: "index_c16_companies_on_co_20160321163159_191", using: :btree
+  add_index "c16_companies", ["co_20160321182724_208"], name: "index_c16_companies_on_co_20160321182724_208", using: :btree
+  add_index "c16_companies", ["co_20160321182900_409"], name: "index_c16_companies_on_co_20160321182900_409", using: :btree
+  add_index "c16_companies", ["co_20160322001141_58"], name: "index_c16_companies_on_co_20160322001141_58", using: :btree
+  add_index "c16_companies", ["co_20160322001141_591"], name: "index_c16_companies_on_co_20160322001141_591", using: :btree
+  add_index "c16_companies", ["co_20160322001859_451"], name: "index_c16_companies_on_co_20160322001859_451", using: :btree
   add_index "c16_companies", ["name"], name: "index_c16_companies_on_name", using: :btree
+
+  create_table "c17_20160322121003_45205", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160322181120_881"
+    t.string   "co_20160329131337_455"
+    t.string   "co_20160329131337_87"
+    t.integer  "co_20160329143810_614"
+    t.float    "co_20160329143810_362"
+    t.datetime "co_20160329143810_893"
+    t.string   "co_20160401164125_966"
+    t.string   "co_20160401182346_263"
+  end
+
+  add_index "c17_20160322121003_45205", ["co_20160322181120_881"], name: "index_c17_20160322121003_45205_on_co_20160322181120_881", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160329131337_455"], name: "index_c17_20160322121003_45205_on_co_20160329131337_455", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160329131337_87"], name: "index_c17_20160322121003_45205_on_co_20160329131337_87", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160329143810_362"], name: "index_c17_20160322121003_45205_on_co_20160329143810_362", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160329143810_614"], name: "index_c17_20160322121003_45205_on_co_20160329143810_614", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160329143810_893"], name: "index_c17_20160322121003_45205_on_co_20160329143810_893", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160401164125_966"], name: "index_c17_20160322121003_45205_on_co_20160401164125_966", using: :btree
+  add_index "c17_20160322121003_45205", ["co_20160401182346_263"], name: "index_c17_20160322121003_45205_on_co_20160401182346_263", using: :btree
+  add_index "c17_20160322121003_45205", ["company_id"], name: "index_c17_20160322121003_45205_on_company_id", using: :btree
+  add_index "c17_20160322121003_45205", ["name"], name: "index_c17_20160322121003_45205_on_name", using: :btree
+
+  create_table "c17_20160324171635_575", force: :cascade do |t|
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160411153558_70"
+  end
+
+  add_index "c17_20160324171635_575", ["co_20160411153558_70"], name: "index_c17_20160324171635_575_on_co_20160411153558_70", using: :btree
+  add_index "c17_20160324171635_575", ["company_id"], name: "index_c17_20160324171635_575_on_company_id", using: :btree
+  add_index "c17_20160324171635_575", ["name"], name: "index_c17_20160324171635_575_on_name", using: :btree
+
+  create_table "c17_companies", force: :cascade do |t|
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "name",              default: "", null: false
+    t.text     "pref",              default: "", null: false
+    t.text     "tel",               default: "", null: false
+    t.text     "fax",               default: "", null: false
+    t.text     "zip",               default: "", null: false
+    t.text     "address",           default: "", null: false
+    t.text     "mail",              default: "", null: false
+    t.text     "url",               default: "", null: false
+    t.text     "status",            default: "", null: false
+    t.text     "target",            default: "", null: false
+    t.text     "influx",            default: "", null: false
+  end
+
+  add_index "c17_companies", ["address"], name: "index_c17_companies_on_address", using: :btree
+  add_index "c17_companies", ["fax"], name: "index_c17_companies_on_fax", using: :btree
+  add_index "c17_companies", ["influx"], name: "index_c17_companies_on_influx", using: :btree
+  add_index "c17_companies", ["mail"], name: "index_c17_companies_on_mail", using: :btree
+  add_index "c17_companies", ["name"], name: "index_c17_companies_on_name", using: :btree
+  add_index "c17_companies", ["pref"], name: "index_c17_companies_on_pref", using: :btree
+  add_index "c17_companies", ["status"], name: "index_c17_companies_on_status", using: :btree
+  add_index "c17_companies", ["target"], name: "index_c17_companies_on_target", using: :btree
+  add_index "c17_companies", ["tel"], name: "index_c17_companies_on_tel", using: :btree
+  add_index "c17_companies", ["url"], name: "index_c17_companies_on_url", using: :btree
+  add_index "c17_companies", ["zip"], name: "index_c17_companies_on_zip", using: :btree
+
+  create_table "c18_20160324170707_417", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+  end
+
+  add_index "c18_20160324170707_417", ["company_id"], name: "index_c18_20160324170707_417_on_company_id", using: :btree
+  add_index "c18_20160324170707_417", ["name"], name: "index_c18_20160324170707_417_on_name", using: :btree
+
+  create_table "c18_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c18_companies", ["address"], name: "index_c18_companies_on_address", using: :btree
+  add_index "c18_companies", ["fax"], name: "index_c18_companies_on_fax", using: :btree
+  add_index "c18_companies", ["influx"], name: "index_c18_companies_on_influx", using: :btree
+  add_index "c18_companies", ["mail"], name: "index_c18_companies_on_mail", using: :btree
+  add_index "c18_companies", ["name"], name: "index_c18_companies_on_name", using: :btree
+  add_index "c18_companies", ["pref"], name: "index_c18_companies_on_pref", using: :btree
+  add_index "c18_companies", ["status"], name: "index_c18_companies_on_status", using: :btree
+  add_index "c18_companies", ["target"], name: "index_c18_companies_on_target", using: :btree
+  add_index "c18_companies", ["tel"], name: "index_c18_companies_on_tel", using: :btree
+  add_index "c18_companies", ["url"], name: "index_c18_companies_on_url", using: :btree
+  add_index "c18_companies", ["zip"], name: "index_c18_companies_on_zip", using: :btree
 
   create_table "c1_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
@@ -344,6 +486,229 @@ ActiveRecord::Schema.define(version: 20160307075017) do
   end
 
   add_index "c1_people", ["name"], name: "index_c1_people_on_name", using: :btree
+
+  create_table "c21_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c21_companies", ["address"], name: "index_c21_companies_on_address", using: :btree
+  add_index "c21_companies", ["fax"], name: "index_c21_companies_on_fax", using: :btree
+  add_index "c21_companies", ["influx"], name: "index_c21_companies_on_influx", using: :btree
+  add_index "c21_companies", ["mail"], name: "index_c21_companies_on_mail", using: :btree
+  add_index "c21_companies", ["name"], name: "index_c21_companies_on_name", using: :btree
+  add_index "c21_companies", ["pref"], name: "index_c21_companies_on_pref", using: :btree
+  add_index "c21_companies", ["status"], name: "index_c21_companies_on_status", using: :btree
+  add_index "c21_companies", ["target"], name: "index_c21_companies_on_target", using: :btree
+  add_index "c21_companies", ["tel"], name: "index_c21_companies_on_tel", using: :btree
+  add_index "c21_companies", ["url"], name: "index_c21_companies_on_url", using: :btree
+  add_index "c21_companies", ["zip"], name: "index_c21_companies_on_zip", using: :btree
+
+  create_table "c22_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c22_companies", ["address"], name: "index_c22_companies_on_address", using: :btree
+  add_index "c22_companies", ["fax"], name: "index_c22_companies_on_fax", using: :btree
+  add_index "c22_companies", ["influx"], name: "index_c22_companies_on_influx", using: :btree
+  add_index "c22_companies", ["mail"], name: "index_c22_companies_on_mail", using: :btree
+  add_index "c22_companies", ["name"], name: "index_c22_companies_on_name", using: :btree
+  add_index "c22_companies", ["pref"], name: "index_c22_companies_on_pref", using: :btree
+  add_index "c22_companies", ["status"], name: "index_c22_companies_on_status", using: :btree
+  add_index "c22_companies", ["target"], name: "index_c22_companies_on_target", using: :btree
+  add_index "c22_companies", ["tel"], name: "index_c22_companies_on_tel", using: :btree
+  add_index "c22_companies", ["url"], name: "index_c22_companies_on_url", using: :btree
+  add_index "c22_companies", ["zip"], name: "index_c22_companies_on_zip", using: :btree
+
+  create_table "c28_20160322121003_45205", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160329131337_455"
+    t.string   "co_20160329131337_87"
+    t.float    "co_20160329143810_362"
+    t.datetime "co_20160329143810_893"
+    t.integer  "co_20160329143810_614"
+    t.string   "co_20160401164125_966"
+    t.string   "co_20160401182346_263"
+    t.text     "co_20160322181120_881"
+  end
+
+  add_index "c28_20160322121003_45205", ["co_20160322181120_881"], name: "index_c28_20160322121003_45205_on_co_20160322181120_881", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160329131337_455"], name: "index_c28_20160322121003_45205_on_co_20160329131337_455", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160329131337_87"], name: "index_c28_20160322121003_45205_on_co_20160329131337_87", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160329143810_362"], name: "index_c28_20160322121003_45205_on_co_20160329143810_362", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160329143810_614"], name: "index_c28_20160322121003_45205_on_co_20160329143810_614", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160329143810_893"], name: "index_c28_20160322121003_45205_on_co_20160329143810_893", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160401164125_966"], name: "index_c28_20160322121003_45205_on_co_20160401164125_966", using: :btree
+  add_index "c28_20160322121003_45205", ["co_20160401182346_263"], name: "index_c28_20160322121003_45205_on_co_20160401182346_263", using: :btree
+  add_index "c28_20160322121003_45205", ["company_id"], name: "index_c28_20160322121003_45205_on_company_id", using: :btree
+  add_index "c28_20160322121003_45205", ["name"], name: "index_c28_20160322121003_45205_on_name", using: :btree
+
+  create_table "c28_20160324171635_575", force: :cascade do |t|
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160411153558_70"
+  end
+
+  add_index "c28_20160324171635_575", ["co_20160411153558_70"], name: "index_c28_20160324171635_575_on_co_20160411153558_70", using: :btree
+  add_index "c28_20160324171635_575", ["company_id"], name: "index_c28_20160324171635_575_on_company_id", using: :btree
+  add_index "c28_20160324171635_575", ["name"], name: "index_c28_20160324171635_575_on_name", using: :btree
+
+  create_table "c28_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c28_companies", ["address"], name: "index_c28_companies_on_address", using: :btree
+  add_index "c28_companies", ["fax"], name: "index_c28_companies_on_fax", using: :btree
+  add_index "c28_companies", ["influx"], name: "index_c28_companies_on_influx", using: :btree
+  add_index "c28_companies", ["mail"], name: "index_c28_companies_on_mail", using: :btree
+  add_index "c28_companies", ["name"], name: "index_c28_companies_on_name", using: :btree
+  add_index "c28_companies", ["pref"], name: "index_c28_companies_on_pref", using: :btree
+  add_index "c28_companies", ["status"], name: "index_c28_companies_on_status", using: :btree
+  add_index "c28_companies", ["target"], name: "index_c28_companies_on_target", using: :btree
+  add_index "c28_companies", ["tel"], name: "index_c28_companies_on_tel", using: :btree
+  add_index "c28_companies", ["url"], name: "index_c28_companies_on_url", using: :btree
+  add_index "c28_companies", ["zip"], name: "index_c28_companies_on_zip", using: :btree
+
+  create_table "c29_20160322121003_45205", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160329131337_455"
+    t.string   "co_20160329131337_87"
+    t.float    "co_20160329143810_362"
+    t.datetime "co_20160329143810_893"
+    t.integer  "co_20160329143810_614"
+    t.string   "co_20160401164125_966"
+    t.string   "co_20160401182346_263"
+    t.text     "co_20160322181120_881"
+  end
+
+  add_index "c29_20160322121003_45205", ["co_20160322181120_881"], name: "index_c29_20160322121003_45205_on_co_20160322181120_881", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160329131337_455"], name: "index_c29_20160322121003_45205_on_co_20160329131337_455", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160329131337_87"], name: "index_c29_20160322121003_45205_on_co_20160329131337_87", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160329143810_362"], name: "index_c29_20160322121003_45205_on_co_20160329143810_362", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160329143810_614"], name: "index_c29_20160322121003_45205_on_co_20160329143810_614", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160329143810_893"], name: "index_c29_20160322121003_45205_on_co_20160329143810_893", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160401164125_966"], name: "index_c29_20160322121003_45205_on_co_20160401164125_966", using: :btree
+  add_index "c29_20160322121003_45205", ["co_20160401182346_263"], name: "index_c29_20160322121003_45205_on_co_20160401182346_263", using: :btree
+  add_index "c29_20160322121003_45205", ["company_id"], name: "index_c29_20160322121003_45205_on_company_id", using: :btree
+  add_index "c29_20160322121003_45205", ["name"], name: "index_c29_20160322121003_45205_on_name", using: :btree
+
+  create_table "c29_20160324171635_575", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160411153558_70"
+    t.string   "co_20160413141018_498"
+    t.string   "co_20160413141018_218"
+    t.string   "co_20160413141745_398"
+    t.integer  "co_20160413150827_941"
+    t.float    "co_20160413150827_16"
+  end
+
+  add_index "c29_20160324171635_575", ["co_20160411153558_70"], name: "index_c29_20160324171635_575_on_co_20160411153558_70", using: :btree
+  add_index "c29_20160324171635_575", ["co_20160413141018_218"], name: "index_c29_20160324171635_575_on_co_20160413141018_218", using: :btree
+  add_index "c29_20160324171635_575", ["co_20160413141018_498"], name: "index_c29_20160324171635_575_on_co_20160413141018_498", using: :btree
+  add_index "c29_20160324171635_575", ["co_20160413141745_398"], name: "index_c29_20160324171635_575_on_co_20160413141745_398", using: :btree
+  add_index "c29_20160324171635_575", ["co_20160413150827_16"], name: "index_c29_20160324171635_575_on_co_20160413150827_16", using: :btree
+  add_index "c29_20160324171635_575", ["co_20160413150827_941"], name: "index_c29_20160324171635_575_on_co_20160413150827_941", using: :btree
+  add_index "c29_20160324171635_575", ["company_id"], name: "index_c29_20160324171635_575_on_company_id", using: :btree
+  add_index "c29_20160324171635_575", ["name"], name: "index_c29_20160324171635_575_on_name", using: :btree
+
+  create_table "c29_20160414184131", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+  end
+
+  create_table "c29_20160414184203", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+  end
+
+  add_index "c29_20160414184203", ["company_id"], name: "index_c29_20160414184203_on_company_id", using: :btree
+  add_index "c29_20160414184203", ["name"], name: "index_c29_20160414184203_on_name", using: :btree
+
+  create_table "c29_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c29_companies", ["address"], name: "index_c29_companies_on_address", using: :btree
+  add_index "c29_companies", ["fax"], name: "index_c29_companies_on_fax", using: :btree
+  add_index "c29_companies", ["influx"], name: "index_c29_companies_on_influx", using: :btree
+  add_index "c29_companies", ["mail"], name: "index_c29_companies_on_mail", using: :btree
+  add_index "c29_companies", ["name"], name: "index_c29_companies_on_name", using: :btree
+  add_index "c29_companies", ["pref"], name: "index_c29_companies_on_pref", using: :btree
+  add_index "c29_companies", ["status"], name: "index_c29_companies_on_status", using: :btree
+  add_index "c29_companies", ["target"], name: "index_c29_companies_on_target", using: :btree
+  add_index "c29_companies", ["tel"], name: "index_c29_companies_on_tel", using: :btree
+  add_index "c29_companies", ["url"], name: "index_c29_companies_on_url", using: :btree
+  add_index "c29_companies", ["zip"], name: "index_c29_companies_on_zip", using: :btree
 
   create_table "c2_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
@@ -376,6 +741,198 @@ ActiveRecord::Schema.define(version: 20160307075017) do
   end
 
   add_index "c2_people", ["name"], name: "index_c2_people_on_name", using: :btree
+
+  create_table "c30_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c30_companies", ["address"], name: "index_c30_companies_on_address", using: :btree
+  add_index "c30_companies", ["fax"], name: "index_c30_companies_on_fax", using: :btree
+  add_index "c30_companies", ["influx"], name: "index_c30_companies_on_influx", using: :btree
+  add_index "c30_companies", ["mail"], name: "index_c30_companies_on_mail", using: :btree
+  add_index "c30_companies", ["name"], name: "index_c30_companies_on_name", using: :btree
+  add_index "c30_companies", ["pref"], name: "index_c30_companies_on_pref", using: :btree
+  add_index "c30_companies", ["status"], name: "index_c30_companies_on_status", using: :btree
+  add_index "c30_companies", ["target"], name: "index_c30_companies_on_target", using: :btree
+  add_index "c30_companies", ["tel"], name: "index_c30_companies_on_tel", using: :btree
+  add_index "c30_companies", ["url"], name: "index_c30_companies_on_url", using: :btree
+  add_index "c30_companies", ["zip"], name: "index_c30_companies_on_zip", using: :btree
+
+  create_table "c31_20160322121003_45205", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160329131337_455"
+    t.string   "co_20160329131337_87"
+    t.float    "co_20160329143810_362"
+    t.datetime "co_20160329143810_893"
+    t.integer  "co_20160329143810_614"
+    t.string   "co_20160401164125_966"
+    t.string   "co_20160401182346_263"
+    t.text     "co_20160322181120_881"
+    t.integer  "co_20160517171521_451"
+    t.string   "co_20160517171521_728"
+  end
+
+  add_index "c31_20160322121003_45205", ["co_20160322181120_881"], name: "index_c31_20160322121003_45205_on_co_20160322181120_881", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160329131337_455"], name: "index_c31_20160322121003_45205_on_co_20160329131337_455", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160329131337_87"], name: "index_c31_20160322121003_45205_on_co_20160329131337_87", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160329143810_362"], name: "index_c31_20160322121003_45205_on_co_20160329143810_362", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160329143810_614"], name: "index_c31_20160322121003_45205_on_co_20160329143810_614", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160329143810_893"], name: "index_c31_20160322121003_45205_on_co_20160329143810_893", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160401164125_966"], name: "index_c31_20160322121003_45205_on_co_20160401164125_966", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160401182346_263"], name: "index_c31_20160322121003_45205_on_co_20160401182346_263", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160517171521_451"], name: "index_c31_20160322121003_45205_on_co_20160517171521_451", using: :btree
+  add_index "c31_20160322121003_45205", ["co_20160517171521_728"], name: "index_c31_20160322121003_45205_on_co_20160517171521_728", using: :btree
+  add_index "c31_20160322121003_45205", ["company_id"], name: "index_c31_20160322121003_45205_on_company_id", using: :btree
+  add_index "c31_20160322121003_45205", ["name"], name: "index_c31_20160322121003_45205_on_name", using: :btree
+
+  create_table "c31_20160324171635_575", force: :cascade do |t|
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.integer  "company_id"
+    t.string   "co_20160411153558_70"
+  end
+
+  add_index "c31_20160324171635_575", ["co_20160411153558_70"], name: "index_c31_20160324171635_575_on_co_20160411153558_70", using: :btree
+  add_index "c31_20160324171635_575", ["company_id"], name: "index_c31_20160324171635_575_on_company_id", using: :btree
+  add_index "c31_20160324171635_575", ["name"], name: "index_c31_20160324171635_575_on_name", using: :btree
+
+  create_table "c31_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c31_companies", ["address"], name: "index_c31_companies_on_address", using: :btree
+  add_index "c31_companies", ["fax"], name: "index_c31_companies_on_fax", using: :btree
+  add_index "c31_companies", ["influx"], name: "index_c31_companies_on_influx", using: :btree
+  add_index "c31_companies", ["mail"], name: "index_c31_companies_on_mail", using: :btree
+  add_index "c31_companies", ["name"], name: "index_c31_companies_on_name", using: :btree
+  add_index "c31_companies", ["pref"], name: "index_c31_companies_on_pref", using: :btree
+  add_index "c31_companies", ["status"], name: "index_c31_companies_on_status", using: :btree
+  add_index "c31_companies", ["target"], name: "index_c31_companies_on_target", using: :btree
+  add_index "c31_companies", ["tel"], name: "index_c31_companies_on_tel", using: :btree
+  add_index "c31_companies", ["url"], name: "index_c31_companies_on_url", using: :btree
+  add_index "c31_companies", ["zip"], name: "index_c31_companies_on_zip", using: :btree
+
+  create_table "c32_20160414182217", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+  end
+
+  create_table "c32_companies", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+    t.string   "co_20160421084418_499"
+    t.string   "co_20160421084418_525"
+    t.string   "co_20160421084418_692"
+    t.string   "co_20160421084418_311"
+    t.string   "co_20160421084418_422"
+    t.string   "co_20160421084418_634"
+    t.string   "co_20160421084418_214"
+    t.string   "co_20160421084418_199"
+    t.string   "co_20160421084418_493"
+    t.integer  "co_20160421085318_571"
+    t.integer  "co_20160421085318_386"
+    t.integer  "co_20160421090229_753"
+    t.integer  "co_20160421090229_811"
+  end
+
+  add_index "c32_companies", ["address"], name: "index_c32_companies_on_address", using: :btree
+  add_index "c32_companies", ["co_20160421084418_199"], name: "index_c32_companies_on_co_20160421084418_199", using: :btree
+  add_index "c32_companies", ["co_20160421084418_214"], name: "index_c32_companies_on_co_20160421084418_214", using: :btree
+  add_index "c32_companies", ["co_20160421084418_311"], name: "index_c32_companies_on_co_20160421084418_311", using: :btree
+  add_index "c32_companies", ["co_20160421084418_422"], name: "index_c32_companies_on_co_20160421084418_422", using: :btree
+  add_index "c32_companies", ["co_20160421084418_493"], name: "index_c32_companies_on_co_20160421084418_493", using: :btree
+  add_index "c32_companies", ["co_20160421084418_499"], name: "index_c32_companies_on_co_20160421084418_499", using: :btree
+  add_index "c32_companies", ["co_20160421084418_525"], name: "index_c32_companies_on_co_20160421084418_525", using: :btree
+  add_index "c32_companies", ["co_20160421084418_634"], name: "index_c32_companies_on_co_20160421084418_634", using: :btree
+  add_index "c32_companies", ["co_20160421084418_692"], name: "index_c32_companies_on_co_20160421084418_692", using: :btree
+  add_index "c32_companies", ["co_20160421085318_386"], name: "index_c32_companies_on_co_20160421085318_386", using: :btree
+  add_index "c32_companies", ["co_20160421085318_571"], name: "index_c32_companies_on_co_20160421085318_571", using: :btree
+  add_index "c32_companies", ["co_20160421090229_753"], name: "index_c32_companies_on_co_20160421090229_753", using: :btree
+  add_index "c32_companies", ["co_20160421090229_811"], name: "index_c32_companies_on_co_20160421090229_811", using: :btree
+  add_index "c32_companies", ["fax"], name: "index_c32_companies_on_fax", using: :btree
+  add_index "c32_companies", ["influx"], name: "index_c32_companies_on_influx", using: :btree
+  add_index "c32_companies", ["mail"], name: "index_c32_companies_on_mail", using: :btree
+  add_index "c32_companies", ["name"], name: "index_c32_companies_on_name", using: :btree
+  add_index "c32_companies", ["pref"], name: "index_c32_companies_on_pref", using: :btree
+  add_index "c32_companies", ["status"], name: "index_c32_companies_on_status", using: :btree
+  add_index "c32_companies", ["target"], name: "index_c32_companies_on_target", using: :btree
+  add_index "c32_companies", ["tel"], name: "index_c32_companies_on_tel", using: :btree
+  add_index "c32_companies", ["url"], name: "index_c32_companies_on_url", using: :btree
+  add_index "c32_companies", ["zip"], name: "index_c32_companies_on_zip", using: :btree
+
+  create_table "c33_companies", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+  end
+
+  add_index "c33_companies", ["address"], name: "index_c33_companies_on_address", using: :btree
+  add_index "c33_companies", ["fax"], name: "index_c33_companies_on_fax", using: :btree
+  add_index "c33_companies", ["influx"], name: "index_c33_companies_on_influx", using: :btree
+  add_index "c33_companies", ["mail"], name: "index_c33_companies_on_mail", using: :btree
+  add_index "c33_companies", ["name"], name: "index_c33_companies_on_name", using: :btree
+  add_index "c33_companies", ["pref"], name: "index_c33_companies_on_pref", using: :btree
+  add_index "c33_companies", ["status"], name: "index_c33_companies_on_status", using: :btree
+  add_index "c33_companies", ["target"], name: "index_c33_companies_on_target", using: :btree
+  add_index "c33_companies", ["tel"], name: "index_c33_companies_on_tel", using: :btree
+  add_index "c33_companies", ["url"], name: "index_c33_companies_on_url", using: :btree
+  add_index "c33_companies", ["zip"], name: "index_c33_companies_on_zip", using: :btree
 
   create_table "c3_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
@@ -739,6 +1296,39 @@ ActiveRecord::Schema.define(version: 20160307075017) do
   add_index "clients", ["email"], name: "index_clients_on_email", unique: true, using: :btree
   add_index "clients", ["reset_password_token"], name: "index_clients_on_reset_password_token", unique: true, using: :btree
   add_index "clients", ["soft_destroyed_at"], name: "index_clients_on_soft_destroyed_at", using: :btree
+
+  create_table "csvfiles", force: :cascade do |t|
+    t.string   "path",              null: false
+    t.string   "original_filename", null: false
+    t.integer  "all_num"
+    t.integer  "client_table_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+  end
+
+  add_index "csvfiles", ["client_table_id"], name: "index_csvfiles_on_client_table_id", using: :btree
+
+  create_table "imports", force: :cascade do |t|
+    t.text     "matching_params"
+    t.integer  "success_num"
+    t.integer  "unmatch_num"
+    t.integer  "overlap_num"
+    t.integer  "error_num"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.text     "error_message"
+    t.text     "errors_ids"
+    t.datetime "soft_destroyed_at"
+    t.datetime "uploaded_at"
+    t.datetime "queued_at"
+    t.datetime "performed_at"
+    t.datetime "finished_at"
+    t.datetime "rescued_at"
+    t.integer  "csvfile_id"
+  end
+
+  add_index "imports", ["csvfile_id"], name: "index_imports_on_csvfile_id", using: :btree
 
   create_table "sessions", force: :cascade do |t|
     t.string   "session_id", null: false

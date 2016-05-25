@@ -11,9 +11,9 @@ class Bamember::ApplicationController < ActionController::Base
 
   private
 
-  def runtime_error(e = nil)
-    logger.error e
-    logger.error e.backtrace.join("\n")
-    redirect_to "/bamember/", alert: e.message
-  end
+  # def runtime_error(e = nil)
+  #   logger.error e
+  #   logger.error e.backtrace.join("\n")
+  #   redirect_to "/bamember/", alert: e.message
+  # end
 end

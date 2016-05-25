@@ -2,9 +2,9 @@ module ColumnTypes
   extend ActiveSupport::Concern
 
   included do
-    type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
     (ColumnTypes::String.methods - Object.methods).each do |m|
       define_method(m) do |v = nil|
+        type = ColumnTypes.const_get(column_type.classify) rescue ColumnTypes::String
         type.send(m, v.to_s.normalize_charwidth.strip, self)
       end
     end
@@ -17,7 +17,7 @@ module ColumnTypes
     def self.label(*args)        self::NAME end
     def self.db_type(*args)      self::DB_TYPE end
     def self.filter(v, *args)     v end
-    def self.valid(v, *args)      v end
+    def self.valid(v, *args)      true end
 
     def self.selector?(*args)    false end
     def self.def_selector(*args) [] end
@@ -96,7 +96,7 @@ module ColumnTypes
     NAME = "〒"
 
     def self.filter(v, *args) v.match(/\A([0-9]{3})\-?([0-9]{4})/) { |m| "#{m[1]}-#{m[2]}" } end
-    def self.valid(v, *args)  v =~ /\A[0-9]{3}\-[0-9]{4}\z/ end
+    def self.valid(v, *args)  /\A[0-9]{3}\-[0-9]{4}\z/ === v end
   end
 
   class Address < ColumnTypes::String
@@ -110,12 +110,12 @@ module ColumnTypes
 
   class Mail < ColumnTypes::String
     NAME = "メールアドレス"
-    def self.valid(v, *args) v =~ /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i end
+    def self.valid(v, *args) /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i === v end
   end
 
   class Url < ColumnTypes::String
     NAME = "URL"
-    def self.valid(v, *args) v =~ /\A#{URI::regexp}\z/ end
+    def self.valid(v, *args) /\A#{URI::regexp}\z/ === v end
   end
 
   class Selector < ColumnTypes::String
@@ -302,13 +302,6 @@ module ColumnTypes
         98_地方公務
         99_分類不能の産業
       |
-    end
-  end
-
-  class Sex < ColumnTypes::Pref
-    NAME = "性別"
-    def self.def_selector(*args)
-      %w(男 女 不明)
     end
   end
 

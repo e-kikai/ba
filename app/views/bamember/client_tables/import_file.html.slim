@@ -1,5 +1,7 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name}ファイルアップロード"
-- breadcrumb  :clients_table_csv, @table
+- breadcrumb  :clients_table_import, @table
+
+- message = "アップロードしたCSVファイルを削除いたします。\rよろしいでしょうか\r\r※ ファイルを削除すると、再利用できなくなります"
 
 coffee:
   $ ->
@@ -15,10 +17,10 @@ coffee:
       uploadClass: 'btn btn-success fileinput-upload-button'
       uploadIcon: '<i class="fa fa-upload"></i>'
       uploadLabel: ' アップロード'
-      allowedFileExtensions: ['csv', 'xls', 'xlsx', 'ods']
+      allowedFileExtensions: ['csv']
       msgValidationError: '''
         <span class="text-danger">
-          <span class="glyphicon glyphicon-alert"></span>アップロードできるファイル形式はCSV, xls, xlsx, odsです。
+          <span class="glyphicon glyphicon-alert"></span>アップロードできるファイル形式はCSVです。
         </span>
       '''
 
@@ -26,7 +28,7 @@ sass:
   .fileinput-upload-button
     display: none
     
-.col-md-10.col-md-offset-1
+.col-md-8.col-md-offset-2
   .panel.panel-default style="margin-top: 16px;"
     .panel-body
       = form_tag({action: :import_upload}, multipart: true, method: :post, class: 'form-horizontal') do
@@ -38,3 +40,25 @@ sass:
         = button_tag(data: { "disable-with" => "アップロード中..."}, class: "btn btn-success center-block") do
           span.glyphicon.glyphicon-upload
           =< "アップロード"
+          
+.col-md-8.col-md-offset-2
+  = paginate @csvfiles
+
+  table.table.table-striped.table-hover.table-responsive.tables
+    caption アップロードログ
+    tr
+      th ファイル名
+      th アップロード日時
+      th 総数
+      th 削除
+    
+    - @csvfiles.each do |f|
+      tr
+        td = link_to f.original_filename, {action: :import_matching, csvfile_id: f.id}
+        td = f.created_at
+        td.integer = number_with_delimiter(f.all_num)
+        td = link_to({action: :import_matching, csvfile_id: f.id}, {method: :delete, data: { confirm: message, "disable-with" => "削除中..."}, class: "btn btn-danger"}) do
+          span.glyphicon.glyphicon-remove
+          =< "削除"
+
+  = paginate @csvfiles

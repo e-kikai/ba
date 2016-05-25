@@ -1,0 +1,63 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} インポートログ"
+- breadcrumb  :clients_table_import, @table
+
+.col-md-12
+  = paginate @imports
+
+  table.table.table-striped.table-hover.table-responsive.tables
+    caption アップロードログ
+    tr
+      th CSVファイル
+      th 総数
+      th 条件
+      th 新規
+      th 非同期
+      th キュー日時
+      th 開始時間
+      th 終了時間
+      th ステータス
+      th マッチ
+      th 非マッチ
+      th 重複
+      th エラー
+      th エラーCSV
+
+    - @imports.each do |i|
+      tr
+        td
+          - unless i.csvfile.soft_destroyed?
+            = link_to i.csvfile.original_filename, {action: :import_matching, csvfile_id: i.csvfile_id}
+          - else
+            = i.csvfile.original_filename
+        td.integer = number_with_delimiter(i.csvfile.all_num)
+        td
+          - if i.matching_params.dig("option", "if") == "and"
+            span AND
+          - elsif i.matching_params.dig("option", "if") == "or"
+            span OR
+          - else
+            span 曖昧
+        td = i.matching_params.dig("option", "unmatch") == "new" ? "◯" : "☓"
+        td = i.matching_params.dig("background") ? "◯" : "☓"
+        td = i.queued_at
+        td = i.performed_at.try(:strftime, "%H:%M:%S")
+        td = i.finished_at.try(:strftime, "%H:%M:%S")
+        td
+          - if i.rescued_at
+            span.text-danger エラー
+          - elsif i.finished_at
+            span.text-success 完了
+          - elsif i.performed_at
+            span.text-primary 実行中
+          - elsif i.queued_at
+            span 待機
+        td.integer = number_with_delimiter(i.success_num)
+        td.integer = number_with_delimiter(i.unmatch_num)
+        td.integer = number_with_delimiter(i.overlap_num)
+        td.integer = number_with_delimiter(i.error_num)
+        td
+          - if i.finished_at && !i.csvfile.soft_destroyed?
+            = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_error.csv?import_id=#{i.id}", class: "btn btn-danger error" do
+              span.glyphicon.glyphicon-save-file
+              =< "DL"
+  = paginate @imports

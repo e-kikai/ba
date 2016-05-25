@@ -1,5 +1,5 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name} マッチング"
-- breadcrumb  :clients_table_csv_matching, @table
+- breadcrumb  :clients_table_import_matching, @csvfile
 
 - select_client_columns = [["--使用しない--", ""], ["ID", :id]] + @table.show_columns.pluck(:name, :column_name)
 - select_methods        = {"空欄に保存" => :save, "上書き" => :update, "マッチング" => :matching}
@@ -34,9 +34,9 @@ sass:
     color: #999
   
 .col-md-8.col-md-offset-2
-  / dl.dl-horizontal
-  /   dt アップロードデータ
-  /   dd #{number_with_delimiter(@count)} 件 (先頭行、空行を除く)
+  dl.dl-horizontal
+    dt データ件数
+    dd #{number_with_delimiter(@csvfile.all_num)} 件 (先頭行、空行を除く)
     
   = form_tag({action: :import_do}, method: :post, class: 'form-horizontal') do
     table.table.table-striped.table-hover.table-responsive
@@ -46,28 +46,28 @@ sass:
         th ⇒
         th テーブル項目
         th 処理
-      - @header.each_with_index do |h, i|
+      - @csvfile.header.each_with_index do |h, i|
         tr
           td
             .column  = h
-            .example = @first[i]
+            .example = @csvfile.first[i]
           td ⇒
           td = select_tag("table_header[#{i}]",
-            options_for_select(select_client_columns, params.dig(:table_header, :i)),
+            options_for_select(select_client_columns, params.dig("table_header", i.to_s)),
             class: "form-control column_name")
           td = select_tag("method[#{i}]",
-            options_for_select(select_methods, params.dig(:method, :i)),
+            options_for_select(select_methods, params.dig("method", i.to_s)),
             class: "form-control action")
           
     .form-group
       / .col-sm-4 = label_tag  :option_if, "マッチング条件", class: "control-label"
       .col-sm-3: label.control-label(for="option[if]") マッチング条件
       .col-sm-5 = select_tag("option[if]",
-        options_for_select({"AND条件" => :and, "OR条件" => :or, "AND条件でなければOR条件(曖昧検索)" => nil}, params.dig(:option, :if)),
+        options_for_select({"AND条件" => :and, "OR条件" => :or, "AND条件でなければOR条件(曖昧検索)" => nil}, params.dig("option", "if")),
         class: "form-control")
     .form-group
       .col-sm-3 = label_tag  "option[unmatch]", "マッチしなかったデータ", class: "control-label"
-      .col-sm-5 = select_tag "option[unmatch]", options_for_select({"エラー(エラーCSVに出力)" => nil, "新規登録" => :new}, params.dig(:option, :unmatch)), class: "form-control"
+      .col-sm-5 = select_tag "option[unmatch]", options_for_select({"エラー(エラーCSVに出力)" => nil, "新規登録" => :new}, params.dig("option", "unmatch")), class: "form-control"
     .form-group
       .col-sm-3 
       .col-sm-5

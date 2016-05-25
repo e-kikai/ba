@@ -52,7 +52,7 @@ sass:
               =< "検索"
 
 .col-md-12
-  = @pdatas.to_sql
+  / = @pdatas.to_sql
   / = params.to_s
   
   - restext = Array(params[:s]).inject("") do |t, s|

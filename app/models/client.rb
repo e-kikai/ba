@@ -8,6 +8,8 @@ class Client < ActiveRecord::Base
   default_scope { without_soft_destroyed }
 
   has_many :client_tables
+  has_many :csvfiles,     through: :client_tables
+  has_many :imports,      through: :csvfiles
 
   def company_table
     client_tables.find_by(company: true)

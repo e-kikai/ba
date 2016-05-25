@@ -3,7 +3,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_table, except: [:new, :create]
   before_action :find_company_table, only: [:rfm, :relation, :relation_confirm, :relation_do]
   before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
-  before_action :before_import_matching, only: [:import_matching]
+  # before_action :before_import_matching, only: [:import_matching]
 
   rescue_from RuntimeError, with: :runtime_error
 
@@ -317,41 +317,70 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def import_file
+    @csvfiles = @table.csvfiles.without_soft_destroyed.order(created_at: :desc).page(params[:page])
   end
 
   def import_upload
-    file_path = Rails.root.join('tmp').join("#{SecureRandom.urlsafe_base64}.csv")
-    FileUtils.mv(params[:file].path, file_path)
-    session[:import_file] = {
-      path:              file_path.to_s,
-      original_filename: params[:file].original_filename,
-    }
+    csvfile = Csvfile.upload(params[:id], params[:file])
 
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/"
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/"
   end
 
   def import_matching
+    @csvfile = Csvfile.find(params[:csvfile_id])
   rescue => e
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_file/", alert: e.message
   end
 
   def import_do
-    matchings = @table.import_check(params)
+    @csvfile = Csvfile.find(params[:csvfile_id])
+
+    matchings = Import.import_check(params)
     raise "マッチング項目が設定されていません" if matchings.blank? && params[:option][:unmatch] != "new"
 
+    import = Import.create!(
+      csvfile_id:      params[:csvfile_id],
+      matching_params: params,
+      queued_at:       Time.now
+    )
+
     if params[:background].present?
-      ImportJob.perform_later(@table.id, params, session[:import_file])
+      ImportJob.perform_later(import.id)
+      notice =  "バックグラウンドジョブに登録しました"
     else
-      ImportJob.perform_now(@table.id, params, session[:import_file])
+      ImportJob.perform_now(import.id)
+      notice =  "インポートが完了しました"
     end
 
-    session[:import_file] = nil
-
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "非同期インポートを開始しました"
+    redirect_to "/bamember/clients/#{@table.client.id}/", notice: notice
   rescue => e
-    before_import_matching
     flash[:alert] = e.message
     render :import_matching
+  end
+
+  def import_log
+    @imports = @table.imports.includes(:csvfile).order(created_at: :desc).page(params[:page])
+  end
+
+  def import_delete
+    @csvfile = Csvfile.find(params[:csvfile_id])
+
+    File.unlink(@csvfile.path) if File.exist?(@csvfile.path)
+
+    @csvfile.soft_destroy!
+
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_file/", notice: "CSVファイル「#{@csvfile.original_filename}」を削除しました"
+  end
+
+  def import_error
+    @import = Import.find(params[:import_id])
+
+    respond_to do |format|
+      format.csv { send_data render_to_string,
+        content_type: 'text/csv;charset=shift_jis',
+        filename: "error_#{@table.client.name}_#{@table.name}_#{params[:import_id]}.csv"
+      }
+    end
   end
 
   def edit
@@ -385,7 +414,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       render :data_new
     end
   end
-
 
   def data_show
     @data = @klass.company_relation.find(params[:data_id])
@@ -463,7 +491,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def find_table
     raise "テーブル情報が取得できません"                 unless @table = ClientTable.find(params[:id])
     raise "このテーブルはクライアント所有ではありません" if     @table.client_id != @client.id
-    raise "テーブルデータ情報が取得できません"           unless @klass = @table.klass
+    raise "テーブルデータ情報が取得できません"           unless @klass = @table.klass(true)
   end
 
   def find_company_table
@@ -471,21 +499,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     raise "会社IDカラムがありません"       unless @table.company_id_column
 
     @company_table = @client.company_table
-  end
-
-  def before_import_matching
-    # ss = @table.spreadsheet(session[:import_file][:path], session[:import_file][:original_filename])
-    #
-    # @header = ss.row(1).map { |v| v.to_s.normalize_charwidth.strip }
-    # @first  = ss.row(2).map { |v| v.to_s.normalize_charwidth.strip }
-    # @count  = ss.last_row - 1
-
-    File.open(session[:import_file][:path], {encoding: Encoding::SJIS}) do |f|
-      @header = f.gets.parse_csv.map { |v| v.to_s.normalize_charwidth.strip }
-      @first  = f.gets.parse_csv.map { |v| v.to_s.normalize_charwidth.strip }
-      @count =  0
-    end
-
   end
 
   def check_session_spreadseet

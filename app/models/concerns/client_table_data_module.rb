@@ -7,7 +7,6 @@ module ClientTableDataModule
     soft_deletable
     default_scope { without_soft_destroyed }
 
-
     #フィルタ・デフォルト値
     before_validation do |data|
       client_table = self.class.client_table
