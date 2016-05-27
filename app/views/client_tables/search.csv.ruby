@@ -1,10 +1,9 @@
 require 'nkf'
 
-csv_str = CSV.generate do |csv|
-  csv << ["ID"] + @show_columns.map { |co| co.name } + ["登録日時", "変更日時"]
-  @datas.find_each do |d|
-    csv << [d[:id]] + @show_columns.map { |co| d[co.column_name] } + [d[:created_at], d[:updated_at]]
-  end
+csv = NKF::nkf('--sjis -Lw', (["ID"] + @show_columns.map { |co| co.name } + ["登録日時", "変更日時"]).to_csv)
+@datas.find_each do |d|
+  line = [d[:id]] + @show_columns.map { |co| d[co.column_name] } + [d[:created_at], d[:updated_at]]
+  csv << NKF::nkf('--sjis -Lw', line.to_csv)
 end
 
-NKF::nkf('--sjis -Lw', csv_str)
+csv

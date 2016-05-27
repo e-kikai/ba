@@ -1,3 +1,7 @@
+coffee:
+  $ ->
+    FixedMidashi.create();
+ 
 sass:
   .search-menu .btn
     margin-right: 4px
@@ -17,6 +21,18 @@ sass:
       margin-right: 4px
     .btn
       margin-right: 4px
+    
+  .scroll_div
+    overflow: auto
+    
+  table.search-table
+    .tel
+      width: 100px
+      
+  table.search-table
+    td, th
+      &.company
+        width: 210px
       
 .container-fluid.search-menu
   = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
@@ -70,40 +86,40 @@ sass:
   
   - if @pdatas.blank?
     
-  - elsif @sum_res.present?
-    - groups = (@sum[:group].reject(&:blank?) rescue {})
-    - if groups.length == 0
-      table.table.table-bordered.table-hover.table-condensed style="width:40%;"
-        tr
-          th = sum_methods.invert[@sum[:methods]]
-          td.integer = link_to number_with_delimiter(@sum_res), params.merge("sum[methods]" => "") 
-    - elsif groups.length == 1
-      table.table.table-bordered.table-striped.table-hover.table-condensed style="width:40%;"
-        tr
-          th = client_columns.invert[groups[0]]
-          th = sum_methods.invert[@sum[:methods]]
-        - @sum_res.each do |key, v|
-          tr
-            td = key
-            td.integer = link_to number_with_delimiter(v), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: key, cond: :eq}]})
-    - else
-      - rows = @sum_res.map { |k, v| k[0] }.uniq
-      - cols = @sum_res.map { |k, v| k[1] }.uniq
-      .table-responsive
-        table.table.table-bordered.table-striped.table-hover.table-condensed
-          tr
-            th #{client_columns.invert[groups[0]]} / #{client_columns.invert[groups[1]]}
-            - cols.each do |col|
-              th = col
-          - rows.each do |row|
-            tr
-              th = row
-              - cols.each do |col|
-                td.integer
-                  - if @sum_res[[row, col]].blank?
-                    | 0
-                  - else
-                    = link_to number_with_delimiter(@sum_res[[row, col]]), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: row, cond: :eq}, {column_name: groups[1], value: col, cond: :eq}]})
+  / - elsif @sum_res.present?
+  /   - groups = (@sum[:group].reject(&:blank?) rescue {})
+  /   - if groups.length == 0
+  /     table.table.table-bordered.table-hover.table-condensed style="width:40%;"
+  /       tr
+  /         th = sum_methods.invert[@sum[:methods]]
+  /         td.integer = link_to number_with_delimiter(@sum_res), params.merge("sum[methods]" => "") 
+  /   - elsif groups.length == 1
+  /     table.table.table-bordered.table-striped.table-hover.table-condensed style="width:40%;"
+  /       tr
+  /         th = client_columns.invert[groups[0]]
+  /         th = sum_methods.invert[@sum[:methods]]
+  /       - @sum_res.each do |key, v|
+  /         tr
+  /           td = key
+  /           td.integer = link_to number_with_delimiter(v), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: key, cond: :eq}]})
+  /   - else
+  /     - rows = @sum_res.map { |k, v| k[0] }.uniq
+  /     - cols = @sum_res.map { |k, v| k[1] }.uniq
+  /     .table-responsive
+  /       table.table.table-bordered.table-striped.table-hover.table-condensed
+  /         tr
+  /           th #{client_columns.invert[groups[0]]} / #{client_columns.invert[groups[1]]}
+  /           - cols.each do |col|
+  /             th = col
+  /         - rows.each do |row|
+  /           tr
+  /             th = row
+  /             - cols.each do |col|
+  /               td.integer
+  /                 - if @sum_res[[row, col]].blank?
+  /                   | 0
+  /                 - else
+  /                   = link_to number_with_delimiter(@sum_res[[row, col]]), params.merge({sum: {}, s: params.fetch(:s, []) + [ {column_name: groups[0], value: row, cond: :eq}, {column_name: groups[1], value: col, cond: :eq}]})
               
   - else
     - sumally = @show_columns.select { |co| co.sumally }.inject('') do |res, co|
@@ -122,59 +138,56 @@ sass:
         span.glyphicon.glyphicon-save-file
         =< "検索結果をエクスポート"
     
-    .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
-      .table-responsive
-        table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
-          tr
-            th
-              | ID
-              =< column_sorter :id
+    / .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
+      / .table-responsive
+    .scroll_div
+      table.table.table-bordered.table-striped.table-hover.table-condensed.search-table _fixedhead='rows:1'
+        tr
+          th
+            | ID
+            =< column_sorter :id
 
-            - if ba
-              th 変更
-            - @show_columns.each do |co|
-              th
-                = co.name
-                =< column_sorter co.column_name
-            - if @table.company?
-              - child_tables = @client.child_tables
-              - child_tables.each do |ch|
-                th.id = ch.name
-              
-            th.datetime
-              | 登録日時
-              =< column_sorter :created_at
-
-            th.datetime
-              | 変更日時
-              =< column_sorter :updated_at
-
-            / th 削除
-          - @pdatas.each do |d|
-            tr
-              td.id
-                = link_to d[:id], {action: :data_show, data_id: d[:id]}
-              - if ba
-                td.icon.edit = link_to({action: :data_edit, data_id: d[:id]}) do
-                  span.glyphicon.glyphicon-edit
-              - @show_columns.each do |co|
-                td class="#{co.db_type} #{co.column_type} #{co.column_name}"
-                  - if co.column_name == "name"
-                    = link_to column_format(d[co.column_name], co.column_type), {action: :data_show, data_id: d[:id]}
-                  - elsif co.column_name == "company_id" && d.company_id.present?
-                    = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
-                  - elsif d[co.column_name].present?
-                    = column_format(d[co.column_name], co.column_type)
-                    
-              - if @table.company?
-                - child_tables.each do |ch|
-                  td.id
-                    - if d["#{ch.table_name}_count"].present?
-                      = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[][column_name]" => :company_id, "s[][value]" => d[:id], "s[][cond]" => :eq})
-
-              td.datetime = d[:created_at]
-              td.datetime = d[:updated_at]
-              / td.icon.delete = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{d[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"} do
-                span.glyphicon.glyphicon-remove
+          - if ba
+            th 変更
+          - @show_columns.each do |co|
+            th class="#{co.db_type} #{co.column_type} #{co.column_name}"
+              = co.name
+              =< column_sorter co.column_name
+          - if @table.company?
+            - child_tables = @client.child_tables
+            - child_tables.each do |ch|
+              th.id = ch.name
             
-    = paginate @pdatas
+          th.datetime
+            | 登録日時
+            =< column_sorter :created_at
+
+          th.datetime
+            | 変更日時
+            =< column_sorter :updated_at
+        - @pdatas.each do |d|
+          tr
+            td.id
+              = link_to d[:id], {action: :data_show, data_id: d[:id]}
+            - if ba
+              td.icon.edit = link_to({action: :data_edit, data_id: d[:id]}) do
+                span.glyphicon.glyphicon-edit
+            - @show_columns.each do |co|
+              td class="#{co.db_type} #{co.column_type} #{co.column_name}"
+                - if co.column_name == "name"
+                  = link_to column_format(d[co.column_name], co.column_type), {action: :data_show, data_id: d[:id]}
+                - elsif co.column_name == "company_id" && d.company_id.present?
+                  = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
+                - elsif d[co.column_name].present?
+                  = column_format(d[co.column_name], co.column_type)
+                  
+            - if @table.company?
+              - child_tables.each do |ch|
+                td.id
+                  - if d["#{ch.table_name}_count"].present?
+                    = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[][column_name]" => :company_id, "s[][value]" => d[:id], "s[][cond]" => :eq})
+
+            td.datetime = d[:created_at]
+            td.datetime = d[:updated_at]
+            
+    / = paginate @pdatas

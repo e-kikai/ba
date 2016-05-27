@@ -23,6 +23,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @table.soft_destroy!
     redirect_to "/bamember/clients/#{@client.id}/", notice: "#{@table.name}テーブルを削除しました"
   end
+  require 'nkf'
 
   def search
     @datas        = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
@@ -33,9 +34,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       format.html { @pdatas = @datas.page(params[:page]) }
       format.js   { render "client_tables/search" }
       format.csv  {
-        send_data render_to_string("client_tables/search.csv.ruby"),
+        send_data(render_to_string("client_tables/search.csv.ruby"),
           content_type: 'text/csv;charset=shift_jis',
-          filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+          filename:     "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+        )
       }
     end
   end
