@@ -16,4 +16,5 @@
 //= require bootstrap
 //= require jquery_nested_form
 //= require bootstrap-fileinput
+//= require fixed_midashi
 //= require_tree .

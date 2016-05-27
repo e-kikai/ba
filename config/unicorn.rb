@@ -2,12 +2,12 @@
 
 # unicornのプロセスがリスンするアドレスとポートを指定
 # listen "127.0.0.1:3001"
+# listen 3001, :tcp_nopush => false
 
 # pid fileの位置を指定する
 # pid "/run/unicorn_e-kikai.pid"
 ROOT = "#{File.dirname(__FILE__)}/.."
 pid "#{ROOT}/tmp/pids/unicorn.pid"
-
 
 # ワーカーの数を指定する
 worker_processes 3
