@@ -26,7 +26,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   require 'nkf'
 
   def search
-    @datas        = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
+    @datas        = @klass.table_search(params[:s]).company_relation.table_order(params[:order]).order(:id)
     @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
     @sums         = @datas.group("")
 

@@ -83,40 +83,72 @@ module ClientTableDataModule
     scope :table_search, -> (search_params) {
       search_query = {}
       Array(search_params).each do |s|
-        next if s[:column_name].blank? || s[:cond].blank? || ["overlap", "unique", "present", "blank"].include?(s[:cond])
+        next if s[:column_name].blank? || s[:cond].blank?
 
         ### 値の整形 ###
         value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
         value = value.split(" ") if %w(in not_in cont_any not_cont_any).include? s[:cond]
 
-        if co = client_table.client_columns.find_by(column_name: s[:column_name])
-          value = if %w(in not_in cont_any not_cont_any).include? s[:cond]
-            value.map { |v| co.filter(v) }
-          else
-            co.filter(value)
+        co = client_table.client_columns.find_by(column_name: s[:column_name])
+
+        cond = if !co || co.numeric? || co.datetime?
+          case s[:cond]
+          when "cont","start", "end";              "eq"
+          when "not_cont", "not_start", "not_end"; "not_eq"
+          when "cont_any";                         "in"
+          when "not_cont_any";                     "not_in"
+          when "present";                          "not_null"
+          when "blank";                            "null"
+          when "overlap","unique";                 "not_null"
+          else                                     s[:cond]
+          end
+        else
+          case s[:cond]
+          when "overlap","unique"; "present"
+          else                     s[:cond]
           end
         end
 
+        value = if (["present", "blank", "null", "not_null"].include? cond)
+          true
+        elsif !co
+          value
+        elsif %w(in not_in cont_any not_cont_any).include? cond
+          value.map { |v| co.filter(v) }
+        else
+          co.filter(value)
+        end
+
         if value.present?
-          search_query["#{s[:column_name]}_#{s[:cond]}"] = value
+          search_query["#{s[:column_name]}_#{cond}"] = value
         end
       end
 
       ### 重複検索(検索フィルタリング後に行う) ###
-      Array(search_params).each do |s|
-        if (["present", "blank"].include? s[:cond])
-          search_query["#{s[:column_name]}_#{s[:cond]}"] = true
-        end
-
-        if ["overlap", "unique"].include? s[:cond]
-          temp_in = search(search_query).result.select(s[:column_name])
-          .where.not(s[:column_name] => "")
-          .group(s[:column_name]).having("count(*) > 1")
-          .pluck(s[:column_name])
-
-          search_query["#{s[:column_name]}_#{s[:cond] == "overlap" ? "in" : "not_in"}"] = temp_in.presence || "xxxnoaxxx"
-        end
+      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }
+      if overlaps.present?
+        temp_in = search(search_query).result.group(overlaps).having("count(*) > 1")
+          .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
+        search_query["id_in"] = temp_in.presence || "xxxnoaxxx"
       end
+
+      uniques  = Array(search_params).select { |s| s[:cond] == "unique"}.map { |s| s[:column_name] }
+      if uniques.present?
+        temp_in = search(search_query).result.group(uniques).having("count(*) > 1")
+          .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
+        search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
+      end
+
+      # Array(search_params).select { |s| (["overlap", "unique"].include? s[:cond])}.each do |s|
+      #   if ["overlap", "unique"].include? s[:cond]
+      #     temp_in = search(search_query).result.select(s[:column_name])
+      #     .where.not(s[:column_name] => "")
+      #     .group(s[:column_name]).having("count(*) > 1")
+      #     .pluck(s[:column_name])
+      #
+      #     search_query["#{s[:column_name]}_#{s[:cond] == "overlap" ? "in" : "not_in"}"] = temp_in.presence || "xxxnoaxxx"
+      #   end
+      # end
 
       search(search_query).result
     }

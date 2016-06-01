@@ -21,6 +21,9 @@ module ColumnTypes
 
     def self.selector?(*args)    false end
     def self.def_selector(*args) [] end
+
+    def self.numeric?(*args)     false end
+    def self.datetime?(*args)    false end
   end
 
   class SumString < ColumnTypes::String
@@ -38,6 +41,8 @@ module ColumnTypes
 
     def self.filter(v, *args) v.gsub(/[,、]/, "") end
     def self.valid(v, *args)  Integer(v) rescue false end
+
+    def self.numeric?(*args)  true end
   end
 
   class Float < ColumnTypes::Integer
@@ -60,7 +65,8 @@ module ColumnTypes
     DB_TYPE = :datetime
 
     # def self.filter(v, *args)Time.parse(v, *args)rescue "notdate" end
-    def self.valid(v, *args) v != "notdate" end
+    def self.valid(v, *args)  v != "notdate" end
+    def self.datetime?(*args) true end
   end
 
   class Company < ColumnTypes::String
