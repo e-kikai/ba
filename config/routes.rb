@@ -31,6 +31,8 @@ Rails.application.routes.draw do
     get    'clients/:id/edit_password' => 'clients#edit_password'
     patch  'clients/:id/edit_password' => 'clients#update_password'
 
+    get    'clients/:id/bi'            => 'clients#bi'
+
     get    'clients/:client_id/table/new'              => 'client_tables#new'
     post   'clients/:client_id/table/'                 => 'client_tables#create'
     get    'clients/:client_id/table/:id/search'       => 'client_tables#search'
@@ -41,6 +43,8 @@ Rails.application.routes.draw do
     # get    'clients/:client_id/table/:id/csv_confirm'  => 'client_tables#csv_confirm'
     # patch  'clients/:client_id/table/:id/csv_confirm'  => 'client_tables#csv_update'
     # get    'clients/:client_id/table/:id/csv_error'    => 'client_tables#csv_error'
+
+    get    'clients/:client_id/table/:id/bi' => 'client_tables#bi'
 
     get    'clients/:client_id/table/:id/import_file'                 => 'client_tables#import_file'
     post   'clients/:client_id/table/:id/import_upload'               => 'client_tables#import_upload'
@@ -55,9 +59,8 @@ Rails.application.routes.draw do
     post   'clients/:client_id/table/:id/relation_confirm'  => 'client_tables#relation_confirm'
     patch  'clients/:client_id/table/:id/relation_do'       => 'client_tables#relation_do'
 
-    get    'clients/:client_id/table/:id/bulk_delete'        => 'client_tables#data_bulk_delete'
-    get    'clients/:client_id/table/:id/bulk_delete_check'  => 'client_tables#data_bulk_delete_check'
-    delete 'clients/:client_id/table/:id/bulk_delete'        => 'client_tables#data_bulk_destroy'
+    get    'clients/:client_id/table/:id/bulk' => 'client_tables#data_bulk'
+    patch  'clients/:client_id/table/:id/bulk' => 'client_tables#data_bulk_update'
 
     get    'clients/:client_id/table/:id/sum'          => 'client_tables#sum'
     get    'clients/:client_id/table/:id/rfm'          => 'client_tables#rfm'

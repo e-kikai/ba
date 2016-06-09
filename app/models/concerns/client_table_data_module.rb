@@ -139,17 +139,6 @@ module ClientTableDataModule
         search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
       end
 
-      # Array(search_params).select { |s| (["overlap", "unique"].include? s[:cond])}.each do |s|
-      #   if ["overlap", "unique"].include? s[:cond]
-      #     temp_in = search(search_query).result.select(s[:column_name])
-      #     .where.not(s[:column_name] => "")
-      #     .group(s[:column_name]).having("count(*) > 1")
-      #     .pluck(s[:column_name])
-      #
-      #     search_query["#{s[:column_name]}_#{s[:cond] == "overlap" ? "in" : "not_in"}"] = temp_in.presence || "xxxnoaxxx"
-      #   end
-      # end
-
       search(search_query).result
     }
 
@@ -237,6 +226,47 @@ module ClientTableDataModule
 
       res = joins(ch.join(co, Arel::Nodes::OuterJoin).on(jo).join_sources).where(ch[:company_id].eq(nil)).where(co[:soft_destroyed_at].eq(nil))
       res.pluck(:id, company_table.table_name + ".id").group_by{|i| i[0]}
+    end
+
+    # 一括削除
+    #
+    # @param  [Hash]    search_params 検索条件パラメータ
+    # @return [Integer] 削除件数
+    def bulk_destroy(search_params)
+      data = table_search(search_params)
+
+      transaction do
+        data.each do |d|
+          d.soft_destroy!
+        end
+      end
+
+      data.count
+    end
+
+    # 重複一括削除
+    #
+    # @param  [Hash]    search_params 検索条件パラメータ
+    # @return [Integer] 削除件数
+    def overlaps_destroy(search_params)
+      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }
+
+      raise "重複条件がありません" if overlap.blank?
+
+      data_groups = table_search(search_params).order(:id).group_by(overlaps)
+      count = 0
+
+      transaction do
+        data_groups.each do |group|
+          group.each.with_index do |d, i|
+            next if i == 0
+            d.soft_destroy!
+            count += 1
+          end
+        end
+      end
+
+      count
     end
 
   end

@@ -2,8 +2,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_client
   before_action :find_table, except: [:new, :create]
   before_action :find_company_table, only: [:rfm, :relation, :relation_confirm, :relation_do]
-  before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
-  # before_action :before_import_matching, only: [:import_matching]
+  # before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
+
+  skip_before_filter :authenticate_bamember!, only: :bi
 
   rescue_from RuntimeError, with: :runtime_error
 
@@ -42,23 +43,39 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     end
   end
 
-  def data_bulk_delete
+  def data_bulk
     @datas = @klass.table_search(params[:s])
   end
 
-  def data_bulk_destroy
-    data = @klass.table_search(params[:s])
-
-    @klass.transaction do
-      data.each do |d|
-        d.soft_destroy!
-      end
+  def data_bulk_update
+    count = case params[:bulk_method]
+    when :destroy
+      @klass.bulk_destroy(params[:s])
+    when :overlaps
+      @klass.overlaps_destroy(params[:s])
     end
 
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのデータ#{data.count}件を一括削除しました"
+    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのデータ#{count}件を一括削除しました"
   rescue => e
-    flash[:alert] = "データの一括削除に失敗しました"
-    render :relation
+    @datas = @klass.table_search(params[:s])
+
+    flash[:alert] = "データの一括処理に失敗しました : #{e.message}"
+    render :data_bulk_delete
+  end
+
+  # PoweBI用CSV出力
+  def bi
+    @datas        = @klass.company_relation.order(:id)
+    @show_columns = @table.client_columns
+
+    respond_to do |format|
+      format.csv  {
+        send_data(render_to_string("client_tables/search.csv.ruby"),
+          content_type: 'text/csv;charset=shift_jis',
+          filename:     "bi_csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+        )
+      }
+    end
   end
 
   def sum
@@ -135,188 +152,188 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @sums = @klass.find_by_sql(sql)
   end
 
-  def csv
-  end
-
-  def csv_upload
-    ss = @table.spreadsheet(params[:file].path, params[:file].original_filename)
-
-    session[:csv] = {
-      header: ss.row(1).map { |v| v.to_s.normalize_charwidth.strip },
-      first:  ss.row(2).map { |v| v.to_s.normalize_charwidth.strip },
-
-      path:               params[:file].path,
-      original_filename:  params[:file].original_filename,
-      count:              ss.last_row - 1,
-
-      table_header: [],
-      method:       [],
-      option:       {},
-      result:       {}
-    }
-
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/"
-  end
-
-  def csv_matching
-  end
-
-  def csv_matching_check
-    session[:csv][:option]       = params[:option]
-    session[:csv][:table_header] = params[:table_header].map { |k, v| v }
-    session[:csv][:method]       = params[:method].map { |k, v| v }
-    session[:csv][:result]       = {}
-    @csv = session[:csv]
-
-    # 項目設定がされているか
-    matchings = []
-    @csv[:table_header].each.with_index do |h, i|
-      matchings << {table_header: h, i: i } if h.present? && @csv[:method][i] == "matching"
-    end
-
-    raise "マッチング項目が設定されていません" if matchings.blank? && @csv[:option][:unmatch] != "new"
-
-    ctd = @klass.arel_table
-    ss  = @table.spreadsheet(@csv[:path], @csv[:original_filename])
-    (2..ss.last_row).each do |r|
-      d = ss.row(r)
-
-      ### すべて空白の列は無視 ###
-      next if d.all?(&:blank?)
-
-      ### マッチング処理 ###
-      if matchings.present?
-        # マッチングするためのフィルタリング
-        values = @table.filter(matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h)
-
-        if values.has_value? ""
-          count = :skip
-        else
-          # AND条件マッチング
-          if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
-            res = @klass.where(values)
-          end
-
-          # OR条件マッチング
-          if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
-            cond = nil
-            values.each do |k, v|
-              cond = cond ? cond.or(ctd[k].eq(v)) : ctd[k].eq(v)
-            end
-            res = @klass.where(cond)
-          end
-
-          match_ids = res.limit(10).pluck(:id)
-          count     = match_ids.count
-        end
-
-        ### マッチング結果 ###
-        title, data = case count
-        when 1 # マッチ
-          [:match, res.first]
-        when 0 # マッチしない
-          if @csv[:option][:unmatch] == "new"
-            [:new, @klass.new] # 新規登録
-          else
-            [:none, nil]
-          end
-        when :skip # スキップ
-          if @csv[:option][:unmatch] == "new"
-            [:new, @klass.new] # 新規登録
-          else
-            [:skip, nil]
-          end
-        else
-          [:overlap, nil]
-        end
-      else
-        title, data = [:new, @klass.new] # 新規登録
-      end
-
-      ### バリデーション ###
-      if data.present?
-        @csv[:header].each_with_index do |h, i|
-          next if @csv[:table_header][i].blank?
-
-          # データ(バリデーション用に)格納
-          if @csv[:method][i] == "update" \
-             || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
-             || (@csv[:method][i] == "matching" && title == :new && @csv[:table_header][i] != "id")
-            data[@csv[:table_header][i]] = d[i]
-          end
-        end
-
-        # バリデーション(saveはまだしない)
-        data.valid?
-        if data.errors.messages.present?
-          title = :notvalid
-          error = data.errors.messages.map do |k, v|
-            v.map { |mes| "#{k} #{mes}" }.join("\n")
-          end.join("\n")
-        end
-      end
-
-      session[:csv][:result][r] = [title, match_ids, error]
-    end
-
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/"
-  rescue => e
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/", alert: e.message
-  end
-
-  def csv_confirm
-  end
-
-  def csv_update
-    ss  = @table.spreadsheet(@csv[:path], @csv[:original_filename])
-
-    @klass.transaction do
-      @csv[:result].each do |k, v|
-        # 保存先取得
-        data = case v[0]
-        when :new;   @klass.new
-        when :match; @klass.find(v[1].first)
-        else nil
-        end
-
-        # CSVデータ取得
-        d = ss.row(k)
-
-        next unless data && d
-
-        # データ保存部分
-        @csv[:header].each_with_index do |h, i|
-          next if @csv[:table_header][i].blank?
-
-          if @csv[:method][i] == "update" \
-             || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
-             || (@csv[:method][i] == "matching" && v[0] == :new && @csv[:table_header][i] != "id")
-            data[@csv[:table_header][i]] = d[i]
-          end
-        end
-
-        data.save!
-      end
-    end
-
-    # 保存済のCSV情報をクリア
-    session[:csv] = nil
-    ActiveRecord::Base.connection.execute("VACUUM;")
-    # ActiveRecord::Base.connection.execute("REINDEX;")
-
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "データをテーブルに反映しました"
-  rescue => e
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/", alert: e.message
-  end
-
-  def csv_error
-    respond_to do |format|
-      format.csv { send_data render_to_string,
-        content_type: 'text/csv;charset=shift_jis',
-        filename: "error_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
-      }
-    end
-  end
+  # def csv
+  # end
+  #
+  # def csv_upload
+  #   ss = @table.spreadsheet(params[:file].path, params[:file].original_filename)
+  #
+  #   session[:csv] = {
+  #     header: ss.row(1).map { |v| v.to_s.normalize_charwidth.strip },
+  #     first:  ss.row(2).map { |v| v.to_s.normalize_charwidth.strip },
+  #
+  #     path:               params[:file].path,
+  #     original_filename:  params[:file].original_filename,
+  #     count:              ss.last_row - 1,
+  #
+  #     table_header: [],
+  #     method:       [],
+  #     option:       {},
+  #     result:       {}
+  #   }
+  #
+  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/"
+  # end
+  #
+  # def csv_matching
+  # end
+  #
+  # def csv_matching_check
+  #   session[:csv][:option]       = params[:option]
+  #   session[:csv][:table_header] = params[:table_header].map { |k, v| v }
+  #   session[:csv][:method]       = params[:method].map { |k, v| v }
+  #   session[:csv][:result]       = {}
+  #   @csv = session[:csv]
+  #
+  #   # 項目設定がされているか
+  #   matchings = []
+  #   @csv[:table_header].each.with_index do |h, i|
+  #     matchings << {table_header: h, i: i } if h.present? && @csv[:method][i] == "matching"
+  #   end
+  #
+  #   raise "マッチング項目が設定されていません" if matchings.blank? && @csv[:option][:unmatch] != "new"
+  #
+  #   ctd = @klass.arel_table
+  #   ss  = @table.spreadsheet(@csv[:path], @csv[:original_filename])
+  #   (2..ss.last_row).each do |r|
+  #     d = ss.row(r)
+  #
+  #     ### すべて空白の列は無視 ###
+  #     next if d.all?(&:blank?)
+  #
+  #     ### マッチング処理 ###
+  #     if matchings.present?
+  #       # マッチングするためのフィルタリング
+  #       values = @table.filter(matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h)
+  #
+  #       if values.has_value? ""
+  #         count = :skip
+  #       else
+  #         # AND条件マッチング
+  #         if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
+  #           res = @klass.where(values)
+  #         end
+  #
+  #         # OR条件マッチング
+  #         if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
+  #           cond = nil
+  #           values.each do |k, v|
+  #             cond = cond ? cond.or(ctd[k].eq(v)) : ctd[k].eq(v)
+  #           end
+  #           res = @klass.where(cond)
+  #         end
+  #
+  #         match_ids = res.limit(10).pluck(:id)
+  #         count     = match_ids.count
+  #       end
+  #
+  #       ### マッチング結果 ###
+  #       title, data = case count
+  #       when 1 # マッチ
+  #         [:match, res.first]
+  #       when 0 # マッチしない
+  #         if @csv[:option][:unmatch] == "new"
+  #           [:new, @klass.new] # 新規登録
+  #         else
+  #           [:none, nil]
+  #         end
+  #       when :skip # スキップ
+  #         if @csv[:option][:unmatch] == "new"
+  #           [:new, @klass.new] # 新規登録
+  #         else
+  #           [:skip, nil]
+  #         end
+  #       else
+  #         [:overlap, nil]
+  #       end
+  #     else
+  #       title, data = [:new, @klass.new] # 新規登録
+  #     end
+  #
+  #     ### バリデーション ###
+  #     if data.present?
+  #       @csv[:header].each_with_index do |h, i|
+  #         next if @csv[:table_header][i].blank?
+  #
+  #         # データ(バリデーション用に)格納
+  #         if @csv[:method][i] == "update" \
+  #            || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
+  #            || (@csv[:method][i] == "matching" && title == :new && @csv[:table_header][i] != "id")
+  #           data[@csv[:table_header][i]] = d[i]
+  #         end
+  #       end
+  #
+  #       # バリデーション(saveはまだしない)
+  #       data.valid?
+  #       if data.errors.messages.present?
+  #         title = :notvalid
+  #         error = data.errors.messages.map do |k, v|
+  #           v.map { |mes| "#{k} #{mes}" }.join("\n")
+  #         end.join("\n")
+  #       end
+  #     end
+  #
+  #     session[:csv][:result][r] = [title, match_ids, error]
+  #   end
+  #
+  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/"
+  # rescue => e
+  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/", alert: e.message
+  # end
+  #
+  # def csv_confirm
+  # end
+  #
+  # def csv_update
+  #   ss  = @table.spreadsheet(@csv[:path], @csv[:original_filename])
+  #
+  #   @klass.transaction do
+  #     @csv[:result].each do |k, v|
+  #       # 保存先取得
+  #       data = case v[0]
+  #       when :new;   @klass.new
+  #       when :match; @klass.find(v[1].first)
+  #       else nil
+  #       end
+  #
+  #       # CSVデータ取得
+  #       d = ss.row(k)
+  #
+  #       next unless data && d
+  #
+  #       # データ保存部分
+  #       @csv[:header].each_with_index do |h, i|
+  #         next if @csv[:table_header][i].blank?
+  #
+  #         if @csv[:method][i] == "update" \
+  #            || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
+  #            || (@csv[:method][i] == "matching" && v[0] == :new && @csv[:table_header][i] != "id")
+  #           data[@csv[:table_header][i]] = d[i]
+  #         end
+  #       end
+  #
+  #       data.save!
+  #     end
+  #   end
+  #
+  #   # 保存済のCSV情報をクリア
+  #   session[:csv] = nil
+  #   ActiveRecord::Base.connection.execute("VACUUM;")
+  #   # ActiveRecord::Base.connection.execute("REINDEX;")
+  #
+  #   redirect_to "/bamember/clients/#{@table.client.id}/", notice: "データをテーブルに反映しました"
+  # rescue => e
+  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/", alert: e.message
+  # end
+  #
+  # def csv_error
+  #   respond_to do |format|
+  #     format.csv { send_data render_to_string,
+  #       content_type: 'text/csv;charset=shift_jis',
+  #       filename: "error_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
+  #     }
+  #   end
+  # end
 
   def import_file
     @csvfiles = @table.csvfiles.without_soft_destroyed.order(created_at: :desc).page(params[:page])
@@ -503,13 +520,13 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @company_table = @client.company_table
   end
 
-  def check_session_spreadseet
-    if session[:csv][:header].blank?
-      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv/", alert: 'ファイルがアップロードされていません'
-    end
-
-    @csv = session[:csv]
-  end
+  # def check_session_spreadseet
+  #   if session[:csv][:header].blank?
+  #     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv/", alert: 'ファイルがアップロードされていません'
+  #   end
+  #
+  #   @csv = session[:csv]
+  # end
 
   def client_table_params
     params.require(:client_table).permit(:name, client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :sumally, :order_no, :_destroy])

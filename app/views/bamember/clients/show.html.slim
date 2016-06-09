@@ -16,7 +16,7 @@
       / td = link_to "インポート", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/csv/"
       td = link_to "インポート", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/import_file/"
       td = link_to "履歴",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/import_log/"
-      td = link_to "一括削除",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/bulk_delete/"
+      td = link_to "一括処理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/bulk/"
       td = link_to "項目管理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/edit/"
       td = link_to "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search.csv?all=1", class: "btn btn-warning" do
         span.glyphicon.glyphicon-save-file
@@ -34,7 +34,7 @@
         / td = link_to "インポート",   "/bamember/clients/#{@client.id}/table/#{t.id}/csv/"
         td = link_to "インポート",   "/bamember/clients/#{@client.id}/table/#{t.id}/import_file/"
         td = link_to "履歴",         "/bamember/clients/#{@client.id}/table/#{t.id}/import_log/"
-        td = link_to "一括削除",     "/bamember/clients/#{@client.id}/table/#{t.id}/bulk_delete/"
+        td = link_to "一括処理",     "/bamember/clients/#{@client.id}/table/#{t.id}/bulk/"
         td = link_to "項目管理",     "/bamember/clients/#{@client.id}/table/#{t.id}/edit/"
         td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/search.csv?all=1", class: "btn btn-warning" do
           span.glyphicon.glyphicon-save-file
@@ -43,7 +43,9 @@
           span.glyphicon.glyphicon-remove
           =< "削除"
         
-  ul.nav.nav-stacked
+  
+  ul.nav.nav-pills
     li = link_to "テーブルを追加",       "/bamember/clients/#{@client.id}/table/new"
+    li = link_to "PowerBI連携",          "/bamember/clients/#{@client.id}/bi"
     li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
     li = link_to "パスワード変更",       "/bamember/clients/#{@client.id}/edit_password"

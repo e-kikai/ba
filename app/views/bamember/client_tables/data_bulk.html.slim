@@ -1,0 +1,82 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name}テーブル 一括削除"
+- breadcrumb  :clients_search, @table
+
+coffee:
+  $ ->
+    ### 事前バックアップ ###
+    $('.btn.backup').click ->
+      $('.btn.destroy').prop("disabled", false)
+    
+sass:
+  .hidden-area
+    display: none
+  
+#serach_form.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+  .modal-dialog
+    .modal-content
+      .modal-header
+        = button_tag type: :button, class: :close, data: { dismiss: :modal } do
+          span.glyphicon.glyphicon-remove
+        h4 一括条件フォーム
+      .modal-body
+        = form_tag({}, method: :get) do
+          = render "client_tables/search_form", table: @table, status: params[:s]
+          
+          .form-group
+            = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
+              span.glyphicon.glyphicon-search
+              =< "条件を変更"
+
+.col-md-6.col-md-offset-3
+  
+  .panel.panel-default style="margin-top: 16px;"
+    .panel-body
+      = form_tag({}, method: :patch) do
+        .hidden-area
+          = render "client_tables/search_form", status: params[:s], table: @table
+
+        - restext = Array(params[:s]).inject("") do |t, s|
+          - if s[:column_name].blank? || s[:cond].blank?
+            - t
+          - elsif !(s[:value].present? || ClientTable::COND_NOVALS.include?(s[:cond]))
+            - t
+          - else
+            - t << "かつ、" if t.present?
+            - t << "#{@table.columns_options.key(s[:column_name])}が"
+            - t << "「#{s[:value]}」" unless ClientTable::COND_NOVALS.include?(s[:cond])
+            - t << "#{ClientTable::CONDITIONS.key(s[:cond])}"
+           
+        h5
+          = "#{restext.presence || "全件処理"} : #{number_with_delimiter(@datas.count('id'))}件のデータを処理します"
+          = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
+            span.glyphicon.glyphicon-menu-hamburger
+            =< "一括条件を変更"
+            
+        .buttons
+          span.glyphicon.glyphicon-arrow-down
+          
+        .buttons
+          - method_options = [["▼処理を選択▼", ""], ["一括削除 : 条件にあったものをすべて削除します", :destroy], ["重複削除 : 重複したのものの中で一番古いもの以外を削除します(条件に「重複している」がある場合のみ)", :overlaps]]
+
+          = select_tag(:bulk_method, options_for_select(method_options, params[:bulk_method]),
+            class: "form-control child_column") 
+        .buttons
+          span.glyphicon.glyphicon-arrow-down
+        .buttons
+          = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search.csv?all=1", class: "btn btn-warning backup" do
+            span.glyphicon.glyphicon-save-file
+            =< "エクスポート"
+        .buttons
+          span.glyphicon.glyphicon-arrow-down
+        .buttons
+          - message = "一括変更を実行します\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
+          = button_tag data: { confirm: message, "disable-with" => "実行中..."}, class: "btn btn-success destroy", disabled: :true do
+            span.glyphicon.glyphicon-ok
+            =< "一括処理を実行"
+
+          / = button_tag data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-danger destroy", disabled: :true do
+          /   span.glyphicon.glyphicon-remove
+          /   =< "一括削除"
+          / = button_tag data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-danger destroy", disabled: :true do
+          /   span.glyphicon.glyphicon-remove
+          /   =< "重複削除(重複したのものの中で一番古いものを残します)"

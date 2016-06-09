@@ -1,0 +1,32 @@
+- set_meta_tags title: "#{@client.name} PowerBI連携"
+- breadcrumb  :clients_something, "PowerBI連携", @client
+    
+coffee:
+  $ ->
+    $('input.allselect').click ->
+      @.select()
+    
+.col-md-10.col-md-offset-1
+  table.table.table-striped.table-hover.table-responsive.tables
+    caption BA System ⇛ PowerBI : 各テーブルの連携URLをコピー -> PowerBIデスクトップのデータ追加 Webで読み込んで下さい
+    tr
+      td #{@client.company_table.name}テーブル
+      td.integer #{number_with_delimiter(@client.company_table.klass.count)}件
+      td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: @client.company_table.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect'
+
+    - @client.child_tables.each do |t|
+      tr
+        td #{t.name}テーブル
+        td.integer #{number_with_delimiter(t.klass.count)}件
+        td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: t.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect'
+.
+  .col-md-6
+    .panel.panel-default
+      .panel-body.embed-responsive.embed-responsive-16by9
+        <iframe class="embed-responsive-item" src="https://app.powerbi.com/view?r=eyJrIjoiY2JhYTYxOGQtNjFhMy00MDg0LTkyOTgtMGY3MmFhODc3YWI4IiwidCI6ImM2YzA0ZjkyLWM0YWYtNDllYS04NTE5LTFjZDBiNzNjYmMzNyIsImMiOjEwfQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>
+        
+        
+  .col-md-6
+    .panel.panel-default
+      .panel-body.embed-responsive.embed-responsive-16by9
+        <iframe class="embed-responsive-item" src="http://www.yahoo.co.jp/" frameborder="0" allowfullscreen="true"></iframe>

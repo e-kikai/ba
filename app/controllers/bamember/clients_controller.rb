@@ -1,7 +1,10 @@
 class Bamember::ClientsController < Bamember::ApplicationController
-  before_action :get_client, only: ["show", "edit", "update", "destroy", "edit_password", "update_password"]
+  before_action :get_client, only: ["show", "edit", "update", "destroy", "edit_password", "update_password", :bi]
 
   def show
+  end
+
+  def bi
   end
 
   def new
