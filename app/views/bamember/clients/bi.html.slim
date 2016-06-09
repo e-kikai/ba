@@ -6,27 +6,45 @@ coffee:
     $('input.allselect').click ->
       @.select()
     
-.col-md-10.col-md-offset-1
+.col-md-8.col-md-offset-2
   table.table.table-striped.table-hover.table-responsive.tables
-    caption BA System ⇛ PowerBI : 各テーブルの連携URLをコピー -> PowerBIデスクトップのデータ追加 Webで読み込んで下さい
+    caption BA System ⇛ PowerBI : 連携URLをコピー -> PowerBIデスクトップのデータ追加 -> WEBから読み込んで下さい
     tr
       td #{@client.company_table.name}テーブル
       td.integer #{number_with_delimiter(@client.company_table.klass.count)}件
-      td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: @client.company_table.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect'
+      td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: @client.company_table.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect url_form'
 
     - @client.child_tables.each do |t|
       tr
         td #{t.name}テーブル
         td.integer #{number_with_delimiter(t.klass.count)}件
-        td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: t.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect'
-.
-  .col-md-6
-    .panel.panel-default
-      .panel-body.embed-responsive.embed-responsive-16by9
-        <iframe class="embed-responsive-item" src="https://app.powerbi.com/view?r=eyJrIjoiY2JhYTYxOGQtNjFhMy00MDg0LTkyOTgtMGY3MmFhODc3YWI4IiwidCI6ImM2YzA0ZjkyLWM0YWYtNDllYS04NTE5LTFjZDBiNzNjYmMzNyIsImMiOjEwfQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>
+        td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: t.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect url_form'
+
+.col-md-10.col-md-offset-1
+  - if @client.errors.any?
+    .alert.alert-danger
+      ul
+        - @table.errors.full_messages.each do |msg|
+          li = msg
+  = nested_form_for(@client, class: 'form-horizontal', role: 'form', url: {action: 'bi_update'}, method: :patch)  do |f|
+    table#dashboards.table.table-striped.table-hover.table-responsive.edit
+      caption PowerBI ⇛ BA System : Web版のレポート -> ファイル -> Webに公開から、URLをコピーして以下に入力して下さい
+      tr
+        th タイトル
+        th URL
+        th サイズ
+        th 並び順
+        th
+    
+      = f.fields_for :dashboards, wrapper: false do |da|
+        = render "dashboard_fields", f: da
+    
+    = f.link_to_add :dashboards, class: "btn btn-default", data: { target: "#dashboards"} do
+      span.glyphicon.glyphicon-plus
+      =< "追加"
+    
+    .buttons
+      = f.button data: { "disable-with" => "反映中..."}, class: "btn btn-success submit" do
+        span.glyphicon.glyphicon-save
+        =< "ダッシュボードを反映"
         
-        
-  .col-md-6
-    .panel.panel-default
-      .panel-body.embed-responsive.embed-responsive-16by9
-        <iframe class="embed-responsive-item" src="http://www.yahoo.co.jp/" frameborder="0" allowfullscreen="true"></iframe>

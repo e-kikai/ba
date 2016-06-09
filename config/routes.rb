@@ -32,7 +32,8 @@ Rails.application.routes.draw do
     patch  'clients/:id/edit_password' => 'clients#update_password'
 
     get    'clients/:id/bi'            => 'clients#bi'
-
+    patch  'clients/:id/bi'            => 'clients#bi_update'
+    
     get    'clients/:client_id/table/new'              => 'client_tables#new'
     post   'clients/:client_id/table/'                 => 'client_tables#create'
     get    'clients/:client_id/table/:id/search'       => 'client_tables#search'

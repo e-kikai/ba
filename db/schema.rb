@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160524074949) do
+ActiveRecord::Schema.define(version: 20160609151108) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -586,8 +586,8 @@ ActiveRecord::Schema.define(version: 20160524074949) do
   add_index "c28_20160324171635_575", ["name"], name: "index_c28_20160324171635_575_on_name", using: :btree
 
   create_table "c28_companies", force: :cascade do |t|
-    t.datetime "created_at",        null: false
-    t.datetime "updated_at",        null: false
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
     t.datetime "soft_destroyed_at"
     t.string   "name"
     t.string   "pref"
@@ -600,9 +600,11 @@ ActiveRecord::Schema.define(version: 20160524074949) do
     t.string   "status"
     t.string   "target"
     t.string   "influx"
+    t.string   "co_20160525112051_213"
   end
 
   add_index "c28_companies", ["address"], name: "index_c28_companies_on_address", using: :btree
+  add_index "c28_companies", ["co_20160525112051_213"], name: "index_c28_companies_on_co_20160525112051_213", using: :btree
   add_index "c28_companies", ["fax"], name: "index_c28_companies_on_fax", using: :btree
   add_index "c28_companies", ["influx"], name: "index_c28_companies_on_influx", using: :btree
   add_index "c28_companies", ["mail"], name: "index_c28_companies_on_mail", using: :btree
@@ -1308,6 +1310,19 @@ ActiveRecord::Schema.define(version: 20160524074949) do
   end
 
   add_index "csvfiles", ["client_table_id"], name: "index_csvfiles_on_client_table_id", using: :btree
+
+  create_table "dashboards", force: :cascade do |t|
+    t.string   "name"
+    t.string   "url"
+    t.integer  "size"
+    t.integer  "order_no"
+    t.integer  "client_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+  end
+
+  add_index "dashboards", ["client_id"], name: "index_dashboards_on_client_id", using: :btree
 
   create_table "imports", force: :cascade do |t|
     t.text     "matching_params"

@@ -1,10 +1,18 @@
 class Bamember::ClientsController < Bamember::ApplicationController
-  before_action :get_client, only: ["show", "edit", "update", "destroy", "edit_password", "update_password", :bi]
+  before_action :get_client, only: ["show", "edit", "update", "destroy", "edit_password", "update_password", :bi, :bi_update]
 
   def show
   end
 
   def bi
+  end
+
+  def bi_update
+    if @client.update(bi_params)
+      redirect_to "/bamember/clients/#{@client.id}/", notice: "ダッシュボードを変更しました"
+    else
+      render :bi
+    end
   end
 
   def new
@@ -70,5 +78,9 @@ class Bamember::ClientsController < Bamember::ApplicationController
 
   def password_params
     params.require(:client).permit(:password, :password_confirmation)
+  end
+
+  def bi_params
+    params.require(:client).permit(dashboards_attributes: [:id, :name, :url, :size, :order_no, :_destroy])
   end
 end

@@ -1,0 +1,8 @@
+tr.fields
+  td = f.text_field :name,     class: "form-control"
+  td = f.text_field :url,      class: "form-control url_form"
+  td = f.select :size, 4..12, {}, class: "form-control"
+  td = f.text_field :order_no, class: "form-control order_no"
+  td = f.link_to_remove class: "btn btn-danger" do
+    span.glyphicon.glyphicon-remove
+    =< "削除"

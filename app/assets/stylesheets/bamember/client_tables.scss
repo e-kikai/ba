@@ -41,10 +41,6 @@ table.search-table {
   .zip {
     white-space: nowrap;
   }
-
-  .zip {
-    white-space: nowrap;
-  }
 }
 
 .percent {
@@ -91,10 +87,20 @@ table.edit td {
     width: 150px;
   }
 
-  input.order_no {
-    width: 76px;
-    text-align: right;
+  input {
+    &.order_no {
+      width: 76px;
+      text-align: right;
+    }
+
+    &.url_form {
+      width: 500px;
+    }
   }
+}
+
+input.url_form {
+  width: 500px;
 }
 
 table.tables tbody tr td {
