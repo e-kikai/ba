@@ -2,7 +2,8 @@ coffee:
   $ ->
     $_blank = $('.form-group.blank').clone()
     
-    $(document).on 'click', 'button.add', ->
+    # $(document).on 'click', 'button.add', ->
+    $('button.add').click ->
       $('.add-group').before($_blank.clone())
 
 h4 検索条件
