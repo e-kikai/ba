@@ -1,8 +1,7 @@
 coffee:
   $ ->
-    $_blank = $('.form-group.blank').clone()
+    $_blank = $('.form-group.blank').first().clone()
     
-    # $(document).on 'click', 'button.add', ->
     $('button.add').click ->
       $('.add-group').before($_blank.clone())
 

@@ -124,22 +124,29 @@ module ClientTableDataModule
         end
       end
 
+      res = search(search_query).result
+
       ### 重複検索(検索フィルタリング後に行う) ###
-      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }
+      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }.reject(&:blank?)
       if overlaps.present?
-        temp_in = search(search_query).result.group(overlaps).having("count(*) > 1")
-          .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
-        search_query["id_in"] = temp_in.presence || "xxxnoaxxx"
+        # temp_in = search(search_query).result.group(overlaps).having("count(*) > 1")
+        #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
+        # search_query["id_in"] = temp_in.presence || "xxxnoaxxx"
+
+        res = res.where("(#{overlaps.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).to_sql})")
       end
 
-      uniques  = Array(search_params).select { |s| s[:cond] == "unique"}.map { |s| s[:column_name] }
+      uniques  = Array(search_params).select { |s| s[:cond] == "unique"}.map { |s| s[:column_name] }.reject(&:blank?)
       if uniques.present?
-        temp_in = search(search_query).result.group(uniques).having("count(*) > 1")
-          .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
-        search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
+        # temp_in = search(search_query).result.group(uniques).having("count(*) > 1")
+        #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
+        # search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
+
+        res = res.where("(#{uniques.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).to_sql})")
       end
 
-      search(search_query).result
+      # search(search_query).result
+      res
     }
 
     scope :table_order, -> (order_params) {
@@ -236,12 +243,8 @@ module ClientTableDataModule
       data = table_search(search_params)
 
       transaction do
-        data.each do |d|
-          d.soft_destroy!
-        end
+        data.update_all(soft_destroyed_at: Time.now)
       end
-
-      data.count
     end
 
     # 重複一括削除
@@ -249,25 +252,16 @@ module ClientTableDataModule
     # @param  [Hash]    search_params 検索条件パラメータ
     # @return [Integer] 削除件数
     def overlaps_destroy(search_params)
-      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }
+      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }.reject(&:blank?)
 
-      raise "重複条件がありません" if overlap.blank?
+      raise "重複条件がありません" if overlaps.blank?
 
-      data_groups = table_search(search_params).order(:id).group_by(overlaps)
-      count = 0
+      data     = table_search(search_params)
+      keep_ids = data.group(overlaps).minimum(:id).values
 
       transaction do
-        data_groups.each do |group|
-          group.each.with_index do |d, i|
-            next if i == 0
-            d.soft_destroy!
-            count += 1
-          end
-        end
+        data.where.not(id: keep_ids).update_all(soft_destroyed_at: Time.now)
       end
-
-      count
     end
-
   end
 end

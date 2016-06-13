@@ -49,10 +49,12 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def data_bulk_update
     count = case params[:bulk_method]
-    when :destroy
+    when "destroy"
       @klass.bulk_destroy(params[:s])
-    when :overlaps
+    when "overlaps"
       @klass.overlaps_destroy(params[:s])
+    else
+      raise "処理が選択されていません"
     end
 
     redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのデータ#{count}件を一括削除しました"
@@ -60,7 +62,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @datas = @klass.table_search(params[:s])
 
     flash[:alert] = "データの一括処理に失敗しました : #{e.message}"
-    render :data_bulk_delete
+    render :data_bulk
   end
 
   # PoweBI用CSV出力

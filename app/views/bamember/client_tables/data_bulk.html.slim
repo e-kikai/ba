@@ -31,10 +31,7 @@ sass:
   
   .panel.panel-default style="margin-top: 16px;"
     .panel-body
-      = form_tag({}, method: :patch) do
-        .hidden-area
-          = render "client_tables/search_form", status: params[:s], table: @table
-
+      = form_tag(params, method: :patch) do
         - restext = Array(params[:s]).inject("") do |t, s|
           - if s[:column_name].blank? || s[:cond].blank?
             - t
@@ -70,13 +67,6 @@ sass:
           span.glyphicon.glyphicon-arrow-down
         .buttons
           - message = "一括変更を実行します\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
-          = button_tag data: { confirm: message, "disable-with" => "実行中..."}, class: "btn btn-success destroy", disabled: :true do
+          = button_tag data: { confirm: message, "disable-with" => "実行中..."}, class: "btn btn-success destroy" do
             span.glyphicon.glyphicon-ok
             =< "一括処理を実行"
-
-          / = button_tag data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-danger destroy", disabled: :true do
-          /   span.glyphicon.glyphicon-remove
-          /   =< "一括削除"
-          / = button_tag data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-danger destroy", disabled: :true do
-          /   span.glyphicon.glyphicon-remove
-          /   =< "重複削除(重複したのものの中で一番古いものを残します)"
