@@ -72,7 +72,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     respond_to do |format|
       format.csv  {
-        send_data(render_to_string("client_tables/search_utf8.csv.ruby"),
+        send_data(render_to_string("client_tables/search.csv.ruby"),
           content_type: 'text/csv;charset=shift_jis',
           filename:     "bi_csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
         )
