@@ -14,7 +14,7 @@ sass:
       td = link_to "検索",         "/client_tables/#{@client.company_table.id}/search/"
       td = link_to "集計",         "/client_tables/#{@client.company_table.id}/sum/"
       td
-      td = link_to "/client_tables/#{@client.company_table.id}/search.csv", class: "btn btn-success" do
+      td = link_to "/client_tables/#{@client.company_table.id}/search.csv", class: "btn btn-warning" do
         span.glyphicon.glyphicon-save-file
         =< "エクスポート"
 
@@ -25,11 +25,24 @@ sass:
         td = link_to "検索",         "/client_tables/#{t.id}/search/"
         td = link_to "集計",         "/client_tables/#{t.id}/sum/"
         td = link_to "RFM",          "/client_tables/#{t.id}/rfm/"
-        td = link_to "/client_tables/#{t.id}/search.csv", class: "btn btn-success" do
+        td = link_to "/client_tables/#{t.id}/search.csv", class: "btn btn-warning" do
           span.glyphicon.glyphicon-save-file
           =< "エクスポート"
         
-  ul.nav.nav-stacked
+  ul.nav.nav-pills
     / li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
     li = link_to "パスワード変更", "/client/edit_password"
     li = link_to "ログアウト",     "/client/logout", method: :delete
+    
+.col-md-12
+  - @client.dashboards.each do |da|
+    div class="col-md-#{da.size.presence || 4}"
+      .panel.panel-default
+        .panel-heading
+          = da.name
+          
+          .pull-right =< link_to da.url, target: :_blank do
+            span.glyphicon.glyphicon-resize-full
+          end
+        .panel-body.embed-responsive.embed-responsive-4by3
+          iframe.embed-responsive-item src="#{da.url}" frameborder="0" allowFullScreen="true"
