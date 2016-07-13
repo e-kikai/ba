@@ -1,0 +1,19 @@
+- set_meta_tags title: "#{@table.name} テーブル"
+- breadcrumb    :client_root, @client
+
+.col-md-6.col-md-offset-1
+  table.table.table-striped.table-hover.table-responsive#menu_table
+    caption #{@table.name}テーブル #{@table.klass.count}件
+    tr
+      td = link_to "検索",         "/client_tables/#{@table.id}/search/"
+      td = link_to "集計",         "/client_tables/#{@table.id}/sum/"
+      td
+      td = link_to "/client_tables/#{@table.id}/search.csv", class: "btn btn-warning" do
+        span.glyphicon.glyphicon-save-file
+        =< "エクスポート"
+    
+.col-md-12
+  = render "client_tables/summary", table: @table
+  
+.col-md-12
+  = render "client_tables/dashboard", table: @table

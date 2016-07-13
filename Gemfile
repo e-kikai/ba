@@ -20,6 +20,8 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
+gem 'jquery-turbolinks'
+
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
@@ -99,6 +101,9 @@ source 'https://rails-assets.org' do
   # gem 'rails-assets-fontawesome'
   # gem 'rails-assets-jquery.lazyload'
   gem 'rails-assets-bootstrap-fileinput'
+  gem 'rails-assets-bootstrap-select'
+  gem 'rails-assets-bootstrap3-datetimepicker'
+  gem 'rails-assets-moment'
 end
 
 gem 'meta-tags'

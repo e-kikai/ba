@@ -1,3 +1,189 @@
 // Place all the styles related to the client_tables controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+table.search-table {
+  th {
+    white-space: nowrap;
+
+    &.company {
+      min-width: 200px;
+      width: 210px;
+    }
+
+    &.tel {
+      width: 100px
+    }
+  }
+
+  td {
+    &.id {
+      text-align: right;
+    }
+
+    &.icon {
+      text-align: center;
+      &.delete a {
+        color: #900;
+      }
+
+      &.edit a {
+        color: #090;
+      }
+    }
+    &.company {
+      min-width: 200px;
+      width: 210px;
+    }
+
+    &.address {
+      min-width: 300px;
+    }
+
+    &.company_id {
+      text-align: left;
+    }
+
+    &.tel {
+      width: 100px
+    }
+  }
+
+  th.datetime, td.datetime {
+    white-space: nowrap;
+  }
+
+  .zip {
+    white-space: nowrap;
+  }
+}
+
+table.sum-table {
+  th.y {
+    min-width: 150px;
+  }
+}
+
+.hotspots .form-control {
+  width: 48%;
+}
+
+.search-menu .btn {
+  margin-right: 4px;
+}
+
+#serach_form {
+  .my-group {
+    margin: 2px 0;
+  }
+
+  .form-group {
+    margin-bottom: 0;
+    padding: 0 4px 0 0;
+
+    .col-md-4, .col-md-5, .col-md-7, .col-md-2, .col-md-3, .col-md-6, .col-md-1, .col-md-8, .col-md-9, .col-md-12 {
+      padding: 0 4px 4px 0;
+    }
+
+    h5 {
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+
+  hr {
+    clear: both;
+  }
+
+  br {
+    clear: both;
+  }
+}
+
+.percent {
+  color: #777;
+  font-size: 90%;
+}
+
+hr {
+  border-top-color: #666;
+}
+
+nav.affix-nav {
+  background: #EEE;
+  padding: 8px;
+}
+
+.integer, .float {
+  text-align: right;
+}
+
+table#menu_table {
+  tr td {
+    vertical-align: middle;
+  }
+}
+
+
+#modal_company {
+  overflow: scroll;
+}
+
+.buttons {
+  text-align: center;
+
+  a, button {
+    margin: 0 4px;
+  }
+}
+
+table.edit td {
+  input[type=text] {
+    width: 150px;
+  }
+
+  textarea.selector {
+    width: 120px;
+    height: 150px;
+  }
+
+  select.column_type {
+    width: 150px;
+  }
+
+  input {
+    &.order_no {
+      width: 76px;
+      text-align: right;
+    }
+
+    &.url_form {
+      width: 500px;
+    }
+  }
+}
+
+input.url_form {
+  width: 500px;
+}
+
+table.tables tbody tr td {
+  vertical-align: middle;
+}
+
+.page-area {
+  margin-bottom: 2px;
+
+  .pagination {
+    margin: 0;
+    vertical-align: bottom;
+    margin-right: 4px;
+  }
+
+  .btn {
+    margin-right: 4px;
+  }
+}
+
+.scroll_div {
+  overflow: auto;
+}

@@ -80,72 +80,142 @@ module ClientTableDataModule
     }
 
     # ransackによる検索
-    scope :table_search, -> (search_params) {
+    # scope :table_search, -> (search_params) {
+    #   search_query = {}
+    #   Array(search_params).each do |s|
+    #     next if s[:column_name].blank? || s[:cond].blank?
+    #
+    #     ### 値の整形 ###
+    #     value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
+    #     value = value.split(" ") if %w(in not_in cont_any not_cont_any).include? s[:cond]
+    #
+    #     co = client_table.client_columns.find_by(column_name: s[:column_name])
+    #
+    #     cond = if !co || co.numeric? || co.datetime?
+    #       case s[:cond]
+    #       when "cont","start", "end";              "eq"
+    #       when "not_cont", "not_start", "not_end"; "not_eq"
+    #       when "cont_any";                         "in"
+    #       when "not_cont_any";                     "not_in"
+    #       when "present";                          "not_null"
+    #       when "blank";                            "null"
+    #       when "overlap","unique";                 "not_null"
+    #       else                                     s[:cond]
+    #       end
+    #     else
+    #       case s[:cond]
+    #       when "overlap","unique"; "present"
+    #       else                     s[:cond]
+    #       end
+    #     end
+    #
+    #     value = if (["present", "blank", "null", "not_null"].include? cond)
+    #       true
+    #     elsif !co
+    #       value
+    #     elsif %w(in not_in cont_any not_cont_any).include? cond
+    #       value.map { |v| co.filter(v) }
+    #     else
+    #       co.filter(value)
+    #     end
+    #
+    #     if value.present?
+    #       search_query["#{s[:column_name]}_#{cond}"] = value
+    #     end
+    #   end
+    #
+    #   res = search(search_query).result
+    #
+    #   ### 重複検索(検索フィルタリング後に行う) ###
+    #   overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }.reject(&:blank?)
+    #   if overlaps.present?
+    #     # temp_in = search(search_query).result.group(overlaps).having("count(*) > 1")
+    #     #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
+    #     # search_query["id_in"] = temp_in.presence || "xxxnoaxxx"
+    #
+    #     res = res.where("(#{overlaps.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).to_sql})")
+    #   end
+    #
+    #   uniques  = Array(search_params).select { |s| s[:cond] == "unique"}.map { |s| s[:column_name] }.reject(&:blank?)
+    #   if uniques.present?
+    #     # temp_in = search(search_query).result.group(uniques).having("count(*) > 1")
+    #     #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
+    #     # search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
+    #
+    #     res = res.where("(#{uniques.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).to_sql})")
+    #   end
+    #
+    #   # search(search_query).result
+    #   res
+    # }
+
+    # ransackによる検索
+    scope :table_search_02, -> (search_params) {
+      # 検索条件の整形
+      shaping_params = shaping_params(search_params)
+
+      columns = client_table.client_columns_by_column_name
+
       search_query = {}
-      Array(search_params).each do |s|
-        next if s[:column_name].blank? || s[:cond].blank?
-
-        ### 値の整形 ###
-        value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
-        value = value.split(" ") if %w(in not_in cont_any not_cont_any).include? s[:cond]
-
-        co = client_table.client_columns.find_by(column_name: s[:column_name])
-
-        cond = if !co || co.numeric? || co.datetime?
-          case s[:cond]
-          when "cont","start", "end";              "eq"
-          when "not_cont", "not_start", "not_end"; "not_eq"
-          when "cont_any";                         "in"
-          when "not_cont_any";                     "not_in"
-          when "present";                          "not_null"
-          when "blank";                            "null"
-          when "overlap","unique";                 "not_null"
-          else                                     s[:cond]
+      shaping_params.each do |column_name, s|
+        if column_name == "blanks"
+          # 空白
+          s.each { |co2| search_query["#{co2}_blank"] = true }
+        elsif %w(overlaps uniques presents).include? column_name
+          # 存在
+          s.each do |co2|
+            co = columns[co2]
+            cond = (!co || co.numeric? || co.datetime?) ? "not_null" : "present"
+            search_query["#{co2}_#{cond}"] = true
           end
+        elsif column_name == "s"
+          search_query[:s] = s # ソート
         else
-          case s[:cond]
-          when "overlap","unique"; "present"
-          else                     s[:cond]
+          # その他,通常のカラム
+          next unless s.is_a? Hash
+
+          co = columns[column_name]
+
+          conds = s.key?(:v) ? {(s[:c].presence || "cont_any") => s[:v]} : s
+          conds.each do |cond, val|
+            ### 値の整形 ###
+            if val.is_a? Array
+              value = val.map { |v| co.filter(v) }
+            else
+              value = val.to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
+
+              value = if %w(in not_in cont_any not_cont_any start_any not_start_any end_any not_end_any).include? cond
+                value.split(" ").map { |v| co.filter(v) }
+              else
+                co.filter(value)
+              end
+            end
+
+            search_query["#{column_name}_#{cond}"] = value if value.present?
           end
-        end
-
-        value = if (["present", "blank", "null", "not_null"].include? cond)
-          true
-        elsif !co
-          value
-        elsif %w(in not_in cont_any not_cont_any).include? cond
-          value.map { |v| co.filter(v) }
-        else
-          co.filter(value)
-        end
-
-        if value.present?
-          search_query["#{s[:column_name]}_#{cond}"] = value
         end
       end
+
+      # raise search_query.to_s
 
       res = search(search_query).result
 
       ### 重複検索(検索フィルタリング後に行う) ###
-      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }.reject(&:blank?)
-      if overlaps.present?
-        # temp_in = search(search_query).result.group(overlaps).having("count(*) > 1")
-        #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
-        # search_query["id_in"] = temp_in.presence || "xxxnoaxxx"
-
-        res = res.where("(#{overlaps.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).to_sql})")
+      if Hash(search_params)["overlaps"].present?
+        overlaps = Array(search_params["overlaps"]).select { |co| columns[co].present? }
+        if overlaps.present?
+          res = res.where("(#{overlaps.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).reorder(overlaps).to_sql})")
+        end
       end
 
-      uniques  = Array(search_params).select { |s| s[:cond] == "unique"}.map { |s| s[:column_name] }.reject(&:blank?)
-      if uniques.present?
-        # temp_in = search(search_query).result.group(uniques).having("count(*) > 1")
-        #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
-        # search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
-
-        res = res.where("(#{uniques.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).to_sql})")
+      ### ユニーク検索(検索フィルタリング後に行う) ###
+      if Hash(search_params)["uniques"].present?
+        uniques = Array(search_params["uniques"]).select { |co| columns[co].present? }
+        if uniques.present?
+          res = res.where("(#{uniques.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).reorder(uniques).to_sql})")
+        end
       end
 
-      # search(search_query).result
       res
     }
 
@@ -158,15 +228,16 @@ module ClientTableDataModule
       end
     }
 
-    scope :table_sum, -> (sum_params = {}) do
-      tmp = self
+    scope :table_sum, -> (sum_params = []) do
+      tmp = all
+      columns = client_table.client_columns_by_column_name
 
       Array(sum_params).each do |s|
         next if s[:column].blank?
 
-        next unless co = client_table.client_columns.find_by(column_name: s[:column])
+        next unless co = columns[s[:column]]
 
-        if ["integer", "float", "yen"].include?(co.column_type)
+        if co.numeric?
           sepa = s[:sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s)
 
           casewhen = if sepa.blank?
@@ -247,21 +318,35 @@ module ClientTableDataModule
       end
     end
 
-    # 重複一括削除
-    #
-    # @param  [Hash]    search_params 検索条件パラメータ
-    # @return [Integer] 削除件数
-    def overlaps_destroy(search_params)
-      overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }.reject(&:blank?)
+    # 検索条件を整形
+    def shaping_params(search_params)
+      columns = client_table.client_columns_by_column_name
+      res = {}
 
-      raise "重複条件がありません" if overlaps.blank?
+      Hash(search_params).each do |column_name, s|
+        if s.is_a? Hash
+          # 検索対象のカラム
+          co = columns[column_name]
 
-      data     = table_search(search_params)
-      keep_ids = data.group(overlaps).minimum(:id).values
+          conds = s.key?("v") ? {(s["c"].presence || "cont_any") => s["v"]} : s
 
-      transaction do
-        data.where.not(id: keep_ids).update_all(soft_destroyed_at: Time.now)
+          res[column_name] = conds.map do |cond, val|
+            ### 値の整形 ###
+            unless val.is_a? Array
+              val = val.to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
+
+              val = val.split(" ") if ClientTable::COND_ARRAYS.include? cond
+            end
+
+            value = [cond, Array(val).map { |v| co.filter(v) }]
+          end.to_h
+        else
+          # 空白・重複・ソート
+          res[column_name] = Array(s).select { |co2| columns[co2].present? }
+        end
       end
+
+      res
     end
   end
 end

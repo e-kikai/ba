@@ -1,0 +1,34 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name}テーブル 検索条件一覧"
+- breadcrumb  :clients_table_something, "検索条件一覧", @table
+
+.col-md-10.col-md-offset-1
+  - if @table.errors.any?
+    .alert.alert-danger
+      ul
+        - @table.errors.full_messages.each do |msg|
+          li = msg
+  = nested_form_for(@table, class: 'form-horizontal', role: 'form', url: {action: 'searchurls_update'}, method: :patch)  do |f|
+    table#dashboards.table.table-striped.table-hover.table-responsive.edit
+      caption 検索条件
+      tr
+        th 
+        th 検索
+        th 登録日時
+        th 概要
+        th タイトル
+        th サイズ
+        th 並び順
+        th
+    
+      = f.fields_for :searchurls, wrapper: false do |da|
+        = render "searchurl_fields", f: da
+    
+    = f.link_to_add :searchurls, class: "btn btn-default", data: { target: "#dashboards"} do
+      span.glyphicon.glyphicon-plus
+      =< "追加"
+    
+    .buttons
+      = f.button data: { "disable-with" => "反映中..."}, class: "btn btn-success submit" do
+        span.glyphicon.glyphicon-save
+        =< "検索条件を反映"
+        

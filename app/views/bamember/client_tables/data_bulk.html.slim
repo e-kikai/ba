@@ -7,12 +7,8 @@ coffee:
     $('.btn.backup').click ->
       $('.btn.destroy').prop("disabled", false)
     
-sass:
-  .hidden-area
-    display: none
-  
 #serach_form.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
-  .modal-dialog
+  .modal-dialog.modal-lg
     .modal-content
       .modal-header
         = button_tag type: :button, class: :close, data: { dismiss: :modal } do
@@ -20,7 +16,7 @@ sass:
         h4 一括条件フォーム
       .modal-body
         = form_tag({}, method: :get) do
-          = render "client_tables/search_form", table: @table, status: params[:s]
+          = render "client_tables/search_form", table: @table, s: params[:s]
           
           .form-group
             = button_tag data: { "disable-with" => "検索中..."}, class: "btn btn-primary center-block" do
@@ -32,17 +28,18 @@ sass:
   .panel.panel-default style="margin-top: 16px;"
     .panel-body
       = form_tag(params, method: :patch) do
-        - restext = Array(params[:s]).inject("") do |t, s|
-          - if s[:column_name].blank? || s[:cond].blank?
-            - t
-          - elsif !(s[:value].present? || ClientTable::COND_NOVALS.include?(s[:cond]))
-            - t
-          - else
-            - t << "かつ、" if t.present?
-            - t << "#{@table.columns_options.key(s[:column_name])}が"
-            - t << "「#{s[:value]}」" unless ClientTable::COND_NOVALS.include?(s[:cond])
-            - t << "#{ClientTable::CONDITIONS.key(s[:cond])}"
-           
+      
+        / - restext = Array(params[:s]).inject("") do |t, s|
+        /   - if s[:column_name].blank? || s[:cond].blank?
+        /     - t
+        /   - elsif !(s[:value].present? || ClientTable::COND_NOVALS.include?(s[:cond]))
+        /     - t
+        /   - else
+        /     - t << "かつ、" if t.present?
+        /     - t << "#{@table.columns_options.key(s[:column_name])}が"
+        /     - t << "「#{s[:value]}」" unless ClientTable::COND_NOVALS.include?(s[:cond])
+        /     - t << "#{ClientTable::CONDITIONS.key(s[:cond])}"
+        - restext  = ""
         h5
           = "#{restext.presence || "全件処理"} : #{number_with_delimiter(@datas.count('id'))}件のデータを処理します"
           = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do

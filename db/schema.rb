@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160609151108) do
+ActiveRecord::Schema.define(version: 20160712151046) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -908,6 +908,37 @@ ActiveRecord::Schema.define(version: 20160609151108) do
   add_index "c32_companies", ["zip"], name: "index_c32_companies_on_zip", using: :btree
 
   create_table "c33_companies", force: :cascade do |t|
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.string   "pref"
+    t.string   "tel"
+    t.string   "fax"
+    t.string   "zip"
+    t.string   "address"
+    t.string   "mail"
+    t.string   "url"
+    t.string   "status"
+    t.string   "target"
+    t.string   "influx"
+    t.string   "co_20160620183052_925"
+  end
+
+  add_index "c33_companies", ["address"], name: "index_c33_companies_on_address", using: :btree
+  add_index "c33_companies", ["co_20160620183052_925"], name: "index_c33_companies_on_co_20160620183052_925", using: :btree
+  add_index "c33_companies", ["fax"], name: "index_c33_companies_on_fax", using: :btree
+  add_index "c33_companies", ["influx"], name: "index_c33_companies_on_influx", using: :btree
+  add_index "c33_companies", ["mail"], name: "index_c33_companies_on_mail", using: :btree
+  add_index "c33_companies", ["name"], name: "index_c33_companies_on_name", using: :btree
+  add_index "c33_companies", ["pref"], name: "index_c33_companies_on_pref", using: :btree
+  add_index "c33_companies", ["status"], name: "index_c33_companies_on_status", using: :btree
+  add_index "c33_companies", ["target"], name: "index_c33_companies_on_target", using: :btree
+  add_index "c33_companies", ["tel"], name: "index_c33_companies_on_tel", using: :btree
+  add_index "c33_companies", ["url"], name: "index_c33_companies_on_url", using: :btree
+  add_index "c33_companies", ["zip"], name: "index_c33_companies_on_zip", using: :btree
+
+  create_table "c34_companies", force: :cascade do |t|
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
     t.datetime "soft_destroyed_at"
@@ -924,17 +955,67 @@ ActiveRecord::Schema.define(version: 20160609151108) do
     t.string   "influx"
   end
 
-  add_index "c33_companies", ["address"], name: "index_c33_companies_on_address", using: :btree
-  add_index "c33_companies", ["fax"], name: "index_c33_companies_on_fax", using: :btree
-  add_index "c33_companies", ["influx"], name: "index_c33_companies_on_influx", using: :btree
-  add_index "c33_companies", ["mail"], name: "index_c33_companies_on_mail", using: :btree
-  add_index "c33_companies", ["name"], name: "index_c33_companies_on_name", using: :btree
-  add_index "c33_companies", ["pref"], name: "index_c33_companies_on_pref", using: :btree
-  add_index "c33_companies", ["status"], name: "index_c33_companies_on_status", using: :btree
-  add_index "c33_companies", ["target"], name: "index_c33_companies_on_target", using: :btree
-  add_index "c33_companies", ["tel"], name: "index_c33_companies_on_tel", using: :btree
-  add_index "c33_companies", ["url"], name: "index_c33_companies_on_url", using: :btree
-  add_index "c33_companies", ["zip"], name: "index_c33_companies_on_zip", using: :btree
+  add_index "c34_companies", ["address"], name: "index_c34_companies_on_address", using: :btree
+  add_index "c34_companies", ["fax"], name: "index_c34_companies_on_fax", using: :btree
+  add_index "c34_companies", ["influx"], name: "index_c34_companies_on_influx", using: :btree
+  add_index "c34_companies", ["mail"], name: "index_c34_companies_on_mail", using: :btree
+  add_index "c34_companies", ["name"], name: "index_c34_companies_on_name", using: :btree
+  add_index "c34_companies", ["pref"], name: "index_c34_companies_on_pref", using: :btree
+  add_index "c34_companies", ["status"], name: "index_c34_companies_on_status", using: :btree
+  add_index "c34_companies", ["target"], name: "index_c34_companies_on_target", using: :btree
+  add_index "c34_companies", ["tel"], name: "index_c34_companies_on_tel", using: :btree
+  add_index "c34_companies", ["url"], name: "index_c34_companies_on_url", using: :btree
+  add_index "c34_companies", ["zip"], name: "index_c34_companies_on_zip", using: :btree
+
+  create_table "c35_companies", force: :cascade do |t|
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+    t.text     "co_20160113133335_63208"
+    t.text     "co_20160113133335_25158"
+    t.text     "co_20160113133335_92308"
+    t.text     "co_20160113133335_55292"
+    t.text     "co_20160113133335_27331"
+    t.string   "co_20160113133335_40604"
+    t.string   "co_20160113133335_69971"
+    t.string   "co_20160113133335_37799"
+    t.text     "co_20160113133335_81558"
+    t.string   "co_20160113133335_2096"
+    t.text     "co_20160113133335_14048"
+    t.text     "co_20160113133335_38217"
+    t.text     "co_20160113133335_40754"
+    t.integer  "co_20160113160005_22033"
+    t.integer  "co_20160113160005_8999"
+    t.text     "co_20160113160005_81105"
+  end
+
+  add_index "c35_companies", ["co_20160113133335_14048"], name: "index_c35_companies_on_co_20160113133335_14048", using: :btree
+  add_index "c35_companies", ["co_20160113133335_2096"], name: "index_c35_companies_on_co_20160113133335_2096", using: :btree
+  add_index "c35_companies", ["co_20160113133335_25158"], name: "index_c35_companies_on_co_20160113133335_25158", using: :btree
+  add_index "c35_companies", ["co_20160113133335_27331"], name: "index_c35_companies_on_co_20160113133335_27331", using: :btree
+  add_index "c35_companies", ["co_20160113133335_37799"], name: "index_c35_companies_on_co_20160113133335_37799", using: :btree
+  add_index "c35_companies", ["co_20160113133335_38217"], name: "index_c35_companies_on_co_20160113133335_38217", using: :btree
+  add_index "c35_companies", ["co_20160113133335_40604"], name: "index_c35_companies_on_co_20160113133335_40604", using: :btree
+  add_index "c35_companies", ["co_20160113133335_40754"], name: "index_c35_companies_on_co_20160113133335_40754", using: :btree
+  add_index "c35_companies", ["co_20160113133335_55292"], name: "index_c35_companies_on_co_20160113133335_55292", using: :btree
+  add_index "c35_companies", ["co_20160113133335_63208"], name: "index_c35_companies_on_co_20160113133335_63208", using: :btree
+  add_index "c35_companies", ["co_20160113133335_69971"], name: "index_c35_companies_on_co_20160113133335_69971", using: :btree
+  add_index "c35_companies", ["co_20160113133335_81558"], name: "index_c35_companies_on_co_20160113133335_81558", using: :btree
+  add_index "c35_companies", ["co_20160113133335_92308"], name: "index_c35_companies_on_co_20160113133335_92308", using: :btree
+  add_index "c35_companies", ["co_20160113160005_22033"], name: "index_c35_companies_on_co_20160113160005_22033", using: :btree
+  add_index "c35_companies", ["co_20160113160005_81105"], name: "index_c35_companies_on_co_20160113160005_81105", using: :btree
+  add_index "c35_companies", ["co_20160113160005_8999"], name: "index_c35_companies_on_co_20160113160005_8999", using: :btree
+  add_index "c35_companies", ["name"], name: "index_c35_companies_on_name", using: :btree
+
+  create_table "c35_people", force: :cascade do |t|
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.string   "name"
+  end
+
+  add_index "c35_people", ["name"], name: "index_c35_people_on_name", using: :btree
 
   create_table "c3_companies", force: :cascade do |t|
     t.datetime "created_at",                           null: false
@@ -1320,9 +1401,11 @@ ActiveRecord::Schema.define(version: 20160609151108) do
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
     t.datetime "soft_destroyed_at"
+    t.integer  "client_table_id"
   end
 
   add_index "dashboards", ["client_id"], name: "index_dashboards_on_client_id", using: :btree
+  add_index "dashboards", ["client_table_id"], name: "index_dashboards_on_client_table_id", using: :btree
 
   create_table "imports", force: :cascade do |t|
     t.text     "matching_params"
@@ -1344,6 +1427,21 @@ ActiveRecord::Schema.define(version: 20160609151108) do
   end
 
   add_index "imports", ["csvfile_id"], name: "index_imports_on_csvfile_id", using: :btree
+
+  create_table "searchurls", force: :cascade do |t|
+    t.string   "name"
+    t.string   "action"
+    t.integer  "size"
+    t.integer  "order_no"
+    t.boolean  "summary"
+    t.integer  "client_table_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.datetime "soft_destroyed_at"
+    t.text     "query"
+  end
+
+  add_index "searchurls", ["client_table_id"], name: "index_searchurls_on_client_table_id", using: :btree
 
   create_table "sessions", force: :cascade do |t|
     t.string   "session_id", null: false

@@ -11,7 +11,12 @@ class ClientTable < ActiveRecord::Base
   has_many   :csvfiles
   has_many   :imports,       through: :csvfiles
 
+  has_many :dashboards
+  has_many :searchurls
+
   accepts_nested_attributes_for :client_columns, allow_destroy: true, reject_if: :check_name
+  accepts_nested_attributes_for :dashboards, allow_destroy: true
+  accepts_nested_attributes_for :searchurls, allow_destroy: true
 
   before_create :create_client_table_before
 
@@ -24,12 +29,13 @@ class ClientTable < ActiveRecord::Base
     "重複している" => "overlap", "重複していない" => "unique",
   }
 
+  STRING_CONDITIONS = { "を含む" => "", "を含まない" => "not_cont_any", "で一致" => "in", "で一致しない" => "not_in",
+    "から始まる" => "start_any", "から始まらない" => "not_start_any", "で終わる" => "end_any", "で終わらない" => "not_end_any",
+  }
+
   NUM_CONDITIONS = %w(eq not_eq blank present in not_in lteq gteq lt gt overlap unique).map { |v| self::CONDITIONS.rassoc(v) }.compact.to_h
 
-  COND_ARRAYS   = %w(in not_in cont_any not_cont_any)
-  COND_PRESENTS = %w(present blank)
-  COND_UNIQUES  = %w(overlap unique)
-  COND_NOVALS   = self::COND_PRESENTS + self::COND_UNIQUES
+  COND_ARRAYS   = %w(in not_in cont_any not_cont_any start_any not_start_any end_any not_end_any)
 
   # 会社テーブルとデフォルトカラム生成
   #
@@ -102,7 +108,11 @@ class ClientTable < ActiveRecord::Base
   end
 
   def columns_options
-    ([["ID", "id"]] + show_columns.pluck(:name, :column_name) + [["登録日時", "created_at"], ["変更日時", "updated_at"]]).to_h
+    options = [["ID", "id", {data: { db_type: :id}}]]
+    options += show_columns.map do |co|
+      [co.name, co.column_name, {data: { db_type: co.db_type}}]
+    end
+    options += [["登録日時", "created_at", {data: { db_type: :datetime}}], ["変更日時", "updated_at", {data: { db_type: :datetime}}]]
   end
 
   # client_table_dataクラスを取得
@@ -141,6 +151,12 @@ class ClientTable < ActiveRecord::Base
 
   def company_id_column
     client_columns.find_by(column_name: :company_id)
+  end
+
+  def client_columns_by_column_name
+    client_columns.map do |co|
+      [co.column_name, co]
+    end.to_h
   end
 
   # # マッチングして保存

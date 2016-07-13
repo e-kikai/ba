@@ -1,0 +1,15 @@
+tr.fields
+  td = Searchurl::ACTION_SELECTOR.key(f.object.action) 
+  td
+    - unless f.object.new_record? 
+      = link_to "検索", {action: f.object.action.presence || "sum"}.merge(Hash(f.object.query))
+  td
+    - unless f.object.new_record?
+      = f.object.created_at
+  td = f.check_box  :summary
+  td = f.text_field :name,            class: "form-control"
+  td = f.select     :size, 4..12, {}, class: "form-control"
+  td = f.text_field :order_no,        class: "form-control order_no"
+  td = f.link_to_remove class: "btn btn-danger" do
+    span.glyphicon.glyphicon-remove
+    =< "削除"

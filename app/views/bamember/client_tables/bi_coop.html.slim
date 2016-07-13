@@ -1,27 +1,21 @@
-- set_meta_tags title: "#{@client.name} PowerBI連携"
-- breadcrumb  :clients_something, "PowerBI連携", @client
+- set_meta_tags title: "#{@table.client.name}/#{@table.name}テーブル PowerBI連携"
+- breadcrumb  :clients_table_something, "PowerBI連携", @table
 
-.col-md-8.col-md-offset-2
+.col-md-10.col-md-offset-1
   table.table.table-striped.table-hover.table-responsive.tables
     caption BA System ⇛ PowerBI : 連携URLをコピー -> PowerBIデスクトップのデータ追加 -> WEBから読み込んで下さい
     tr
-      td #{@client.company_table.name}テーブル
-      td.integer #{number_with_delimiter(@client.company_table.klass.count)}件
-      td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: @client.company_table.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect url_form'
-
-    - @client.child_tables.each do |t|
-      tr
-        td #{t.name}テーブル
-        td.integer #{number_with_delimiter(t.klass.count)}件
-        td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: t.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect url_form'
+      td #{@table.name}テーブル
+      td.integer #{number_with_delimiter(@table.klass.count)}件
+      td = text_field_tag "", url_for(controller: "bamember/client_tables", action: :bi, client_id: @client.id, id: @table.id, format: :csv ,only_path: false), readonly: true, class: 'form-control allselect url_form'
 
 .col-md-10.col-md-offset-1
-  - if @client.errors.any?
+  - if @table.errors.any?
     .alert.alert-danger
       ul
         - @table.errors.full_messages.each do |msg|
           li = msg
-  = nested_form_for(@client, class: 'form-horizontal', role: 'form', url: {action: 'bi_update'}, method: :patch)  do |f|
+  = nested_form_for(@table, class: 'form-horizontal', role: 'form', url: {action: 'bi_coop_update'}, method: :patch)  do |f|
     table#dashboards.table.table-striped.table-hover.table-responsive.edit
       caption PowerBI ⇛ BA System : Web版のレポート -> ファイル -> Webに公開から、URLをコピーして以下に入力して下さい
       tr

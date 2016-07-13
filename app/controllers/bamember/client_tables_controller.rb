@@ -8,6 +8,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   rescue_from RuntimeError, with: :runtime_error
 
+  def show
+  end
+
   def new
     @table = @client.client_tables.new
   end
@@ -27,9 +30,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   require 'nkf'
 
   def search
-    @datas        = @klass.table_search(params[:s]).company_relation.table_order(params[:order]).order(:id)
+    # @datas        = @klass.table_search(params[:s]).company_relation.table_order(params[:order]).order(:id)
+    @shaping_params = @klass.shaping_params(params[:s])
+    @datas        = @klass.table_search_02(@shaping_params).company_relation.order(:id)
     @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
-    @sums         = @datas.group("")
 
     respond_to do |format|
       format.html { @pdatas = @datas.page(params[:page]) }
@@ -44,7 +48,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def data_bulk
-    @datas = @klass.table_search(params[:s])
+    # @datas = @klass.table_search(params[:s])
+    @datas = @klass.table_search_02(params[:s])
   end
 
   def data_bulk_update
@@ -57,9 +62,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       raise "処理が選択されていません"
     end
 
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのデータ#{count}件を一括削除しました"
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルのデータ#{count}件を一括削除しました"
   rescue => e
-    @datas = @klass.table_search(params[:s])
+    # @datas = @klass.table_search(params[:s])
+    @datas = @klass.table_search_02(params[:s])
 
     flash[:alert] = "データの一括処理に失敗しました : #{e.message}"
     render :data_bulk
@@ -81,8 +87,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def sum
-    @datas = @klass.table_search(params[:s])
+    # @datas = @klass.table_search(params[:s])
+    @datas = @klass.table_search_02(params[:s])
     @sums  = @datas.table_sum(params[:sum]).count
+    @all_count = @klass.all.count
   end
 
   def rfm
@@ -373,7 +381,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       notice =  "インポートが完了しました"
     end
 
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: notice
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: notice
   rescue => e
     flash[:alert] = e.message
     render :import_matching
@@ -421,13 +429,44 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルを削除しました"
   end
 
+  def searchurl_create
+    if @table.searchurls.create(searchurl_set_paramas)
+      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/searchurls/", notice: "検索条件を保存しました"
+    else
+      render :show
+    end
+  end
+
+  def searchurls
+  end
+
+  def searchurls_update
+    if @table.update(searchurls_params)
+      redirect_to "/bamember/clients/#{@client.id}/table/#{@table.id}/", notice: "概要を変更しました"
+    else
+      render :searchurls
+    end
+  end
+
+
+  def bi_coop
+  end
+
+  def bi_coop_update
+    if @table.update(bi_params)
+      redirect_to "/bamember/clients/#{@client.id}/table/#{@table.id}/", notice: "ダッシュボードを変更しました"
+    else
+      render :bi_coop
+    end
+  end
+
   ### data table ###
   def data_new
     @data = @klass.new
   end
 
   def data_create
-    @data = @klass.create(data_params)
+    @data = @klass.new(data_params)
 
     if @data.save
       redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/search/", notice: "#{@data.id}: #{@data.name}を新規作成しました"
@@ -495,7 +534,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       @klass.update(id, {company_id: c[0][1]})
     end
 
-    redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルのリレーションを更新しました"
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルのリレーションを更新しました"
   rescue => e
     flash[:alert] = e.message
     render :relation_confirm
@@ -522,14 +561,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @company_table = @client.company_table
   end
 
-  # def check_session_spreadseet
-  #   if session[:csv][:header].blank?
-  #     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv/", alert: 'ファイルがアップロードされていません'
-  #   end
-  #
-  #   @csv = session[:csv]
-  # end
-
   def client_table_params
     params.require(:client_table).permit(:name, client_columns_attributes: [:id, :name, :column_type, :selector, :default, :unique, :presence, :hidden, :sumally, :order_no, :_destroy])
   end
@@ -542,5 +573,17 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     logger.error e
     logger.error e.backtrace.join("\n")
     redirect_to "/bamember/clients/#{@client.id}/", alert: e.message
+  end
+
+  def bi_params
+    params.require(:client_table).permit(dashboards_attributes: [:id, :name, :url, :size, :order_no, :_destroy])
+  end
+
+  def searchurls_params
+    params.require(:client_table).permit(searchurls_attributes: [:id, :name, :action, :query, :size, :order_no, :_destroy])
+  end
+
+  def searchurl_set_paramas
+    params.require(:searchurl).permit([:action, :query])
   end
 end

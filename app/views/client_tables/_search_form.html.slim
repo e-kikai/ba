@@ -1,41 +1,86 @@
-coffee:
-  $ ->
-    $_blank = $('.form-group.blank').first().clone()
-    
-    $('button.add').click ->
-      $('.add-group').before($_blank.clone())
+/ coffee:
+/   $ ->
+/     # 検索フォームの追加
+/     $_blank = $('.form-group.blank').first().clone()
+/     
+/     $('button.add').click ->
+/       $('.add-group').before($_blank.clone())
+      
+/ h4 検索条件
+/ - Array(s).each.with_index do |s|
+/   - next if s[:column_name].blank? || s[:cond].blank?
+/   .form-group
+/     .col-md-4 = select_tag     "s[][column_name]", options_for_select(table.columns_options, s[:column_name]), include_blank: "-- 検索する項目 --", class: "form-control search-form-column_name"
+/     .col-md-4 = text_field_tag "s[][value]", s[:value], class: "form-control"
+/     .col-md-4 = select_tag     "s[][cond]", options_for_select(ClientTable::CONDITIONS, s[:cond]), class: "form-control"
+/ .form-group.blank
+/   .col-md-4 = select_tag     "s[][column_name]", options_for_select(table.columns_options), include_blank: "-- 検索する項目 --", class: "form-control"
+/   .col-md-4 = text_field_tag "s[][value]", "", class: "form-control"
+/   .col-md-4 = select_tag     "s[][cond]", options_for_select(ClientTable::CONDITIONS), class: "form-control"
+/   
+/ .form-group.add-group
+/   = button_tag type: "button", class: "btn btn-default add" do
+/     span.glyphicon.glyphicon-plus
+/     =< "検索条件を追加"
 
-h4 検索条件
-- Array(status).each.with_index do |s|
-  - next if s[:column_name].blank? || s[:cond].blank?
-  .form-group
-    .col-md-4 = select_tag     "s[][column_name]", options_for_select(table.columns_options, s[:column_name]), include_blank: "-- 検索する項目 --", class: "form-control"
-    .col-md-4 = text_field_tag "s[][value]", s[:value], class: "form-control"
-    .col-md-4 = select_tag     "s[][cond]", options_for_select(ClientTable::CONDITIONS, s[:cond]), class: "form-control"
+- s = Hash(s)
+.form-group.col-md-6
+  h5.col-md-3 ID
+  .col-md-9 = text_field_tag "s[id][in]", s.dig(:id, :in), class: "form-control", placeholder: "完全一致(複数条件は空白区切り)"
   
-.form-group.blank
-  .col-md-4 = select_tag     "s[][column_name]", options_for_select(table.columns_options), include_blank: "-- 検索する項目 --", class: "form-control"
-  .col-md-4 = text_field_tag "s[][value]", "", class: "form-control"
-  .col-md-4 = select_tag     "s[][cond]", options_for_select(ClientTable::CONDITIONS), class: "form-control"
-.form-group.add-group
-  = button_tag type: "button", class: "btn btn-default add" do
-    span.glyphicon.glyphicon-plus
-    =< "検索条件を追加"
-    
-  / h4 集計
-  / .form-group
-  /   .col-md-3 = label_tag "sum[methods]", "集計値"
-  /   .col-md-4 = select_tag "sum[methods]", options_for_select(sum_methods, params.dig(:sum, :methods)), class: "form-control"
-  /   .col-md-5 = label_tag "sum[methods]", "集計値"
-  / .form-group
-  /   .col-md-3 = label_tag "sum[methods]", "Y軸"
-  /   .col-md-9 = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 0)), class: "form-control"
-  / .form-group
-  /   .col-md-3 = label_tag "sum[methods]", "Y軸セパレータ"
-  /   .col-md-4 = text_field_tag "sum[sepa][]", params.dig(:sum, :sepa, 0), class: "form-control"
-  /   .col-md-5 
-  / .form-group
-  /   .col-md-2 = label_tag "sum[methods]", "X軸"
-  /   .col-md-3 = select_tag "sum[group][]", options_for_select((client_columns), params.dig(:sum, :group, 1)), class: "form-control"
-  /   .col-md-7 = text_field_tag "sum[sepa][]", params.dig(:sum, :sepa, 1), class: "form-control"
-    
+- table.show_columns.each do |co|
+  .form-group.col-md-6
+    h5.col-md-3 = co.name
+    - if co.id?
+      .col-md-9 = text_field_tag "s[#{co.column_name}][in]", s.dig(co.column_name, :in), class: "form-control", placeholder: "完全一致(複数条件は空白区切り)"
+    - elsif co.datetime?
+      .col-md-4 = text_field_tag "s[#{co.column_name}][gteq]", s.dig(co.column_name, :gteq), class: "form-control datetimepicker", placeholder: "開始日時"
+      h5.col-md-1 style="text-align:center;" 〜
+      .col-md-4 = text_field_tag "s[#{co.column_name}][lteq]", s.dig(co.column_name, :lteq), class: "form-control datetimepicker", placeholder: "終了日時"
+    - elsif co.numeric?
+      .col-md-4 = text_field_tag "s[#{co.column_name}][gteq]", s.dig(co.column_name, :gteq), class: "form-control", placeholder: "以下"
+      h5.col-md-1 style="text-align:center;" 〜
+      .col-md-4 = text_field_tag "s[#{co.column_name}][lteq]", s.dig(co.column_name, :lteq), class: "form-control", placeholder: "以上"
+    - elsif co.def_selector.present?
+      .col-md-9 = select_tag "s[#{co.column_name}][in]", options_for_select(co.def_selector, s.dig(co.column_name, :in)), multiple: true, class: "form-control selectpicker", title: ""
+    - elsif co.selector?
+      .col-md-9 = select_tag "s[#{co.column_name}][in]", options_for_select(co.selector.split("\n").map(&:strip), s.dig(co.column_name, :in)), multiple: true, class: "form-control selectpicker", title: ""
+    - else
+      .col-md-5 = text_field_tag "s[#{co.column_name}][v]", s.dig(co.column_name, :v), class: "form-control", placeholder: "(複数条件は空白区切り)"
+      .col-md-4 = select_tag     "s[#{co.column_name}][c]", options_for_select(ClientTable::STRING_CONDITIONS, s.dig(co.column_name, :c)), class: "form-control"
+  
+.form-group.col-md-6
+  h5.col-md-3 登録日時
+  .col-md-4
+    = text_field_tag "s[created_at][gteq]", s.dig(:created_at, :gteq), class: "form-control datetimepicker", placeholder: "開始日時"
+  .col-md-1
+    h5 style="text-align:center;" 〜
+  .col-md-4
+    = text_field_tag "s[created_at][lteq]", s.dig(:created_at, :lteq), class: "form-control datetimepicker", placeholder: "終了日時"
+
+.form-group.col-md-6
+  h5.col-md-3 変更日時
+  .col-md-4
+    = text_field_tag "s[updated_at][gteq]", s.dig(:updated_at, :gteq), class: "form-control datetimepicker", placeholder: "開始日時"
+  .col-md-1
+    h5 style="text-align:center;" 〜
+  .col-md-4
+    = text_field_tag "s[updated_at][lteq]", s.dig(:updated_at, :iteq), class: "form-control datetimepicker", placeholder: "終了日時"
+
+hr
+
+.form-group.col-md-6
+  h5.col-md-3 空白である
+  .col-md-9 = select_tag "s[blanks]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] }, s["blanks"]), multiple: true, class: "form-control selectpicker", title: ""
+
+.form-group.col-md-6
+  h5.col-md-3 存在する
+  .col-md-9 = select_tag "s[presents]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] }, s["presents"]), multiple: true, class: "form-control selectpicker", title: ""
+
+.form-group.col-md-6
+  h5.col-md-3 重複している
+  .col-md-9 = select_tag "s[overlaps]", options_for_select(table.show_columns.pluck(:name, :column_name), s["overlaps"]), multiple: true, class: "form-control selectpicker", title: ""
+
+.form-group.col-md-6
+  h5.col-md-3 重複していない
+  .col-md-9 = select_tag "s[uniques]", options_for_select(table.show_columns.pluck(:name, :column_name), s["uniques"]), multiple: true, class: "form-control selectpicker", title: ""

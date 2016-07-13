@@ -2,6 +2,9 @@ class ClientTablesController < ApplicationController
   before_action :find_table
   before_action :find_company_table, only: [:rfm]
 
+  def show
+  end
+
   def search
     @datas        = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
     @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show

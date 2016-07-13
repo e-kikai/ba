@@ -1,0 +1,12 @@
+h4 ダッシュボード
+- table.dashboards.each do |da|
+  div class="col-md-#{da.size.presence || 4}"
+    .panel.panel-default
+      .panel-heading
+        = da.name
+        
+        .pull-right =< link_to da.url, target: :_blank do
+          span.glyphicon.glyphicon-resize-full
+        end
+      .panel-body.embed-responsive.embed-responsive-4by3
+        iframe.embed-responsive-item src="#{da.url}" frameborder="0" allowFullScreen="true"

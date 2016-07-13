@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   get   'client/edit_password' => 'client#edit_password'
   patch 'client/edit_password' => 'client#update_password'
 
+  get 'client_tables/:id/'         => 'client_tables#show'
   get 'client_tables/:id/search'   => 'client_tables#search'
   get 'client_tables/:id/sum'      => 'client_tables#sum'
   get 'client_tables/:id/rfm'      => 'client_tables#rfm'
@@ -33,9 +34,10 @@ Rails.application.routes.draw do
 
     get    'clients/:id/bi'            => 'clients#bi'
     patch  'clients/:id/bi'            => 'clients#bi_update'
-    
+
     get    'clients/:client_id/table/new'              => 'client_tables#new'
     post   'clients/:client_id/table/'                 => 'client_tables#create'
+    get    'clients/:client_id/table/:id/'             => 'client_tables#show'
     get    'clients/:client_id/table/:id/search'       => 'client_tables#search'
     # get    'clients/:client_id/table/:id/csv'          => 'client_tables#csv'
     # post   'clients/:client_id/table/:id/csv'          => 'client_tables#csv_upload'
@@ -44,6 +46,10 @@ Rails.application.routes.draw do
     # get    'clients/:client_id/table/:id/csv_confirm'  => 'client_tables#csv_confirm'
     # patch  'clients/:client_id/table/:id/csv_confirm'  => 'client_tables#csv_update'
     # get    'clients/:client_id/table/:id/csv_error'    => 'client_tables#csv_error'
+
+    get    'clients/:client_id/table/:id/searchurls'   => 'client_tables#searchurls'
+    patch  'clients/:client_id/table/:id/searchurls'   => 'client_tables#searchurls_update'
+    put    'clients/:client_id/table/:id/searchurls'   => 'client_tables#searchurl_create'
 
     get    'clients/:client_id/table/:id/bi' => 'client_tables#bi'
 
@@ -69,6 +75,9 @@ Rails.application.routes.draw do
     get    'clients/:client_id/table/:id/edit'         => 'client_tables#edit'
     patch  'clients/:client_id/table/:id/'             => 'client_tables#update'
     delete 'clients/:client_id/table/:id/'             => 'client_tables#destroy'
+
+    get    'clients/:client_id/table/:id/bi_coop'     => 'client_tables#bi_coop'
+    patch  'clients/:client_id/table/:id/bi_coop'     => 'client_tables#bi_coop_update'
 
     get    'clients/:client_id/table/:id/new'           => 'client_tables#data_new'
     post   'clients/:client_id/table/:id/'              => 'client_tables#data_create'

@@ -14,10 +14,6 @@ coffee:
   $ ->
     if $('select#x').val() == 'count' && $('select#y').val() == 'count'
       $('button.btn.option').click()
-
-sass:
-  .hotspots .form-control
-    width: 48%
   
 = button_tag  "設定", type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#RFMForm" }
 #RFMForm.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
@@ -120,4 +116,3 @@ sass:
       - cols.each do |col|
         th = col == "more" ? "それ以上" : "〜 #{col}#{@x_unit}"
       th 合計(人)
-  = select_tag :x, options_for_select(targets, params[:x]), class: "form-control"

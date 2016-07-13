@@ -24,6 +24,11 @@ module ColumnTypes
 
     def self.numeric?(*args)     false end
     def self.datetime?(*args)    false end
+    def self.id?(*args)          false end
+
+    def self.ransack_null?(*args)
+      numeric? || datetime? || id?
+    end
   end
 
   class SumString < ColumnTypes::String
@@ -313,5 +318,6 @@ module ColumnTypes
 
   class Id < ColumnTypes::Integer
     NAME = "ID"
+    def self.id?(*args) true end
   end
 end

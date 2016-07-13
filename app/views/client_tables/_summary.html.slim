@@ -1,0 +1,12 @@
+h4 概要
+- table.searchurls.where(summary: true).each do |su|
+  div class="col-md-#{su.size.presence || 4}"
+    .panel.panel-default
+      .panel-heading
+        = su.name
+        
+      /   .pull-right =< link_to da.url, target: :_blank do
+      /     span.glyphicon.glyphicon-resize-full
+      /   end
+      / .panel-body.embed-responsive.embed-responsive-4by3
+      /   iframe.embed-responsive-item src="#{da.url}" frameborder="0" allowFullScreen="true"

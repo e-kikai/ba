@@ -10,9 +10,9 @@ class Client < ActiveRecord::Base
   has_many :client_tables
   has_many :csvfiles,     through: :client_tables
   has_many :imports,      through: :csvfiles
-  has_many :dashboards
+  # has_many :dashboards
 
-  accepts_nested_attributes_for :dashboards, allow_destroy: true
+  # accepts_nested_attributes_for :dashboards, allow_destroy: true
 
   def company_table
     client_tables.find_by(company: true)

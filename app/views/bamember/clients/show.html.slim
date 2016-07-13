@@ -3,61 +3,61 @@
 
 - message = "テーブルを削除いたします。よろしいでしょうか\r\r※ 事前にテーブルをエクスポートしておくことをお勧めいたします"
     
-.col-md-10.col-md-offset-1
+.col-md-6.col-md-offset-3
   table.table.table-striped.table-hover.table-responsive.tables
-    caption テーブル管理
+    / caption テーブル管理
     tr
-      td #{@client.company_table.name}テーブル
+      / td #{@client.company_table.name}テーブル
+      td = link_to "#{@client.company_table.name}テーブル", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/"
       td.integer #{number_with_delimiter(@client.company_table.klass.count)}件
-      td = link_to "検索",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search/"
-      td = link_to "集計",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/sum/"
-      td
-      td
+      / td = link_to "検索",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search/"
+      / td = link_to "集計",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/sum/"
+      / td
       / td = link_to "インポート", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/csv/"
-      td = link_to "インポート", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/import_file/"
-      td = link_to "履歴",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/import_log/"
-      td = link_to "一括処理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/bulk/"
-      td = link_to "項目管理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/edit/"
+      / td = link_to "インポート", "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/import_file/"
+      / td = link_to "履歴",       "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/import_log/"
+      / td
+      / td = link_to "一括処理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/bulk/"
+      / td = link_to "項目管理",   "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/edit/"
       td = link_to "/bamember/clients/#{@client.id}/table/#{@client.company_table.id}/search.csv?all=1", class: "btn btn-warning" do
         span.glyphicon.glyphicon-save-file
         =< "エクスポート"
-      td
+      / td
 
     - @client.child_tables.each do |t|
       tr
-        td #{t.name}テーブル
+        td = link_to "#{t.name}テーブル", "/bamember/clients/#{@client.id}/table/#{t.id}/"
         td.integer #{number_with_delimiter(t.klass.count)}件
-        td = link_to "検索",         "/bamember/clients/#{@client.id}/table/#{t.id}/search/"
-        td = link_to "集計",         "/bamember/clients/#{@client.id}/table/#{t.id}/sum/"
-        td = link_to "RFM",          "/bamember/clients/#{@client.id}/table/#{t.id}/rfm/"
-        td = link_to "リレーション", "/bamember/clients/#{@client.id}/table/#{t.id}/relation/"
-        / td = link_to "インポート",   "/bamember/clients/#{@client.id}/table/#{t.id}/csv/"
-        td = link_to "インポート",   "/bamember/clients/#{@client.id}/table/#{t.id}/import_file/"
-        td = link_to "履歴",         "/bamember/clients/#{@client.id}/table/#{t.id}/import_log/"
-        td = link_to "一括処理",     "/bamember/clients/#{@client.id}/table/#{t.id}/bulk/"
-        td = link_to "項目管理",     "/bamember/clients/#{@client.id}/table/#{t.id}/edit/"
+        / td = link_to "検索",         "/bamember/clients/#{@client.id}/table/#{t.id}/search/"
+        / td = link_to "集計",         "/bamember/clients/#{@client.id}/table/#{t.id}/sum/"
+        / td = link_to "RFM",          "/bamember/clients/#{@client.id}/table/#{t.id}/rfm/"
+        / td = link_to "インポート",   "/bamember/clients/#{@client.id}/table/#{t.id}/import_file/"
+        / td = link_to "履歴",         "/bamember/clients/#{@client.id}/table/#{t.id}/import_log/"
+        / td = link_to "リレーション", "/bamember/clients/#{@client.id}/table/#{t.id}/relation/"
+        / td = link_to "一括処理",     "/bamember/clients/#{@client.id}/table/#{t.id}/bulk/"
+        / td = link_to "項目管理",     "/bamember/clients/#{@client.id}/table/#{t.id}/edit/"
         td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/search.csv?all=1", class: "btn btn-warning" do
           span.glyphicon.glyphicon-save-file
           =< "エクスポート"
-        td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/", method: :delete, data: { confirm: message, "disable-with" => "削除中..."}, class: "btn btn-danger" do
-          span.glyphicon.glyphicon-remove
-          =< "削除"
+        / td = link_to "/bamember/clients/#{@client.id}/table/#{t.id}/", method: :delete, data: { confirm: message, "disable-with" => "削除中..."}, class: "btn btn-danger" do
+        /   span.glyphicon.glyphicon-remove
+        /   =< "削除"
         
   ul.nav.nav-pills
     li = link_to "テーブルを追加",       "/bamember/clients/#{@client.id}/table/new"
-    li = link_to "PowerBI連携",          "/bamember/clients/#{@client.id}/bi"
+    / li = link_to "PowerBI連携",          "/bamember/clients/#{@client.id}/bi"
     li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
     li = link_to "パスワード変更",       "/bamember/clients/#{@client.id}/edit_password"
 
-.col-md-12
-  - @client.dashboards.each do |da|
-    div class="col-md-#{da.size.presence || 4}"
-      .panel.panel-default
-        .panel-heading
-          = da.name
-          
-          .pull-right =< link_to da.url, target: :_blank do
-            span.glyphicon.glyphicon-resize-full
-          end
-        .panel-body.embed-responsive.embed-responsive-4by3
-          iframe.embed-responsive-item src="#{da.url}" frameborder="0" allowFullScreen="true"
+/ .col-md-12
+/   - @client.dashboards.each do |da|
+/     div class="col-md-#{da.size.presence || 4}"
+/       .panel.panel-default
+/         .panel-heading
+/           = da.name
+/           
+/           .pull-right =< link_to da.url, target: :_blank do
+/             span.glyphicon.glyphicon-resize-full
+/           end
+/         .panel-body.embed-responsive.embed-responsive-4by3
+/           iframe.embed-responsive-item src="#{da.url}" frameborder="0" allowFullScreen="true"
