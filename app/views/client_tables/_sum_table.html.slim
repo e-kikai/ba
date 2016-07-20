@@ -1,0 +1,40 @@
+- if sums.blank?
+  . 集計結果がありませんでした
+- elsif !sums.kind_of?(Hash)
+  table.table.table-bordered.table-hover.table-condensed.sum-table
+    tr
+      th 合計
+      td.integer
+        = link_to number_with_delimiter(sums), params.merge(action: :search)
+        .percent = "#{(sums * 100 / all_count).round(2)}%"
+      
+- elsif !sums.first[0].kind_of?(Array)
+  - x_group = sums.map { |k, v| k }.uniq.sort
+  table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
+    tr
+    - x_group.each do |x|
+      tr
+        th = x
+        td.integer
+          - co = params.dig(:sum, 0, :column).presence || params.dig(:sum, 1, :column)
+          = link_to number_with_delimiter(sums[x]), params.merge({action: :search, sum: {}, s: params.fetch(:s, {}).merge({co => {v: x, c: :in}})})
+          .percent = "#{(sums[x] * 100 / all_count).round(2)}%"
+      
+- else
+  - x_group = sums.map { |k, v| k[0] }.uniq.sort
+  - y_group = sums.map { |k, v| k[1] }.uniq.sort
+  
+  table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
+    tr
+      th
+      - x_group.each do |x|
+        th.x = x
+    - y_group.each do |y|
+      tr
+        th.y = y
+        - x_group.each do |x|
+          td.integer
+            - if sums[[x, y]].present?
+              = link_to number_with_delimiter(sums[[x, y]]), params.merge({action: :search, sum: {}, s: params.fetch(:s, []) + [ {column_name: params.dig(:sum, 0, :column), value: x, cond: :eq}, {column_name: params.dig(:sum, 1, :column), value: y, cond: :eq}]})
+            - else
+              = 0

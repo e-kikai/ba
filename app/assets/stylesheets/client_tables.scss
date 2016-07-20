@@ -67,8 +67,12 @@ table.sum-table {
   width: 48%;
 }
 
-.search-menu .btn {
-  margin-right: 4px;
+.search-menu {
+  margin-bottom: 8px;
+
+  .btn {
+    margin-right: 4px;
+  }
 }
 
 #serach_form {

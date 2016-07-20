@@ -9,6 +9,17 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   rescue_from RuntimeError, with: :runtime_error
 
   def show
+    searchurls = @table.searchurls.where(summary: true)
+    @summaries  = searchurls.map do |su|
+      if su.target = "sum"
+        shaping_params = @klass.shaping_params(su.query["s"])
+        datas          = @klass.table_search_02(shaping_params)
+        sums           = datas.table_sum(su.query["sum"]).count
+        all_count      = @klass.all.count
+
+        {searchurl: su, sums: sums, all_count: all_count}
+      end
+    end
   end
 
   def new
@@ -32,8 +43,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def search
     # @datas        = @klass.table_search(params[:s]).company_relation.table_order(params[:order]).order(:id)
     @shaping_params = @klass.shaping_params(params[:s])
-    @datas        = @klass.table_search_02(@shaping_params).company_relation.order(:id)
-    @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
+    @datas          = @klass.table_search_02(@shaping_params).company_relation.order(:id)
+    @show_columns   = params[:all] ? @table.client_columns : @table.client_columns.show
 
     respond_to do |format|
       format.html { @pdatas = @datas.page(params[:page]) }
@@ -88,9 +99,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def sum
     # @datas = @klass.table_search(params[:s])
-    @datas = @klass.table_search_02(params[:s])
-    @sums  = @datas.table_sum(params[:sum]).count
-    @all_count = @klass.all.count
+    @shaping_params = @klass.shaping_params(params[:s])
+    @datas          = @klass.table_search_02(@shaping_params)
+    @sums           = @datas.table_sum(params[:sum]).count
+    @all_count      = @klass.all.count
   end
 
   def rfm
@@ -430,7 +442,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def searchurl_create
-    if @table.searchurls.create(searchurl_set_paramas)
+    if @table.searchurls.create(
+      target: params[:target],
+      query:  params.select { |k, v| ["s", "sum"].include? k }
+    )
       redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/searchurls/", notice: "検索条件を保存しました"
     else
       render :show
@@ -576,14 +591,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def bi_params
-    params.require(:client_table).permit(dashboards_attributes: [:id, :name, :url, :size, :order_no, :_destroy])
+    params.require(:client_table).permit(dashboards_attributes: [:id, :name, :url, :size, :order_no, :soft_destroyed_at])
   end
 
   def searchurls_params
-    params.require(:client_table).permit(searchurls_attributes: [:id, :name, :action, :query, :size, :order_no, :_destroy])
-  end
-
-  def searchurl_set_paramas
-    params.require(:searchurl).permit([:action, :query])
+    params.require(:client_table).permit(searchurls_attributes: [:id, :name, :summary, :query, :size, :order_no, :soft_destroyed_at])
   end
 end

@@ -51,28 +51,28 @@ module ApplicationHelper
 
       concat( content_tag(:ul, class: "dropdown-menu", role:"menu") do
         concat( content_tag(:li) do
-          link_to params.merge("order[column]" => column_name, "order[type]" => :asc) do
+          link_to params.merge("s[s]" => "#{column_name}") do
             tag(:span, class: "glyphicon glyphicon-sort-by-alphabet") + " 昇順でソート"
           end
         end)
         concat( content_tag(:li) do
-          link_to params.merge("order[column]" => column_name, "order[type]" => :desc) do
+          link_to params.merge("s[s]" => "#{column_name}_desc") do
             tag(:span, class: "glyphicon glyphicon-sort-by-alphabet-alt") + " 降順でソート"
           end
         end)
         concat( tag :li, class: "divider")
 
         concat( content_tag(:li) do
-          link_to "空白", params.merge("s[][column_name]" => column_name, "s[][value]" => "", "s[][cond]" => :blank)
+          link_to "空白", params.merge("s[blanks][]" => column_name)
         end)
         concat( content_tag(:li) do
-          link_to "空白でない", params.merge("s[][column_name]" => column_name, "s[][value]" => "", "s[][cond]" => :present)
+          link_to "空白でない", params.merge("s[presents][]" => column_name)
         end)
         concat( content_tag(:li) do
-          link_to "重複している", params.merge("s[][column_name]" => column_name, "s[][value]" => "", "s[][cond]" => :overlap)
+          link_to "重複している", params.merge("s[overlaps][]" => column_name)
         end)
         concat( content_tag(:li) do
-          link_to "重複していない", params.merge("s[][column_name]" => column_name, "s[][value]" => "", "s[][cond]" => :unique)
+          link_to "重複していない", params.merge("s[uniques][]" => column_name)
         end)
       end)
     end

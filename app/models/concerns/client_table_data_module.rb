@@ -172,26 +172,8 @@ module ClientTableDataModule
           search_query[:s] = s # ソート
         else
           # その他,通常のカラム
-          next unless s.is_a? Hash
-
-          co = columns[column_name]
-
-          conds = s.key?(:v) ? {(s[:c].presence || "cont_any") => s[:v]} : s
-          conds.each do |cond, val|
-            ### 値の整形 ###
-            if val.is_a? Array
-              value = val.map { |v| co.filter(v) }
-            else
-              value = val.to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
-
-              value = if %w(in not_in cont_any not_cont_any start_any not_start_any end_any not_end_any).include? cond
-                value.split(" ").map { |v| co.filter(v) }
-              else
-                co.filter(value)
-              end
-            end
-
-            search_query["#{column_name}_#{cond}"] = value if value.present?
+          s.each do |cond, val|
+            search_query["#{column_name}_#{cond}"] = val
           end
         end
       end
@@ -233,15 +215,15 @@ module ClientTableDataModule
       columns = client_table.client_columns_by_column_name
 
       Array(sum_params).each do |s|
-        next if s[:column].blank?
+        next if s["column"].blank?
 
-        next unless co = columns[s[:column]]
+        next unless co = columns[s["column"]]
 
         if co.numeric?
-          sepa = s[:sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s)
+          sepa = s["sepa"].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s)
 
           casewhen = if sepa.blank?
-            s[:column]
+            s["column"]
           else
             sepa.inject(" CASE ") do |s, i|
               s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN #{co.column_name} <= ? THEN ? ", "#{i}", "〜 #{i}"])
@@ -250,7 +232,7 @@ module ClientTableDataModule
 
           tmp = tmp.group(casewhen).where("#{co.column_name} IS NOT NULL")
         else
-          tmp = tmp.group(s[:column]).where.not(s[:column] => "")
+          tmp = tmp.group(s["column"]).where.not(s["column"] => "")
         end
       end
 
@@ -325,20 +307,24 @@ module ClientTableDataModule
 
       Hash(search_params).each do |column_name, s|
         if s.is_a? Hash
-          # 検索対象のカラム
-          co = columns[column_name]
+          co = columns[column_name] # 検索対象のカラム情報
 
+          # value, cond
           conds = s.key?("v") ? {(s["c"].presence || "cont_any") => s["v"]} : s
 
           res[column_name] = conds.map do |cond, val|
             ### 値の整形 ###
             unless val.is_a? Array
               val = val.to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
-
               val = val.split(" ") if ClientTable::COND_ARRAYS.include? cond
             end
 
-            value = [cond, Array(val).map { |v| co.filter(v) }]
+            # フィルタリング
+            if val.is_a? Array
+              [cond, Array(val).map { |v| co.try(:filter, v) || v }]
+            else
+              [cond, co.try(:filter, val) || val]
+            end
           end.to_h
         else
           # 空白・重複・ソート

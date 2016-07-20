@@ -4,10 +4,13 @@
   = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
     span.glyphicon.glyphicon-menu-hamburger
     =< "集計フォーム"
+  = link_to "#{request.path_info}", class: "btn btn-warning" do
+    span.glyphicon.glyphicon-remove
+    =< "条件リセット"
   - if ba
-    = link_to url_for({action: :searchurls, searchurl: {action: :sum, query: ""}}), method: :put, class: "btn btn-success" do
+    = link_to params.merge({action: :searchurls, target: :sum}), method: :put, class: "btn btn-success" do
       span.glyphicon.glyphicon-save
-      =< "この集計条件を保存"
+      =< "この条件を保存"
         
 #serach_form.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog.modal-lg
@@ -18,7 +21,7 @@
         h4 集計フォーム
       .modal-body
         = form_tag({}, method: :get) do
-          = render "client_tables/search_form", table: @table, s: params[:s]
+          = render "client_tables/search_form", table: @table, s: @shaping_params
           
           hr
           .form-group.col-md-6
@@ -40,45 +43,4 @@
 
 .col-md-12
   / = @datas.table_sum(params[:sum]).to_sql
-
-  - if @sums.blank?
-    . 集計結果がありませんでした
-  - elsif !@sums.kind_of?(Hash)
-    table.table.table-bordered.table-hover.table-condensed.sum-table style="width:25%;"
-      tr
-        th 合計
-        td.integer
-          = link_to number_with_delimiter(@sums), params.merge(action: :search)
-          .percent = "#{(@sums * 100 / @all_count).round(2)}%"
-        
-  - elsif !@sums.first[0].kind_of?(Array)
-    - x_group = @sums.map { |k, v| k }.uniq.sort
-    table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table style="width:25%;"
-      tr
-      - x_group.each do |x|
-        tr
-          th = x
-          td.integer
-            - co = params.dig(:sum, 0, :column).presence || params.dig(:sum, 1, :column)
-            = link_to number_with_delimiter(@sums[x]), params.merge({action: :search, sum: {}, s: params.fetch(:s, {}).merge({co => {v: x, c: :in}})})
-            .percent = "#{(@sums[x] * 100 / @all_count).round(2)}%"
-        
-  - else
-    - x_group = @sums.map { |k, v| k[0] }.uniq.sort
-    - y_group = @sums.map { |k, v| k[1] }.uniq.sort
-    
-    table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
-      tr
-        th
-        - x_group.each do |x|
-          th.x = x
-      - y_group.each do |y|
-        tr
-          th.y = y
-          - x_group.each do |x|
-            td.integer
-              - if @sums[[x, y]].present?
-                = link_to number_with_delimiter(@sums[[x, y]]), params.merge({action: :search, sum: {}, s: params.fetch(:s, []) + [ {column_name: params.dig(:sum, 0, :column), value: x, cond: :eq}, {column_name: params.dig(:sum, 1, :column), value: y, cond: :eq}]})
-              - else
-                = 0
-        
+  = render "client_tables/sum_table", sums: @sums, all_count: @all_count

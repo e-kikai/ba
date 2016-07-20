@@ -18,14 +18,14 @@
         th タイトル
         th サイズ
         th 並び順
-        th
+        th 削除
     
       = f.fields_for :searchurls, wrapper: false do |da|
         = render "searchurl_fields", f: da
     
-    = f.link_to_add :searchurls, class: "btn btn-default", data: { target: "#dashboards"} do
-      span.glyphicon.glyphicon-plus
-      =< "追加"
+    / = f.link_to_add :searchurls, class: "btn btn-default", data: { target: "#dashboards"} do
+    /   span.glyphicon.glyphicon-plus
+    /   =< "追加"
     
     .buttons
       = f.button data: { "disable-with" => "反映中..."}, class: "btn btn-success submit" do

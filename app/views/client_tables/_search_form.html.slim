@@ -26,56 +26,56 @@
 - s = Hash(s)
 .form-group.col-md-6
   h5.col-md-3 ID
-  .col-md-9 = text_field_tag "s[id][in]", s.dig(:id, :in), class: "form-control", placeholder: "完全一致(複数条件は空白区切り)"
+  .col-md-9 = text_field_tag "s[id][in]", s.dig("id", "in").try(:join, ' '), class: "form-control", placeholder: "完全一致"
   
 - table.show_columns.each do |co|
   .form-group.col-md-6
     h5.col-md-3 = co.name
     - if co.id?
-      .col-md-9 = text_field_tag "s[#{co.column_name}][in]", s.dig(co.column_name, :in), class: "form-control", placeholder: "完全一致(複数条件は空白区切り)"
+      .col-md-9 = text_field_tag "s[#{co.column_name}][in]", s.dig(co.column_name, "in").try(:join, ' '), class: "form-control", placeholder: "完全一致"
     - elsif co.datetime?
-      .col-md-4 = text_field_tag "s[#{co.column_name}][gteq]", s.dig(co.column_name, :gteq), class: "form-control datetimepicker", placeholder: "開始日時"
+      .col-md-4 = text_field_tag "s[#{co.column_name}][gteq]", s.dig(co.column_name, "gteq"), class: "form-control datetimepicker", placeholder: "開始日時"
       h5.col-md-1 style="text-align:center;" 〜
-      .col-md-4 = text_field_tag "s[#{co.column_name}][lteq]", s.dig(co.column_name, :lteq), class: "form-control datetimepicker", placeholder: "終了日時"
+      .col-md-4 = text_field_tag "s[#{co.column_name}][lteq]", s.dig(co.column_name, "lteq"), class: "form-control datetimepicker", placeholder: "終了日時"
     - elsif co.numeric?
-      .col-md-4 = text_field_tag "s[#{co.column_name}][gteq]", s.dig(co.column_name, :gteq), class: "form-control", placeholder: "以下"
+      .col-md-4 = text_field_tag "s[#{co.column_name}][gteq]", s.dig(co.column_name, "gteq"), class: "form-control", placeholder: "以上"
       h5.col-md-1 style="text-align:center;" 〜
-      .col-md-4 = text_field_tag "s[#{co.column_name}][lteq]", s.dig(co.column_name, :lteq), class: "form-control", placeholder: "以上"
+      .col-md-4 = text_field_tag "s[#{co.column_name}][lteq]", s.dig(co.column_name, "lteq"), class: "form-control", placeholder: "以下"
     - elsif co.def_selector.present?
-      .col-md-9 = select_tag "s[#{co.column_name}][in]", options_for_select(co.def_selector, s.dig(co.column_name, :in)), multiple: true, class: "form-control selectpicker", title: ""
+      .col-md-9 = select_tag "s[#{co.column_name}][in]", options_for_select(co.def_selector, s.dig(co.column_name, "in")), multiple: true, class: "form-control selectpicker", title: ""
     - elsif co.selector?
-      .col-md-9 = select_tag "s[#{co.column_name}][in]", options_for_select(co.selector.split("\n").map(&:strip), s.dig(co.column_name, :in)), multiple: true, class: "form-control selectpicker", title: ""
+      .col-md-9 = select_tag "s[#{co.column_name}][in]", options_for_select(co.selector.split("\n").map(&:strip), s.dig(co.column_name, "in")), multiple: true, class: "form-control selectpicker", title: ""
     - else
-      .col-md-5 = text_field_tag "s[#{co.column_name}][v]", s.dig(co.column_name, :v), class: "form-control", placeholder: "(複数条件は空白区切り)"
-      .col-md-4 = select_tag     "s[#{co.column_name}][c]", options_for_select(ClientTable::STRING_CONDITIONS, s.dig(co.column_name, :c)), class: "form-control"
+      .col-md-5 = text_field_tag "s[#{co.column_name}][v]", s.dig(co.column_name).try(:first).try(:at, 1), class: "form-control", placeholder: ""
+      .col-md-4 = select_tag     "s[#{co.column_name}][c]", options_for_select(ClientTable::STRING_CONDITIONS, s.dig(co.column_name).try(:first).try(:at, 0)), class: "form-control"
   
 .form-group.col-md-6
   h5.col-md-3 登録日時
   .col-md-4
-    = text_field_tag "s[created_at][gteq]", s.dig(:created_at, :gteq), class: "form-control datetimepicker", placeholder: "開始日時"
+    = text_field_tag "s[created_at][gteq]", s.dig("created_at", "gteq"), class: "form-control datetimepicker", placeholder: "開始日時"
   .col-md-1
     h5 style="text-align:center;" 〜
   .col-md-4
-    = text_field_tag "s[created_at][lteq]", s.dig(:created_at, :lteq), class: "form-control datetimepicker", placeholder: "終了日時"
+    = text_field_tag "s[created_at][lteq]", s.dig("created_at", "lteq"), class: "form-control datetimepicker", placeholder: "終了日時"
 
 .form-group.col-md-6
   h5.col-md-3 変更日時
   .col-md-4
-    = text_field_tag "s[updated_at][gteq]", s.dig(:updated_at, :gteq), class: "form-control datetimepicker", placeholder: "開始日時"
+    = text_field_tag "s[updated_at][gteq]", s.dig("updated_at", "gteq"), class: "form-control datetimepicker", placeholder: "開始日時"
   .col-md-1
     h5 style="text-align:center;" 〜
   .col-md-4
-    = text_field_tag "s[updated_at][lteq]", s.dig(:updated_at, :iteq), class: "form-control datetimepicker", placeholder: "終了日時"
+    = text_field_tag "s[updated_at][lteq]", s.dig("updated_at", "iteq"), class: "form-control datetimepicker", placeholder: "終了日時"
 
 hr
 
 .form-group.col-md-6
   h5.col-md-3 空白である
-  .col-md-9 = select_tag "s[blanks]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] }, s["blanks"]), multiple: true, class: "form-control selectpicker", title: ""
+  .col-md-9 = select_tag "s[blanks]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] },s["blanks"]), multiple: true, class: "form-control selectpicker", title: ""
 
 .form-group.col-md-6
   h5.col-md-3 存在する
-  .col-md-9 = select_tag "s[presents]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] }, s["presents"]), multiple: true, class: "form-control selectpicker", title: ""
+  .col-md-9 = select_tag "s[presents]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] },s["presents"]), multiple: true, class: "form-control selectpicker", title: ""
 
 .form-group.col-md-6
   h5.col-md-3 重複している
