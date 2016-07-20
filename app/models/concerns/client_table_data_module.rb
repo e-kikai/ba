@@ -293,10 +293,11 @@ module ClientTableDataModule
     # @param  [Hash]    search_params 検索条件パラメータ
     # @return [Integer] 削除件数
     def bulk_destroy(search_params)
-      data = table_search(search_params)
+      shaping_params = shaping_params(search_params)
+      datas          = table_search_02(shaping_params)
 
       transaction do
-        data.update_all(soft_destroyed_at: Time.now)
+        datas.update_all(soft_destroyed_at: Time.now)
       end
     end
 

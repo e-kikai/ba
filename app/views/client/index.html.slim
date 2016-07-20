@@ -1,30 +1,26 @@
 - set_meta_tags title: "メニュー"
 - breadcrumb    :client_root, @client
-
-sass:
-  table.tables tr td
-    vertical-align: middle
     
-.col-md-6.col-md-offset-1
+.col-md-6.col-md-offset-3
   table.table.table-striped.table-hover.table-responsive.tables
     caption テーブル管理
     tr
-      td #{@client.company_table.name}テーブル
+      td = link_to "#{@client.company_table.name}テーブル", "/client_tables/#{@client.company_table.id}/"
       td.integer #{@client.company_table.klass.count}件
-      td = link_to "検索",         "/client_tables/#{@client.company_table.id}/search/"
-      td = link_to "集計",         "/client_tables/#{@client.company_table.id}/sum/"
-      td
+      / td = link_to "検索",         "/client_tables/#{@client.company_table.id}/search/"
+      / td = link_to "集計",         "/client_tables/#{@client.company_table.id}/sum/"
+      / td
       td = link_to "/client_tables/#{@client.company_table.id}/search.csv", class: "btn btn-warning" do
         span.glyphicon.glyphicon-save-file
         =< "エクスポート"
 
     - @client.child_tables.each do |t|
       tr
-        td #{t.name}テーブル
+        td = link_to "#{t.name}テーブル", "/client_tables/#{t.id}/"
         td.integer #{t.klass.count}件
-        td = link_to "検索",         "/client_tables/#{t.id}/search/"
-        td = link_to "集計",         "/client_tables/#{t.id}/sum/"
-        td = link_to "RFM",          "/client_tables/#{t.id}/rfm/"
+        / td = link_to "検索",         "/client_tables/#{t.id}/search/"
+        / td = link_to "集計",         "/client_tables/#{t.id}/sum/"
+        / td = link_to "RFM",          "/client_tables/#{t.id}/rfm/"
         td = link_to "/client_tables/#{t.id}/search.csv", class: "btn btn-warning" do
           span.glyphicon.glyphicon-save-file
           =< "エクスポート"
@@ -33,16 +29,3 @@ sass:
     / li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
     li = link_to "パスワード変更", "/client/edit_password"
     li = link_to "ログアウト",     "/client/logout", method: :delete
-    
-.col-md-12
-  - @client.dashboards.each do |da|
-    div class="col-md-#{da.size.presence || 4}"
-      .panel.panel-default
-        .panel-heading
-          = da.name
-          
-          .pull-right =< link_to da.url, target: :_blank do
-            span.glyphicon.glyphicon-resize-full
-          end
-        .panel-body.embed-responsive.embed-responsive-4by3
-          iframe.embed-responsive-item src="#{da.url}" frameborder="0" allowFullScreen="true"

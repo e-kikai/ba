@@ -3,12 +3,24 @@ class ClientTablesController < ApplicationController
   before_action :find_company_table, only: [:rfm]
 
   def show
+    searchurls = @table.searchurls.where(summary: true)
+    @summaries  = searchurls.map do |su|
+      if su.target = "sum"
+        shaping_params = @klass.shaping_params(su.query["s"])
+        datas          = @klass.table_search_02(shaping_params)
+        sums           = datas.table_sum(su.query["sum"]).count
+        all_count      = @klass.all.count
+
+        {searchurl: su, sums: sums, all_count: all_count}
+      end
+    end
   end
 
   def search
-    @datas        = @klass.company_relation.table_search(params[:s]).table_order(params[:order]).order(:id)
-    @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
-    @sums         = @datas.group("")
+    @shaping_params = @klass.shaping_params(params[:s])
+    @datas          = @klass.table_search_02(@shaping_params)
+    @show_columns   = params[:all] ? @table.client_columns : @table.client_columns.show
+    @sums           = @datas.group("")
 
     # CSV出力
     respond_to do |format|
@@ -22,8 +34,9 @@ class ClientTablesController < ApplicationController
   end
 
   def sum
-    @datas = @klass.table_search(params[:s])
+    @datas = @klass.table_search_02(params[:s])
     @sums  = @datas.table_sum(params[:sum]).count
+    @all_count      = @klass.all.count
   end
 
   def rfm
