@@ -60,23 +60,18 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def data_bulk
     # @datas = @klass.table_search(params[:s])
-    @datas = @klass.table_search_02(params[:s])
+    @shaping_params = @klass.shaping_params(params[:s])
+    @datas          = @klass.table_search_02(@shaping_params)
   end
 
   def data_bulk_update
-    count = case params[:bulk_method]
-    when "destroy"
-      @klass.bulk_destroy(params[:s])
-    when "overlaps"
-      @klass.overlaps_destroy(params[:s])
-    else
-      raise "処理が選択されていません"
-    end
+    count = @klass.bulk_destroy(params[:bulk_method], params[:s])
 
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルのデータ#{count}件を一括削除しました"
   rescue => e
     # @datas = @klass.table_search(params[:s])
-    @datas = @klass.table_search_02(params[:s])
+    @shaping_params = @klass.shaping_params(params[:s])
+    @datas          = @klass.table_search_02(@shaping_params)
 
     flash[:alert] = "データの一括処理に失敗しました : #{e.message}"
     render :data_bulk

@@ -292,12 +292,35 @@ module ClientTableDataModule
     #
     # @param  [Hash]    search_params 検索条件パラメータ
     # @return [Integer] 削除件数
-    def bulk_destroy(search_params)
+    def bulk_destroy(bulk_method, search_params)
       shaping_params = shaping_params(search_params)
       datas          = table_search_02(shaping_params)
 
-      transaction do
-        datas.update_all(soft_destroyed_at: Time.now)
+      case bulk_method
+      when "destroy"
+        transaction do
+          datas.update_all(soft_destroyed_at: Time.now)
+        end
+      when "overlaps"
+        raise "重複条件が設定されていません" if shaping_params["overlaps"].blank?
+        delcount = 0
+
+        transaction do
+          overlap_datas = datas.group(shaping_params["overlaps"]).select(shaping_params["overlaps"])
+
+          overlap_datas.each do |od|
+            res = datas.where(od.attributes.reject { |k, v| v.blank? }).order(:id)
+
+            # 一番最初に登録されたものを残して一括削除
+            tmp = res.first
+            delcount += res.update_all(soft_destroyed_at: Time.now)
+            tmp.restore!
+            delcount -= 1
+          end
+        end
+        delcount
+      else
+        raise "処理が選択されていません"
       end
     end
 
