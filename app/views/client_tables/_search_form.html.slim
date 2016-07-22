@@ -71,16 +71,16 @@ hr
 
 .form-group.col-md-6
   h5.col-md-3 空白である
-  .col-md-9 = select_tag "s[blanks]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] },s["blanks"]), multiple: true, class: "form-control selectpicker", title: ""
+  .col-md-9 = select_tag "s[blanks]", options_for_select(table.show_columns_selector ,s["blanks"]), multiple: true, class: "form-control selectpicker", title: ""
 
 .form-group.col-md-6
   h5.col-md-3 存在する
-  .col-md-9 = select_tag "s[presents]", options_for_select(table.show_columns.map { |co| [co.name, co.column_name] },s["presents"]), multiple: true, class: "form-control selectpicker", title: ""
+  .col-md-9 = select_tag "s[presents]", options_for_select(table.show_columns_selector ,s["presents"]), multiple: true, class: "form-control selectpicker", title: ""
 
 .form-group.col-md-6
   h5.col-md-3 重複している
-  .col-md-9 = select_tag "s[overlaps]", options_for_select(table.show_columns.pluck(:name, :column_name), s["overlaps"]), multiple: true, class: "form-control selectpicker", title: ""
+  .col-md-9 = select_tag "s[overlaps]", options_for_select(table.show_columns_selector, s["overlaps"]), multiple: true, class: "form-control selectpicker", title: ""
 
 .form-group.col-md-6
   h5.col-md-3 重複していない
-  .col-md-9 = select_tag "s[uniques]", options_for_select(table.show_columns.pluck(:name, :column_name), s["uniques"]), multiple: true, class: "form-control selectpicker", title: ""
+  .col-md-9 = select_tag "s[uniques]", options_for_select(table.show_columns_selector, s["uniques"]), multiple: true, class: "form-control selectpicker", title: ""

@@ -49,35 +49,35 @@ module ClientTableDataModule
     end
 
     # リレーション結果取得
-    scope :company_relation, -> {
-      if client_table.company?
-        co = arel_table
-
-        tmp = select(co[Arel.star])
-        client_table.client.child_tables.each.with_index do |child_table, i|
-          next unless child_table.company_id_column
-
-          child_column = "#{child_table.table_name}_count"
-          child_as     = "r_#{i.to_s}"
-          ch = child_table.klass.arel_table
-
-          ch_count = ch.project(ch[:id].count.as(child_column), ch[:company_id]).group(ch[:company_id]).as(child_as)
-          tmp = tmp.joins(co.join(ch_count, Arel::Nodes::OuterJoin).on(co[:id].eq(ch_count[:company_id])).join_sources)
-            .select(ch_count[child_column])
-        end
-        tmp
-      else
-        if client_table.company_id_column
-          ch = arel_table
-          co = company_table.klass.arel_table.alias('company')
-
-          joins(ch.join(co, Arel::Nodes::OuterJoin).on(ch[:company_id].eq(co[:id])).join_sources)
-            .select(ch[Arel.star], co[:name].as("company_name"))
-        else
-          self
-        end
-      end
-    }
+    # scope :company_relation, -> {
+    #   if client_table.company?
+    #     co = arel_table
+    #
+    #     tmp = select(co[Arel.star])
+    #     client_table.client.child_tables.each.with_index do |child_table, i|
+    #       next unless child_table.company_id_column
+    #
+    #       child_column = "#{child_table.table_name}_count"
+    #       child_as     = "r_#{i.to_s}"
+    #       ch = child_table.klass.arel_table
+    #
+    #       ch_count = ch.project(ch[:id].count.as(child_column), ch[:company_id]).group(ch[:company_id]).as(child_as)
+    #       tmp = tmp.joins(co.join(ch_count, Arel::Nodes::OuterJoin).on(co[:id].eq(ch_count[:company_id])).join_sources)
+    #         .select(ch_count[child_column])
+    #     end
+    #     tmp
+    #   else
+    #     if client_table.company_id_column
+    #       ch = arel_table
+    #       co = company_table.klass.arel_table.alias('company')
+    #
+    #       joins(ch.join(co, Arel::Nodes::OuterJoin).on(ch[:company_id].eq(co[:id])).join_sources)
+    #         .select(ch[Arel.star], co[:name].as("company_name"))
+    #     else
+    #       self
+    #     end
+    #   end
+    # }
 
     # ransackによる検索
     # scope :table_search, -> (search_params) {
@@ -182,11 +182,18 @@ module ClientTableDataModule
 
       res = search(search_query).result
 
+      # リレーションのincludes
+      if client_table.company?
+        res = res.includes(client_table.client.child_tables.map { |ct| ct.table_name.pluralize })
+      else
+        res = res.includes(:company)
+      end
+
       ### 重複検索(検索フィルタリング後に行う) ###
       if Hash(search_params)["overlaps"].present?
         overlaps = Array(search_params["overlaps"]).select { |co| columns[co].present? }
         if overlaps.present?
-          res = res.where("(#{overlaps.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).reorder(overlaps).to_sql})")
+          res = res.where("(#{overlaps.map { |co| "#{client_table.table_name}.#{co}" }.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).reorder(overlaps).to_sql})")
         end
       end
 
@@ -194,21 +201,21 @@ module ClientTableDataModule
       if Hash(search_params)["uniques"].present?
         uniques = Array(search_params["uniques"]).select { |co| columns[co].present? }
         if uniques.present?
-          res = res.where("(#{uniques.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).reorder(uniques).to_sql})")
+          res = res.where("(#{uniques.map { |co| "#{client_table.table_name}.#{co}" }.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).reorder(uniques).to_sql})")
         end
       end
 
       res
     }
 
-    scope :table_order, -> (order_params) {
-      if order_params.present?
-        column = order_params[:column].presence || :id
-        type   = order_params[:type] == "desc" ? :desc : :asc
-
-        order(column => type)
-      end
-    }
+    # scope :table_order, -> (order_params) {
+    #   if order_params.present?
+    #     column = order_params[:column].presence || :id
+    #     type   = order_params[:type] == "desc" ? :desc : :asc
+    #
+    #     order(column => type)
+    #   end
+    # }
 
     scope :table_sum, -> (sum_params = []) do
       tmp = all
@@ -260,7 +267,8 @@ module ClientTableDataModule
 
   class_methods do
     def client_table
-      @@client_table ||= ClientTable.find_by(table_name: self.table_name)
+      # @@client_table ||= ClientTable.find_by(table_name: self.table_name)
+      ClientTable.find_by(table_name: self.table_name)
     end
 
     def company_table

@@ -4,7 +4,7 @@
 - message = "テーブルを削除いたします。よろしいでしょうか\r\r※ 事前にテーブルをエクスポートしておくことをお勧めいたします"
 
 .col-md-12
-  h4 #{@table.name}テーブル : #{number_with_delimiter(@client.company_table.klass.count)}件
+  h4 #{@table.name}テーブル : #{number_with_delimiter(@table.klass.count)}件
   table.table.table-striped.table-hover.table-responsive#menu_table
     tr
       / td #{@table.name}テーブル

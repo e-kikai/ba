@@ -21,4 +21,11 @@ class Client < ActiveRecord::Base
   def child_tables
     client_tables.where(company: false)
   end
+
+  # クライアント単位でclient_table_dataクラスを再構築
+  def reflesh_class
+    client_tables.each do |ct|
+      ct.make_class
+    end
+  end
 end

@@ -124,15 +124,20 @@
                 - if co.column_name == "name"
                   = link_to column_format(d[co.column_name], co.column_type), {action: :data_show, data_id: d[:id]}
                 - elsif co.column_name == "company_id" && d.company_id.present?
-                  = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
+                  / = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
+                  = link_to "#{d.company_id} : #{d.company.name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
                 - elsif d[co.column_name].present?
                   = column_format(d[co.column_name], co.column_type)
-                  
+            
+            / 子テーブル
             - if @table.company?
               - child_tables.each do |ch|
                 td.id
-                  - if d["#{ch.table_name}_count"].present?
-                    = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[][column_name]" => :company_id, "s[][value]" => d[:id], "s[][cond]" => :eq})
+                  / - if d["#{ch.table_name}_count"].present?
+                  /   = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[company_id][v]" => d[:id], "s[company_id][c]" => :in})
+                  - val = d.try(ch.table_name.pluralize.intern).try(:size)
+                  - unless [0, nil].include? val
+                    = link_to("#{val}件", {client_id: @table.client_id, id: ch.id, "s[company_id][v]" => d[:id], "s[company_id][c]" => :in})
 
             td.datetime = d[:created_at]
             td.datetime = d[:updated_at]

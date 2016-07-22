@@ -43,7 +43,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def search
     # @datas        = @klass.table_search(params[:s]).company_relation.table_order(params[:order]).order(:id)
     @shaping_params = @klass.shaping_params(params[:s])
-    @datas          = @klass.table_search_02(@shaping_params).company_relation.order(:id)
+    # @datas          = @klass.table_search_02(@shaping_params).company_relation.order(:id)
+    @datas          = @klass.table_search_02(@shaping_params).order(:id)
     @show_columns   = params[:all] ? @table.client_columns : @table.client_columns.show
 
     respond_to do |format|
@@ -79,7 +80,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   # PoweBI用CSV出力
   def bi
-    @datas        = @klass.company_relation.order(:id)
+    # @datas        = @klass.company_relation.order(:id)
+    @datas        = @klass.order(:id)
     @show_columns = @table.client_columns
 
     respond_to do |format|
@@ -424,7 +426,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def update
     if @table.update(client_table_params)
-      @table.klass(:true) # client_table_dataクラス更新
+      @client.reflesh_class # client_table_dataクラス更新
       redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルの項目を変更しました"
     else
       render :edit
@@ -486,7 +488,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def data_show
-    @data = @klass.company_relation.find(params[:data_id])
+    # @data = @klass.company_relation.find(params[:data_id])
+    @data = @klass.find(params[:data_id])
   end
 
   def data_edit
@@ -561,7 +564,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def find_table
     raise "テーブル情報が取得できません"                 unless @table = ClientTable.find(params[:id])
     raise "このテーブルはクライアント所有ではありません" if     @table.client_id != @client.id
-    raise "テーブルデータ情報が取得できません"           unless @klass = @table.klass(true)
+    raise "テーブルデータ情報が取得できません"           unless @klass = @table.klass
   end
 
   def find_company_table

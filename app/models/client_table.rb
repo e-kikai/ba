@@ -107,6 +107,11 @@ class ClientTable < ActiveRecord::Base
     client_columns.show
   end
 
+  # 選択肢用のカラム一覧配列
+  def show_columns_selector
+    show_columns.map { |co| [co.name, co.column_name] }
+  end
+
   def columns_options
     options = [["ID", "id", {data: { db_type: :id}}]]
     options += show_columns.map do |co|
@@ -117,20 +122,39 @@ class ClientTable < ActiveRecord::Base
 
   # client_table_dataクラスを取得
   #
-  # @param  [Boolean]        refresh クラスを更新するかどうか
   # @return [ClentTableData] このclient_tableのclient_table_dataクラス
-  def klass(refresh = false)
-    if refresh || !Object.const_defined?(table_name.singularize.camelcase)
-      client_table = self
-      Object.const_set(table_name.singularize.camelcase, Class.new(ActiveRecord::Base) do |klass|
-        include ClientTableDataModule
-        klass.table_name = client_table.table_name
+  def klass
+    client.reflesh_class if Object.const_defined?(table_name.singularize.camelcase).blank?
 
-        klass.reset_column_information
-      end)
-    else
-      Object.const_get(table_name.singularize.camelcase)
-    end
+    Object.const_get(table_name.singularize.camelcase)
+  end
+
+  # client_table_dataクラスを生成
+  #
+  # @return [ClentTableData] このclient_tableのclient_table_dataクラス
+  def make_class
+    client_table = self
+    Object.const_set(table_name.singularize.camelcase, Class.new(ActiveRecord::Base) do |klass|
+      include ClientTableDataModule
+      klass.table_name   = client_table.table_name
+
+      # リレーション
+      if client_table.company?
+        client_table.client.child_tables.each.with_index do |child_table, i|
+          next unless child_table.company_id_column
+
+          klass.has_many child_table.table_name.pluralize.intern, foreign_key: :company_id
+        end
+      else
+        next unless client_table.company_id_column
+
+        klass.belongs_to :company, class_name: company_table.table_name.classify, foreign_key: :company_id
+      end
+
+      klass.reset_column_information
+    end)
+
+    klass
   end
 
   def filter(data)

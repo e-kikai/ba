@@ -8,7 +8,8 @@
         th class="#{co.column_name}" = co.name
         td class="#{co.column_name}"
           - if co.column_name == "company_id" && @data.company_id.present?
-            = link_to "#{@data.company_id} : #{@data.company_name}", {action: :data_show, id: @table.client.company_table.id, data_id: @data.company_id}
+            / = link_to "#{@data.company_id} : #{@data.company_name}", {action: :data_show, id: @table.client.company_table.id, data_id: @data.company_id}
+            = link_to "#{@data.company_id} : #{@data.company.name}", {action: :data_show, id: @table.client.company_table.id, data_id: @data.company_id}
           - else
             = column_format(@data[co.column_name], co.column_type, :show)
     tr
