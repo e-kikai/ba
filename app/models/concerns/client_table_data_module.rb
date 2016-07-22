@@ -184,9 +184,14 @@ module ClientTableDataModule
 
       # リレーションのincludes
       if client_table.company?
-        res = res.includes(client_table.client.child_tables.map { |ct| ct.table_name.pluralize })
+        inc = []
+        client_table.client.child_tables.each do |ct|
+          inc << ct.table_name.pluralize if ct.company_id_column
+        end
+
+        res = res.includes(inc) if inc.present?
       else
-        res = res.includes(:company)
+        res = res.includes(:company) if client_table.company_id_column
       end
 
       ### 重複検索(検索フィルタリング後に行う) ###

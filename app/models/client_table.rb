@@ -140,15 +140,15 @@ class ClientTable < ActiveRecord::Base
 
       # リレーション
       if client_table.company?
-        client_table.client.child_tables.each.with_index do |child_table, i|
-          next unless child_table.company_id_column
+        client_table.client.child_tables.each.with_index do |ct, i|
+          next unless ct.company_id_column
 
-          klass.has_many child_table.table_name.pluralize.intern, foreign_key: :company_id
+          klass.has_many ct.table_name.pluralize.intern, foreign_key: :company_id
         end
       else
-        next unless client_table.company_id_column
-
-        klass.belongs_to :company, class_name: company_table.table_name.classify, foreign_key: :company_id
+        if client_table.company_id_column
+          klass.belongs_to :company, class_name: company_table.table_name.classify, foreign_key: :company_id
+        end
       end
 
       klass.reset_column_information
