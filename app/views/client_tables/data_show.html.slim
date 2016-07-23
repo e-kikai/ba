@@ -1,4 +1,4 @@
-- set_meta_tags title: "#{@table.name} #{@data.name}"
+- set_meta_tags title: "#{@table.name} #{@data[:name]}"
 - breadcrumb  :data, @table, @data
 
 = render "client_tables/data_show", ba: false

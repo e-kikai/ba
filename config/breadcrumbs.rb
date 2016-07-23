@@ -24,7 +24,7 @@ crumb :sum do |table|
 end
 
 crumb :data do |table, data|
-  link   data.name, "/client_tables/#{table.id}/#{data.id}"
+  link   data[:name], "/client_tables/#{table.id}/#{data.id}"
   parent :search, table
 end
 
@@ -69,7 +69,7 @@ crumb :clients_search do |table|
 end
 
 crumb :clients_data do |table, data|
-  link   data.name, "/bamember/clients/#{table.client.id}/table/#{table.id}/#{data.id}"
+  link   data[:name], "/bamember/clients/#{table.client.id}/table/#{table.id}/#{data.id}"
   parent :clients_search, table
 end
 

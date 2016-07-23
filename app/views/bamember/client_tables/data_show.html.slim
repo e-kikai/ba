@@ -1,4 +1,4 @@
-- set_meta_tags title: "#{@table.client.name}/#{@table.name} #{@data.name.presence || @data.id}"
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} #{@data[:name]}"
 - breadcrumb  :clients_data, @table, @data
 
 = render "client_tables/data_show", ba: true
