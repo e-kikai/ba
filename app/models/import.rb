@@ -32,7 +32,7 @@ class Import < ActiveRecord::Base
 
     errors    = []
 
-    klass     = client_table.klass(true)
+    klass     = client_table.klass
     ctd       = klass.arel_table
 
     matchings = Import.import_check(matching_params)
@@ -120,7 +120,7 @@ class Import < ActiveRecord::Base
     )
   rescue => e
     update!(
-      error_message: e.message,
+      error_message: "#{e.message}",
       rescued_at:   Time.now
     )
   end

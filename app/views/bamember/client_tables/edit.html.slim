@@ -10,8 +10,8 @@ coffee:
       
     $('select.column_type').trigger('change')
     
-    $('.btn.backup').click ->
-      $('.btn.submit').prop("disabled", false)
+    # $('.btn.backup').click ->
+    #   $('.btn.submit').prop("disabled", false)
 
 sass:
   textarea.selector
@@ -70,6 +70,6 @@ sass:
       span.glyphicon.glyphicon-arrow-down
     .buttons
       - message = "変更内容を反映してよろしいでしょうか\r・ 型を変更した場合、データ変更時に、既に入っているデータに影響が出る場合があります\r\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします"
-      = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success submit", disabled: :true do
+      = f.button data: { confirm: message, "disable-with" => "反映中..."}, class: "btn btn-success submit" do
         span.glyphicon.glyphicon-save
         =< "項目変更を反映"

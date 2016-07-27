@@ -29,10 +29,6 @@ coffee:
       
     $('select.column_name').trigger('change')
 
-sass:
-  .example
-    color: #999
-  
 .col-md-8.col-md-offset-2
   dl.dl-horizontal
     dt データ件数
@@ -71,7 +67,7 @@ sass:
     .form-group
       .col-sm-3 
       .col-sm-5
-        = check_box_tag :background
+        = check_box_tag :background, {}, checked: true
         = label_tag  "background", " バックグラウンド処理", class: "control-label"
       
     div style="text-align:center;"
