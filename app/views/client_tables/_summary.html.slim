@@ -9,4 +9,4 @@ h4 概要
           span.glyphicon.glyphicon-resize-full
         
       .panel-body.embed-responsive.embed-responsive-4by3 style="overflow:scroll;"
-        = render "client_tables/sum_table", sums: su[:sums], all_count: su[:all_count]
+        = render "client_tables/sum_table", sums: su[:sums], all_count: su[:all_count], search_query: (su[:searchurl][:query]["s"] || {}), sum_query: (su[:searchurl][:query]["sum"] || {})

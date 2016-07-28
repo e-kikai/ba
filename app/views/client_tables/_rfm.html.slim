@@ -101,7 +101,7 @@ coffee:
             - if sum_res[[row, col]].blank?
               | 0
             - else
-              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, child_table_id: @table.id, id: @company_table.id, s: [ {column_name: :id, value: sum_res[[row, col]][:company_ids], cond: :in}]}, remote: true
+              .data = link_to number_with_delimiter(sum_res[[row, col]][:count]), {action: :search, child_table_id: @table.id, id: @company_table.id, s:  {id: { v: sum_res[[row, col]][:company_ids], c: :in}}}, remote: true
               
               .percent = "#{(sum_res[[row, col]][:count].to_f * 100 / sum_count).round(2)}%"
               

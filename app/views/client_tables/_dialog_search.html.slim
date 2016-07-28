@@ -7,12 +7,14 @@
 
 .modal-body
   .menu
-    = link_to params.merge(id: @client.company_table.id, s: [ {column_name: :id, value: params[:s][0][:value], cond: :in}]), class: "btn btn-success", remote: true do
-      span.glyphicon.glyphicon-save-file
-      =< "会社一覧"
-    = link_to params.merge(id: chilid_table.id, s: [ {column_name: :company_id, value: params[:s][0][:value], cond: :in}]), class: "btn btn-success", remote: true do
-      span.glyphicon.glyphicon-save-file
-      =< "#{chilid_table.name}一覧"
+    - if params.dig(:s, :id, "v")
+      = link_to url_for({action: :search, id: chilid_table.id, child_table_id: params[:child_table_id], s: {company_id: {v: params.dig(:s, :id, "v"), c: :in}}}), class: "btn btn-success", remote: true do
+        span.glyphicon.glyphicon-save-file
+        =< "#{chilid_table.name}一覧"
+    - else
+      = link_to url_for({action: :search, id: @client.company_table.id, child_table_id: params[:child_table_id], s: {id: {v: params.dig(:s, :company_id, "v"), c: :in}}}), class: "btn btn-success", remote: true do
+        span.glyphicon.glyphicon-save-file
+        =< "会社一覧"
     = link_to params.merge(format: :csv), class: "btn btn-success" do
       span.glyphicon.glyphicon-save-file
       =< "CSV出力"
@@ -23,10 +25,10 @@
         th ID
         - @show_columns.each do |co|
           th = co.name
-
+  
         th.datetime 登録日時
         th.datetime 変更日時
-
+  
       - @datas.each do |d|
         tr
           td.id
@@ -36,7 +38,7 @@
               - if co.column_name == "name"
                 = link_to column_format(d[co.column_name], co.column_type), {action: :data_show, data_id: d[:id]}
               - elsif co.column_name == "company_id" && d.company_id.present?
-                = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
+                = link_to "#{d.company_id} : #{d.company.name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
               - elsif d[co.column_name].present?
                 = column_format(d[co.column_name], co.column_type)
                 

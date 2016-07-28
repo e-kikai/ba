@@ -41,6 +41,6 @@
               span.glyphicon.glyphicon-search
               =< "集計"
 
-.col-md-12
+. class="#{params.dig(:sum, 0, :column) && params.dig(:sum, 1, :column) ? 'col-md-12': 'col-md-4'}"
   / = @datas.table_sum(params[:sum]).to_sql
-  = render "client_tables/sum_table", sums: @sums, all_count: @all_count
+  = render "client_tables/sum_table", sums: @sums, all_count: @all_count, search_query: params[:s] || {}, sum_query: params[:sum] || {}
