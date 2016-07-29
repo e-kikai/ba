@@ -41,7 +41,7 @@ sass:
           span.glyphicon.glyphicon-upload
           =< "アップロード"
           
-.col-md-8.col-md-offset-2
+.col-md-10.col-md-offset-1
   = paginate @csvfiles
 
   table.table.table-striped.table-hover.table-responsive.tables
@@ -49,14 +49,22 @@ sass:
     tr
       th ファイル名
       th アップロード日時
-      th 総数
-      th 削除
+      th 件数
+      th インポート
+      / th 検索
+      th
+      th
     
     - @csvfiles.each do |f|
       tr
-        td = link_to f.original_filename, {action: :import_matching, csvfile_id: f.id}
+        td = f.original_filename
         td = f.created_at
         td.integer = number_with_delimiter(f.all_num)
+        td = link_to "インポート", {action: :import_matching, csvfile_id: f.id}
+        / td = link_to "検索", {action: :import_search, csvfile_id: f.id}
+        td = link_to({action: :import_download, csvfile_id: f.id, format: :csv}, {method: :get, class: "btn btn-warning"}) do
+          span.glyphicon.glyphicon-save-file
+          =< "ダウンロード"
         td = link_to({action: :import_matching, csvfile_id: f.id}, {method: :delete, data: { confirm: message, "disable-with" => "削除中..."}, class: "btn btn-danger"}) do
           span.glyphicon.glyphicon-remove
           =< "削除"

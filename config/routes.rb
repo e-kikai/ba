@@ -61,6 +61,9 @@ Rails.application.routes.draw do
     get    'clients/:client_id/table/:id/import_log'                  => 'client_tables#import_log'
     get    'clients/:client_id/table/:id/import_error'                => 'client_tables#import_error'
 
+    get    'clients/:client_id/table/:id/import_search/:csvfile_id'   => 'client_tables#import_search'
+    get    'clients/:client_id/table/:id/import_download/:csvfile_id' => 'client_tables#import_download'
+
     get    'clients/:client_id/table/:id/relation'          => 'client_tables#relation'
     get    'clients/:client_id/table/:id/relation_error'    => 'client_tables#relation_error'
     post   'clients/:client_id/table/:id/relation_confirm'  => 'client_tables#relation_confirm'

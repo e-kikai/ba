@@ -361,9 +361,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def import_upload
     csvfile = Csvfile.upload(params[:id], params[:file])
 
-    # redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/"
-    notice = "ファイル「#{params[:file][:original_filename]}」をアップロードしました"
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/", notice: notice
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/"
+    # notice = "ファイル「#{params[:file][:original_filename]}」をアップロードしました"
+    # redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/", notice: notice
   end
 
   def import_matching
@@ -457,7 +457,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def searchurl_create
     if @table.searchurls.create(
       target: params[:target],
-      query:  params.select { |k, v| ["s", "sum"].include? k }
+      query:  params.select { |k, v| ["s", "sum", "rfm"].include? k }
     )
       redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/searchurls/", notice: "検索条件を保存しました"
     else
