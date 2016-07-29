@@ -361,7 +361,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def import_upload
     csvfile = Csvfile.upload(params[:id], params[:file])
 
-    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/"
+    # redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/"
+    notice = "ファイル「#{params[:file][:original_filename]}」をアップロードしました"
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_matching/#{csvfile.id}/", notice: notice
   end
 
   def import_matching
@@ -421,6 +423,20 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     end
   end
 
+  def import_search
+    @csvfile = Csvfile.find(params[:csvfile_id])
+  rescue => e
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_file/", alert: e.message
+  end
+
+  def import_download
+    @csvfile = Csvfile.find(params[:csvfile_id])
+
+    send_file(@csvfile.path, filename: @csvfile.original_filename, length: File::stat(@csvfile.path).size)
+  rescue => e
+    redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_file/", alert: e.message
+  end
+
   def edit
   end
 
@@ -459,7 +475,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       render :searchurls
     end
   end
-
 
   def bi_coop
   end

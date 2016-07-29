@@ -179,7 +179,6 @@ module ClientTableDataModule
       end
 
       # raise search_query.to_s
-
       res = search(search_query).result
 
       # リレーションのincludes
@@ -191,7 +190,7 @@ module ClientTableDataModule
 
         res = res.includes(inc) if inc.present?
       else
-        res = res.includes(:company) if client_table.company_id_column
+        res = res.includes(:company) # if client_table.company_id_column
       end
 
       ### 重複検索(検索フィルタリング後に行う) ###
@@ -365,7 +364,8 @@ module ClientTableDataModule
           end.to_h
         else
           # 空白・重複・ソート
-          res[column_name] = Array(s).select { |co2| columns[co2].present? }
+          # res[column_name] = Array(s).select { |co2| columns[co2].present? }
+          res[column_name] = Array(s)
         end
       end
 

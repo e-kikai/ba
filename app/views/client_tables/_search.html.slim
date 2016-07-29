@@ -101,9 +101,16 @@
               = co.name
               =< column_sorter co.column_name
           - if @table.company?
+            - s_tmp = {presents: [:company_id] }
+            - @shaping_params.each do |key, v|
+              - if %w(overlaps uniques presents blanks).include? key
+                - s_tmp[key] = Array(v).map { |v2| "company_#{v2}" }
+              - else
+                - s_tmp["company_#{key}"] = v
+
             - child_tables = @client.child_tables
             - child_tables.each do |ch|
-              th.id = ch.name
+              th.id = link_to ch.name, {client_id: @table.client_id, id: ch.id, s: s_tmp}
             
           th.datetime
             | 登録日時
@@ -124,7 +131,6 @@
                 - if co.column_name == "name"
                   = link_to column_format(d[co.column_name], co.column_type), {action: :data_show, data_id: d[:id]}
                 - elsif co.column_name == "company_id" && d.company_id.present?
-                  / = link_to "#{d.company_id} : #{d.company_name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
                   = link_to "#{d.company_id} : #{d.company.name}", {action: :data_show, id: @client.company_table.id, data_id: d.company_id}
                 - elsif d[co.column_name].present?
                   = column_format(d[co.column_name], co.column_type)
@@ -133,11 +139,9 @@
             - if @table.company?
               - child_tables.each do |ch|
                 td.id
-                  / - if d["#{ch.table_name}_count"].present?
-                  /   = link_to("#{d["#{ch.table_name}_count"]}件", {client_id: @table.client_id, id: ch.id, "s[company_id][v]" => d[:id], "s[company_id][c]" => :in})
                   - val = d.try(ch.table_name.pluralize.intern).try(:size)
                   - unless [0, nil].include? val
-                    = link_to("#{val}件", {client_id: @table.client_id, id: ch.id, "s[company_id][v]" => d[:id], "s[company_id][c]" => :in})
+                    = link_to "#{val}件", {client_id: @table.client_id, id: ch.id, "s[company_id][v]" => d[:id], "s[company_id][c]" => :in}
 
             td.datetime = d[:created_at]
             td.datetime = d[:updated_at]
