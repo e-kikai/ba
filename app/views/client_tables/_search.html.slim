@@ -20,7 +20,7 @@
         h4 検索フォーム
       .modal-body
         = form_tag({}, method: :get) do
-          = render "client_tables/search_form", table: @table, s: @shaping_params
+          = render "client_tables/search_form", table: @table, s: @s_params
           
           hr
           
@@ -30,7 +30,7 @@
           .form-group.col-md-6
             h5.col-md-3 ソート
             .col-md-9
-              = select_tag "s[s]", options_for_select(s_options, @shaping_params["s"]), class: "form-control"
+              = select_tag "s[s]", options_for_select(s_options, @s_params["s"]), class: "form-control"
 
           / = label_tag :order_column, "ソート"
           / .form-group
@@ -47,7 +47,7 @@
 .col-md-12
   / = @pdatas.to_sql
   / = params.to_s
-  / = @shaping_params.to_s
+  / = @s_params.to_s
   
   / - restext = Array(params[:s]).inject("") do |t, s|
   /   - if s[:column_name].blank? || s[:cond].blank?
@@ -102,7 +102,7 @@
               =< column_sorter co.column_name
           - if @table.company?
             - s_tmp = {presents: [:company_id] }
-            - @shaping_params.each do |key, v|
+            - @s_params.each do |key, v|
               - if %w(overlaps uniques presents blanks).include? key
                 - s_tmp[key] = Array(v).map { |v2| "company_#{v2}" }
               - else

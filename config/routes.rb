@@ -19,11 +19,12 @@ Rails.application.routes.draw do
   get   'client/edit_password' => 'client#edit_password'
   patch 'client/edit_password' => 'client#update_password'
 
-  get 'client_tables/:id/'         => 'client_tables#show'
-  get 'client_tables/:id/search'   => 'client_tables#search'
-  get 'client_tables/:id/sum'      => 'client_tables#sum'
-  get 'client_tables/:id/rfm'      => 'client_tables#rfm'
-  get 'client_tables/:id/:data_id' => 'client_tables#data_show'
+  get 'client_tables/:id/'           => 'client_tables#show'
+  get 'client_tables/:id/search'     => 'client_tables#search'
+  get 'client_tables/:id/sum'        => 'client_tables#sum'
+  get 'client_tables/:id/rfm'        => 'client_tables#rfm'
+  get 'client_tables/:id/searchurls' => 'client_tables#searchurls'
+  get 'client_tables/:id/:data_id'   => 'client_tables#data_show'
 
   # BA member pages
   namespace :bamember do

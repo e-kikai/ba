@@ -48,107 +48,6 @@ module ClientTableDataModule
       end
     end
 
-    # リレーション結果取得
-    # scope :company_relation, -> {
-    #   if client_table.company?
-    #     co = arel_table
-    #
-    #     tmp = select(co[Arel.star])
-    #     client_table.client.child_tables.each.with_index do |child_table, i|
-    #       next unless child_table.company_id_column
-    #
-    #       child_column = "#{child_table.table_name}_count"
-    #       child_as     = "r_#{i.to_s}"
-    #       ch = child_table.klass.arel_table
-    #
-    #       ch_count = ch.project(ch[:id].count.as(child_column), ch[:company_id]).group(ch[:company_id]).as(child_as)
-    #       tmp = tmp.joins(co.join(ch_count, Arel::Nodes::OuterJoin).on(co[:id].eq(ch_count[:company_id])).join_sources)
-    #         .select(ch_count[child_column])
-    #     end
-    #     tmp
-    #   else
-    #     if client_table.company_id_column
-    #       ch = arel_table
-    #       co = company_table.klass.arel_table.alias('company')
-    #
-    #       joins(ch.join(co, Arel::Nodes::OuterJoin).on(ch[:company_id].eq(co[:id])).join_sources)
-    #         .select(ch[Arel.star], co[:name].as("company_name"))
-    #     else
-    #       self
-    #     end
-    #   end
-    # }
-
-    # ransackによる検索
-    # scope :table_search, -> (search_params) {
-    #   search_query = {}
-    #   Array(search_params).each do |s|
-    #     next if s[:column_name].blank? || s[:cond].blank?
-    #
-    #     ### 値の整形 ###
-    #     value = s[:value].to_s.normalize_charwidth.gsub(/[[:blank:]]+/, ' ').strip
-    #     value = value.split(" ") if %w(in not_in cont_any not_cont_any).include? s[:cond]
-    #
-    #     co = client_table.client_columns.find_by(column_name: s[:column_name])
-    #
-    #     cond = if !co || co.numeric? || co.datetime?
-    #       case s[:cond]
-    #       when "cont","start", "end";              "eq"
-    #       when "not_cont", "not_start", "not_end"; "not_eq"
-    #       when "cont_any";                         "in"
-    #       when "not_cont_any";                     "not_in"
-    #       when "present";                          "not_null"
-    #       when "blank";                            "null"
-    #       when "overlap","unique";                 "not_null"
-    #       else                                     s[:cond]
-    #       end
-    #     else
-    #       case s[:cond]
-    #       when "overlap","unique"; "present"
-    #       else                     s[:cond]
-    #       end
-    #     end
-    #
-    #     value = if (["present", "blank", "null", "not_null"].include? cond)
-    #       true
-    #     elsif !co
-    #       value
-    #     elsif %w(in not_in cont_any not_cont_any).include? cond
-    #       value.map { |v| co.filter(v) }
-    #     else
-    #       co.filter(value)
-    #     end
-    #
-    #     if value.present?
-    #       search_query["#{s[:column_name]}_#{cond}"] = value
-    #     end
-    #   end
-    #
-    #   res = search(search_query).result
-    #
-    #   ### 重複検索(検索フィルタリング後に行う) ###
-    #   overlaps = Array(search_params).select { |s| s[:cond] == "overlap"}.map { |s| s[:column_name] }.reject(&:blank?)
-    #   if overlaps.present?
-    #     # temp_in = search(search_query).result.group(overlaps).having("count(*) > 1")
-    #     #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
-    #     # search_query["id_in"] = temp_in.presence || "xxxnoaxxx"
-    #
-    #     res = res.where("(#{overlaps.join(',')}) IN (#{res.group(overlaps).having("count(*) > 1").select(overlaps).to_sql})")
-    #   end
-    #
-    #   uniques  = Array(search_params).select { |s| s[:cond] == "unique"}.map { |s| s[:column_name] }.reject(&:blank?)
-    #   if uniques.present?
-    #     # temp_in = search(search_query).result.group(uniques).having("count(*) > 1")
-    #     #   .pluck("string_agg(CAST(id AS text), ',')").inject([]) { |res, a| res.concat(a.split(',')) }
-    #     # search_query["id_not_in"] = temp_in.presence || "xxxnoaxxx"
-    #
-    #     res = res.where("(#{uniques.join(',')}) IN (#{res.group(uniques).having("count(*) = 1").select(uniques).to_sql})")
-    #   end
-    #
-    #   # search(search_query).result
-    #   res
-    # }
-
     # ransackによる検索
     scope :table_search_02, -> (search_params) {
       # 検索条件の整形
@@ -212,15 +111,6 @@ module ClientTableDataModule
       res
     }
 
-    # scope :table_order, -> (order_params) {
-    #   if order_params.present?
-    #     column = order_params[:column].presence || :id
-    #     type   = order_params[:type] == "desc" ? :desc : :asc
-    #
-    #     order(column => type)
-    #   end
-    # }
-
     scope :table_sum, -> (sum_params = []) do
       tmp = all
       columns = client_table.client_columns_by_column_name
@@ -263,6 +153,24 @@ module ClientTableDataModule
     }
 
     scope :presents, -> (column_name) { where(cast(arel_table[column_name], "TEXT").not_eq("")) }
+
+    scope :rfm, -> (rfm_parmas) {
+      companies_sql = select("company_id, #{rfm_parmas["x_select"]} as ax, #{rfm_parmas["y_select"]} as ay")
+        .where.not(company_id: nil, rfm_parmas["x_column"] => nil, rfm_parmas["y_column"] => nil).group(:company_id).to_sql
+
+      x_case = rfm_parmas[:x_sepa].split(",").inject(" CASE ") do |s, i|
+        s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ax <= ? THEN ? ", "#{i} #{rfm_parmas["x_date"]}", "#{i}"])
+      end + " ELSE 'more' END "
+
+      y_case = rfm_parmas[:y_sepa].split(",").inject(" CASE ") do |s, i|
+        s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ay <= ? THEN ? ", "#{i} #{rfm_parmas["y_date"]}", "#{i}"])
+      end + " ELSE 'more' END "
+
+      sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(CAST(company_id AS TEXT), ' ') as company_ids
+        FROM (#{companies_sql}) cs GROUP BY x, y ORDER BY x, y;"
+
+      find_by_sql(sql)
+    }
   end
 
   def client_column(column_name)
@@ -371,5 +279,54 @@ module ClientTableDataModule
 
       res
     end
+
+    # 検索条件を整形
+    def rfm_shaping_params(rfm_params)
+      res = {}
+      rfm_params   = Hash(rfm_params)
+
+      rfm_params.select { |k, v| k =~ /^hot_/ }.each do |k, v|
+        res[k] = v.to_s
+      end
+
+      res[:x_sepa] = rfm_params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
+      res[:y_sepa] = rfm_params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
+
+      [:x, :y].each do |key|
+        key_res = case rfm_params[key]
+        when /^(.*)__(.*)__(.*)$/
+          co = client_table.client_columns.find_by(column_name: $1)
+
+          case
+          when co.datetime?
+            key_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
+            case $2
+            when "day"
+              [rfm_params[key], "日",   "DAY",   key_select, $1]
+            when "year"
+              [rfm_params[key], "年",   "YEAR",  key_select, $1]
+            else
+              [rfm_params[key], "ヶ月", "MONTH", key_select, $1]
+            end
+          when co.numeric?
+            func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
+            [rfm_params[key], ($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
+          end
+        else
+          ["count", "回", "", " count(*) ", "company_id"]
+        end
+
+        res.merge!({
+          "#{key}"        => key_res[0],
+          "#{key}_unit"   => key_res[1],
+          "#{key}_date"   => key_res[2],
+          "#{key}_select" => key_res[3],
+          "#{key}_column" => key_res[4],
+        })
+      end
+
+      res
+    end
+
   end
 end

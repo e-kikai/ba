@@ -33,7 +33,7 @@ crumb :something do |title|
   parent :client_root
 end
 
-crumb :table_something do |table, title|
+crumb :table_something do |title, table|
   link   title
   parent :table, table
 end

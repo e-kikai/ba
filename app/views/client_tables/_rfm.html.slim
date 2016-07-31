@@ -1,4 +1,3 @@
-
 - targets = {"件数" => :count}
 - @table.client_columns.each do |co|
   - case co.column_type
@@ -12,10 +11,19 @@
 
 coffee:
   $ ->
-    if $('select#x').val() == 'count' && $('select#y').val() == 'count'
+    if $('select#rfm_x').val() == 'count' && $('select#rfm_y').val() == 'count'
       $('button.btn.option').click()
   
-= button_tag  "設定", type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#RFMForm" }
+.container-fluid.search-menu
+  = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#RFMForm" } do
+    span.glyphicon.glyphicon-menu-hamburger
+    =< "設定フォーム"
+
+  - if ba
+    = link_to params.merge({action: :searchurls, target: :rfm}), method: :put, class: "btn btn-success" do
+      span.glyphicon.glyphicon-save
+      =< "この条件を保存"
+
 #RFMForm.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog
     .modal-content
@@ -26,43 +34,43 @@ coffee:
           h4 RFM設定フォーム
         .modal-body
           .form-group
-            .col-sm-3 = label_tag  :x, "X軸項目", class: "control-label"
-            .col-sm-9 = select_tag :x, options_for_select(targets, params[:x]), class: "form-control"
+            .col-sm-3 = label_tag      "rfm[x]", "X軸項目", class: "control-label"
+            .col-sm-9 = select_tag     "rfm[x]", options_for_select(targets, @rfm_params["x"]), class: "form-control"
           .form-group
-            .col-sm-3 = label_tag  :y, "Y軸項目", class: "control-label"
-            .col-sm-9 = select_tag :y, options_for_select(targets, params[:y]), class: "form-control"
+            .col-sm-3 = label_tag      "rfm[y]", "Y軸項目", class: "control-label"
+            .col-sm-9 = select_tag     "rfm[y]", options_for_select(targets, @rfm_params["y"]), class: "form-control"
           .form-group
-            .col-sm-3 = label_tag  :x_sepa, "X軸セパレート", class: "control-label"
-            .col-sm-9 = text_field_tag :x_sepa, params[:x_sepa], class: "form-control", placeholder: ",区切り"
+            .col-sm-3 = label_tag      "rfm[x_sepa]", "X軸セパレート", class: "control-label"
+            .col-sm-9 = text_field_tag "rfm[x_sepa]", @rfm_params[:x_sepa], class: "form-control", placeholder: ",区切り"
           .form-group
-            .col-sm-3 = label_tag  :y_sepa, "Y軸セパレート", class: "control-label"
-            .col-sm-9 = text_field_tag :y_sepa, params[:y_sepa], class: "form-control", placeholder: ",区切り"
+            .col-sm-3 = label_tag      "rfm[y_sepa]", "Y軸セパレート", class: "control-label"
+            .col-sm-9 = text_field_tag "rfm[y_sepa]", @rfm_params[:y_sepa], class: "form-control", placeholder: ",区切り"
             
           .hotspots
             .form-group
-              .col-sm-3 = label_tag  "hotspots_0_0", "ホットスポット", class: "control-label"
+              .col-sm-3 = label_tag  "rfm[hot_0_0]", "ホットスポット", class: "control-label"
               .col-sm-3
                 .input-group.has-error
                   span.input-group-addon 1
-                  = text_field_tag "hotspots_0_0", params[:hotspots_0_0], class: "form-control", placeholder: "X"
-                  = text_field_tag "hotspots_0_1", params[:hotspots_0_1], class: "form-control", placeholder: "Y"
+                  = text_field_tag "rfm[hot_0_0]", @rfm_params["hot_0_0"], class: "form-control", placeholder: "X"
+                  = text_field_tag "rfm[hot_0_1]", @rfm_params["hot_0_1"], class: "form-control", placeholder: "Y"
               .col-sm-3
                 .input-group.has-warning
                   span.input-group-addon 2
-                  = text_field_tag "hotspots_1_0", params[:hotspots_1_0], class: "form-control", placeholder: "X"
-                  = text_field_tag "hotspots_1_1", params[:hotspots_1_1], class: "form-control", placeholder: "Y"
+                  = text_field_tag "rfm[hot_1_0]", @rfm_params["hot_1_0"], class: "form-control", placeholder: "X"
+                  = text_field_tag "rfm[hot_1_1]", @rfm_params["hot_1_1"], class: "form-control", placeholder: "Y"
             .form-group
               .col-sm-3
               .col-sm-3
                 .input-group.has-success
                   span.input-group-addon 3
-                  = text_field_tag "hotspots_2_0", params[:hotspots_2_0], class: "form-control", placeholder: "X"
-                  = text_field_tag "hotspots_2_1", params[:hotspots_2_1], class: "form-control", placeholder: "Y"
+                  = text_field_tag "rfm[hot_2_0]", @rfm_params["hot_2_0"], class: "form-control", placeholder: "X"
+                  = text_field_tag "rfm[hot_2_1]", @rfm_params["hot_2_1"], class: "form-control", placeholder: "Y"
               .col-sm-3
                 .input-group
                   span.input-group-addon 4
-                  = text_field_tag "hotspots_3_0", params[:hotspots_3_0], class: "form-control", placeholder: "X"
-                  = text_field_tag "hotspots_3_1", params[:hotspots_3_1], class: "form-control", placeholder: "Y"
+                  = text_field_tag "rfm[hot_3_0]", @rfm_params["hot_3_0"], class: "form-control", placeholder: "X"
+                  = text_field_tag "rfm[hot_3_1]", @rfm_params["hot_3_1"], class: "form-control", placeholder: "Y"
 
         .modal-footer
           = button_tag "Σ 集計", type: :submit, class: "btn btn-primary"
@@ -71,11 +79,11 @@ coffee:
   .modal-dialog.modal-lg
     .modal-content#modal-main
     
-- cols = params[:x_sepa].split(',') + ["more"]
-- rows = (params[:y_sepa].split(',') + ["more"]).reverse
+- cols = @rfm_params[:x_sepa].split(',') + ["more"]
+- rows = (@rfm_params[:y_sepa].split(',') + ["more"]).reverse
 
 - sum_res = {}
-- @sums.each do |s|
+- @rfms.each do |s|
   - sum_res[[s.y, s.x]] = { count: s.count || 0, company_ids: s.company_ids }
 
 - sum_count = sum_res.inject(0) { |sum, (key, s)| sum + s[:count] }
@@ -84,15 +92,15 @@ coffee:
   table.table.table-bordered.table-striped.table-hover.table-condensed
     - rows.each.with_index do |row, i|
       tr
-        th = row == "more" ? "それ以上" : "〜 #{row}#{@y_unit}"
+        th = row == "more" ? "それ以上" : "〜 #{row}#{@rfm_params["y_unit"]}"
         - cols.each.with_index do |col, j|
-          - if i < params[:hotspots_0_0].to_i && j < params[:hotspots_0_1].to_i 
+          - if i < @rfm_params["hot_0_0"].to_i && j < @rfm_params["hot_0_1"].to_i 
             - c = :danger
-          - elsif i < params[:hotspots_1_0].to_i && j < params[:hotspots_1_1].to_i 
+          - elsif i < @rfm_params["hot_1_0"].to_i && j < @rfm_params["hot_1_1"].to_i 
             - c = :warning
-          - elsif i < params[:hotspots_2_0].to_i && j < params[:hotspots_2_1].to_i 
+          - elsif i < @rfm_params["hot_2_0"].to_i && j < @rfm_params["hot_2_1"].to_i 
             - c = :success
-          - elsif i < params[:hotspots_3_0].to_i && j < params[:hotspots_3_1].to_i 
+          - elsif i < @rfm_params["hot_3_0"].to_i && j < @rfm_params["hot_3_1"].to_i 
             - c = :info
           - else
             - c = ""
@@ -114,5 +122,5 @@ coffee:
     tr
       th
       - cols.each do |col|
-        th = col == "more" ? "それ以上" : "〜 #{col}#{@x_unit}"
+        th = col == "more" ? "それ以上" : "〜 #{col}#{@rfm_params["x_unit"]}"
       th 合計(人)

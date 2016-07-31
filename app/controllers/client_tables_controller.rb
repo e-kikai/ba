@@ -40,78 +40,84 @@ class ClientTablesController < ApplicationController
   end
 
   def rfm
-    params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
-    params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
+    @rfm_params = @klass.rfm_shaping_params(params[:rfm])
+    @rfms       = @klass.rfm(@rfm_params)
 
-    @x_unit, x_date, x_select, x_column = case params[:x]
-    when /^(.*)__(.*)__(.*)$/
-      co = @table.client_columns.find_by(column_name: $1)
-
-      case co.column_type
-      when "datetime"
-        x_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
-        case $2
-        when "day"
-          ["日", "DAY", x_select, $1]
-        when "year"
-          ["年", "YEAR", x_select, $1]
-        else
-          ["ヶ月", "MONTH", x_select, $1]
-        end
-      when "integer", "float", "yen"
-        func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
-        [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
-      end
-    else
-      params[:x] = :count
-      ["回", "", " count(*) ", "company_id"]
-    end
-
-    @y_unit, y_date, y_select, y_column = case params[:y]
-    when /^(.*)__(.*)__(.*)$/
-      co = @table.client_columns.find_by(column_name: $1)
-
-      case co.column_type
-      when "datetime"
-        y_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
-        case $2
-        when "day"
-          ["日", "DAY", y_select, $1]
-        when "year"
-          ["年", "YEAR", y_select, $1]
-        else
-          ["ヶ月", "MONTH", y_select, $1]
-        end
-      when "integer", "float", "yen"
-        func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
-        [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
-      end
-    else
-      params[:y] = "count"
-      ["回", "", " count(*) ", "company_id"]
-    end
-
-    companies_sql = @klass.select("company_id, #{x_select} as ax, #{y_select} as ay")
-      .where.not(company_id: nil, x_column => nil, y_column => nil).group(:company_id).to_sql
-
-    x_case = params[:x_sepa].split(",").inject(" CASE ") do |s, i|
-      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ax <= ? THEN ? ", "#{i} #{x_date}", "#{i}"])
-    end + " ELSE 'more' END "
-
-    y_case = params[:y_sepa].split(",").inject(" CASE ") do |s, i|
-      s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ay <= ? THEN ? ", "#{i} #{y_date}", "#{i}"])
-    end + " ELSE 'more' END "
-
-    sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(CAST(company_id AS TEXT), ' ') as company_ids
-      FROM (#{companies_sql}) cs GROUP BY x, y ORDER BY x, y;"
-
-    @sums = @klass.find_by_sql(sql)
+    # params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
+    # params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
+    #
+    # @x_unit, x_date, x_select, x_column = case params[:x]
+    # when /^(.*)__(.*)__(.*)$/
+    #   co = @table.client_columns.find_by(column_name: $1)
+    #
+    #   case co.column_type
+    #   when "datetime"
+    #     x_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
+    #     case $2
+    #     when "day"
+    #       ["日", "DAY", x_select, $1]
+    #     when "year"
+    #       ["年", "YEAR", x_select, $1]
+    #     else
+    #       ["ヶ月", "MONTH", x_select, $1]
+    #     end
+    #   when "integer", "float", "yen"
+    #     func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
+    #     [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
+    #   end
+    # else
+    #   params[:x] = :count
+    #   ["回", "", " count(*) ", "company_id"]
+    # end
+    #
+    # @y_unit, y_date, y_select, y_column = case params[:y]
+    # when /^(.*)__(.*)__(.*)$/
+    #   co = @table.client_columns.find_by(column_name: $1)
+    #
+    #   case co.column_type
+    #   when "datetime"
+    #     y_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
+    #     case $2
+    #     when "day"
+    #       ["日", "DAY", y_select, $1]
+    #     when "year"
+    #       ["年", "YEAR", y_select, $1]
+    #     else
+    #       ["ヶ月", "MONTH", y_select, $1]
+    #     end
+    #   when "integer", "float", "yen"
+    #     func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
+    #     [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
+    #   end
+    # else
+    #   params[:y] = "count"
+    #   ["回", "", " count(*) ", "company_id"]
+    # end
+    #
+    # companies_sql = @klass.select("company_id, #{x_select} as ax, #{y_select} as ay")
+    #   .where.not(company_id: nil, x_column => nil, y_column => nil).group(:company_id).to_sql
+    #
+    # x_case = params[:x_sepa].split(",").inject(" CASE ") do |s, i|
+    #   s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ax <= ? THEN ? ", "#{i} #{x_date}", "#{i}"])
+    # end + " ELSE 'more' END "
+    #
+    # y_case = params[:y_sepa].split(",").inject(" CASE ") do |s, i|
+    #   s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ay <= ? THEN ? ", "#{i} #{y_date}", "#{i}"])
+    # end + " ELSE 'more' END "
+    #
+    # sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(CAST(company_id AS TEXT), ' ') as company_ids
+    #   FROM (#{companies_sql}) cs GROUP BY x, y ORDER BY x, y;"
+    #
+    # @sums = @klass.find_by_sql(sql)
   rescue => e
     @alert = e.message
   end
 
+  def searchurls
+  end
+
   def data_show
-    @data = @klass.company_relation.find(params[:data_id])
+    @data = @klass.find(params[:data_id])
   end
 
   private

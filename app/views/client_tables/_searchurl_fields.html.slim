@@ -1,0 +1,27 @@
+tr.fields
+  td
+    - unless f.object.new_record?
+      - case f.object.target
+      - when "search"
+        = link_to "検索", {action: :search}.merge(Hash(f.object.query))
+      - when "rfm"
+        = link_to "RFM", {action: :rfm}.merge(Hash(f.object.query))
+      - else
+        = link_to "集計", {action: :sum}.merge(Hash(f.object.query))
+  td
+    - unless f.object.new_record?
+      = f.object.created_at
+      
+  - if ba
+    td = f.text_field :name,            class: "form-control"
+    td
+      - if f.object.target == "sum" 
+        = f.check_box  :summary
+    td = f.select     :size, 2..12, {}, class: "form-control"
+    td = f.text_field :order_no,        class: "form-control order_no"
+    / td = f.link_to_remove class: "btn btn-danger" do
+    /   span.glyphicon.glyphicon-remove
+    /   =< "削除"
+    td = f.check_box :soft_destroyed_at, {}, Time.now
+  - else
+    td = f.object.name

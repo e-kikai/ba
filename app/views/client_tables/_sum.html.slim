@@ -21,7 +21,7 @@
         h4 集計フォーム
       .modal-body
         = form_tag({}, method: :get) do
-          = render "client_tables/search_form", table: @table, s: @shaping_params
+          = render "client_tables/search_form", table: @table, s: @s_params
           
           hr
           .form-group.col-md-6

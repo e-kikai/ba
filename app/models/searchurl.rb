@@ -7,5 +7,5 @@ class Searchurl < ActiveRecord::Base
 
   serialize :query, JSON
 
-  ACTION_SELECTOR = {"集計" => "sum", "検索" => "search"}
+  ACTION_SELECTOR = {"集計" => "sum", "検索" => "search", "RFM" => "rfm"}
 end
