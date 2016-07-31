@@ -97,7 +97,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def sum
     # @datas = @klass.table_search(params[:s])
     @s_params  = @klass.shaping_params(params[:s])
-    @da        = @klass.table_search_02(@s_params)
+    @datas     = @klass.table_search_02(@s_params)
     @sums      = @datas.table_sum(params[:sum]).count
     @all_count = @klass.all.count
   end

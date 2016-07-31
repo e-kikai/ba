@@ -34,9 +34,9 @@ class ClientTablesController < ApplicationController
   end
 
   def sum
-    @datas = @klass.table_search_02(params[:s])
-    @sums  = @datas.table_sum(params[:sum]).count
-    @all_count      = @klass.all.count
+    @datas     = @klass.table_search_02(params[:s])
+    @sums      = @datas.table_sum(params[:sum]).count
+    @all_count = @klass.all.count
   end
 
   def rfm
