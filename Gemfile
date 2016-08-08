@@ -54,6 +54,16 @@ group :development, :test do
 
   gem 'better_errors'
   gem 'binding_of_caller'
+
+  # RSpec
+  gem 'rspec-rails', '~> 3.5'
+  gem 'factory_girl_rails'
+  gem 'faker'
+end
+
+group :test do
+  gem 'capybara'
+  gem 'database_cleaner'
 end
 
 gem 'ransack'
