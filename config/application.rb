@@ -35,7 +35,7 @@ module Ba
 
     config.active_job.queue_adapter = :sidekiq
 
-    config.web_console.development_only = false
+    # config.web_console.development_only = false
 
     config.generators do |g|
       g.test_framework :rspec,
