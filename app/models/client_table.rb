@@ -37,6 +37,8 @@ class ClientTable < ActiveRecord::Base
 
   COND_ARRAYS   = %w(in not_in cont_any not_cont_any start_any not_start_any end_any not_end_any)
 
+  SUM_METHODS   = {'件数' => "count", '合計' => "sum", "最大" => "maximum", "最小" => "minimum", "平均" => "average"}
+
   # 会社テーブルとデフォルトカラム生成
   #
   # @param [Iinteger]     client_id クライアントID

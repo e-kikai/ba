@@ -23,7 +23,8 @@
 #= require bootstrap3-datetimepicker
 #= require_tree .
 
-$(document).on 'ready page:load', ->
+# $(document).on 'ready page:load', ->
+$(document).ready ->
   # フォーム共通 : フォーム自動全選択
   $('input.allselect').click ->
     @.select()

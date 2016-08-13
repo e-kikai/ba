@@ -112,10 +112,11 @@ module ClientTableDataModule
     }
 
     scope :table_sum, -> (sum_params = []) do
+      sum_shaping_params = sum_shaping_params(sum_params)
       tmp = all
       columns = client_table.client_columns_by_column_name
 
-      Array(sum_params).each do |s|
+      Array(sum_shaping_params[:axis]).each do |s|
         next if s["column"].blank?
 
         next unless co = columns[s["column"]]
@@ -137,7 +138,7 @@ module ClientTableDataModule
         end
       end
 
-      tmp
+      tmp.try(sum_shaping_params[:method], sum_shaping_params[:column])
     end
 
     # PostgreSQLでの型キャスト
@@ -280,10 +281,23 @@ module ClientTableDataModule
       res
     end
 
+    def sum_shaping_params(sum_params)
+      # 旧仕様URL対応
+      res = if sum_params.is_a? Array
+         { axis: Array(sum_params) }
+      else
+         Hash(sum_params).dup
+      end
+
+      res[:method] = :count unless ClientTable::SUM_METHODS.value? res[:method]
+
+      res
+    end
+
     # 検索条件を整形
     def rfm_shaping_params(rfm_params)
       res = {}
-      rfm_params   = Hash(rfm_params)
+      rfm_params = Hash(rfm_params)
 
       rfm_params.select { |k, v| k =~ /^hot_/ }.each do |k, v|
         res[k] = v.to_s

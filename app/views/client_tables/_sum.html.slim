@@ -1,5 +1,6 @@
-- targets = @table.show_columns.select { |co| co.selector? || co.def_selector.present? || co.numeric? }.map { |co| [co.name, co.column_name] }
-      
+- targets     = @table.show_columns.select { |co| co.selector? || co.def_selector.present? || co.numeric? }.map { |co| [co.name, co.column_name] }
+- sum_columns = [['ID', :id]] + @table.show_columns.select { |co| co.numeric? }.map { |co| [co.name, co.column_name] }
+
 .container-fluid.search-menu
   = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
     span.glyphicon.glyphicon-menu-hamburger
@@ -11,7 +12,7 @@
     = link_to params.merge({action: :searchurls, target: :sum}), method: :put, class: "btn btn-success" do
       span.glyphicon.glyphicon-save
       =< "この条件を保存"
-        
+
 #serach_form.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog.modal-lg
     .modal-content
@@ -26,16 +27,22 @@
           hr
           .form-group.col-md-6
             h5.col-md-3 X軸項目
-            .col-md-9 = select_tag "sum[][column]", options_for_select(targets, params.dig(:sum, 0, :column)), include_blank: "-- 集計する項目 --", class: "form-control"
+            .col-md-9 = select_tag "sum[axis][][column]", options_for_select(targets, @sum_params.dig(:axis, 0, :column)), include_blank: "-- 集計する項目 --", class: "form-control"
           .form-group.col-md-6
-            .col-md-12 = text_field_tag "sum[][sepa]", params.dig(:sum, 0, :sepa), class: "form-control", placeholder: "数値の項目のみ,区切り"
+            .col-md-12 = text_field_tag "sum[axis][][sepa]", @sum_params.dig(:axis, 0, :sepa), class: "form-control", placeholder: "数値の項目のみ,区切り"
           br
           .form-group.col-md-6
             h5.col-md-3 Y軸項目
-            .col-md-9 = select_tag "sum[][column]", options_for_select(targets, params.dig(:sum, 1, :column)), include_blank: "-- 集計する項目 --", class: "form-control"
+            .col-md-9 = select_tag "sum[axis][][column]", options_for_select(targets, @sum_params.dig(:axis, 1, :column)), include_blank: "-- 集計する項目 --", class: "form-control"
           .form-group.col-md-6
-            .col-md-12 = text_field_tag "sum[][sepa]", params.dig(:sum, 1, :sepa), class: "form-control", placeholder: "数値の項目のみ,区切り"
+            .col-md-12 = text_field_tag "sum[axis][][sepa]", @sum_params.dig(:axis, 1, :sepa), class: "form-control", placeholder: "数値の項目のみ,区切り"
           br
+          .form-group.col-md-6
+            h5.col-md-3 集計対象
+            .col-md-6 = select_tag "sum[column]", options_for_select(sum_columns, @sum_params[:column]), class: "form-control"
+            .col-md-3 = select_tag "sum[method]", options_for_select(ClientTable::SUM_METHODS, @sum_params[:method]), class: "form-control"
+          br
+          
           .form-group
             = button_tag data: { "disable-with" => "集計中..."}, class: "btn btn-primary center-block" do
               span.glyphicon.glyphicon-search

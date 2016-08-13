@@ -14,7 +14,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       if su.target = "sum"
         shaping_params = @klass.shaping_params(su.query["s"])
         datas          = @klass.table_search_02(shaping_params)
-        sums           = datas.table_sum(su.query["sum"]).count
+        sums           = datas.table_sum(su.query["sum"])
         all_count      = @klass.all.count
 
         {searchurl: su, sums: sums, all_count: all_count}
@@ -98,8 +98,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     # @datas = @klass.table_search(params[:s])
     @s_params  = @klass.shaping_params(params[:s])
     @datas     = @klass.table_search_02(@s_params)
-    @sums      = @datas.table_sum(params[:sum]).count
-    @all_count = @klass.all.count
+
+    @sum_params = @klass.sum_shaping_params(params[:sum])
+    @sums       = @datas.table_sum(@sum_params)
+    @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
   end
 
   def rfm
