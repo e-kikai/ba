@@ -38,7 +38,7 @@
             .col-md-12 = text_field_tag "sum[axis][][sepa]", @sum_params.dig(:axis, 1, :sepa), class: "form-control", placeholder: "数値の項目のみ,区切り"
           br
           .form-group.col-md-6
-            h5.col-md-3 集計対象
+            h5.col-md-3 集計方法
             .col-md-6 = select_tag "sum[column]", options_for_select(sum_columns, @sum_params[:column]), class: "form-control"
             .col-md-3 = select_tag "sum[method]", options_for_select(ClientTable::SUM_METHODS, @sum_params[:method]), class: "form-control"
           br
