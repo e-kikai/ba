@@ -8,7 +8,7 @@ class ClientTablesController < ApplicationController
       if su.target = "sum"
         shaping_params = @klass.shaping_params(su.query["s"])
         datas          = @klass.table_search_02(shaping_params)
-        sums           = datas.table_sum(su.query["sum"]).count
+        sums           = datas.table_sum(su.query["sum"])
         all_count      = @klass.all.count
 
         {searchurl: su, sums: sums, all_count: all_count}
@@ -17,9 +17,9 @@ class ClientTablesController < ApplicationController
   end
 
   def search
-    @shaping_params = @klass.shaping_params(params[:s])
-    @datas          = @klass.table_search_02(@shaping_params)
-    @show_columns   = params[:all] ? @table.client_columns : @table.client_columns.show
+    @s_params     = @klass.shaping_params(params[:s])
+    @datas        = @klass.table_search_02(@s_params).order(:id)
+    @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
     @sums           = @datas.group("")
 
     # CSV出力
@@ -34,9 +34,12 @@ class ClientTablesController < ApplicationController
   end
 
   def sum
-    @datas     = @klass.table_search_02(params[:s])
-    @sums      = @datas.table_sum(params[:sum]).count
-    @all_count = @klass.all.count
+    @s_params  = @klass.shaping_params(params[:s])
+    @datas     = @klass.table_search_02(@s_params)
+
+    @sum_params = @klass.sum_shaping_params(params[:sum])
+    @sums       = @datas.table_sum(@sum_params)
+    @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
   end
 
   def rfm
