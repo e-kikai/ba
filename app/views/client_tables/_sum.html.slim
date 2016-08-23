@@ -1,6 +1,9 @@
 - targets     = @table.show_columns.select { |co| co.selector? || co.def_selector.present? || co.numeric? }.map { |co| [co.name, co.column_name] }
 - sum_columns = [['ID', :id]] + @table.show_columns.select { |co| co.numeric? }.map { |co| [co.name, co.column_name] }
 
+- company_numeric_columns = @client.company_table.show_columns.select { |co| co.numeric? }.map { |co| [co.name, co.column_name] }
+- company_methods         = {"空欄に保存" => :save, "上書き" => :update}
+
 .container-fluid.search-menu
   = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
     span.glyphicon.glyphicon-menu-hamburger
@@ -12,7 +15,32 @@
     = link_to params.merge({action: :searchurls, target: :sum}), method: :put, class: "btn btn-success" do
       span.glyphicon.glyphicon-save
       =< "この条件を保存"
+      
+    - if @sum_params.dig("axis", 0, "column") == "company_id" && @sum_params.dig("axis", 1, "column").blank?
+      = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#update_form" } do
+        span.glyphicon.glyphicon-save
+        =< "この集計結果を会社テーブルに一括変更"
 
+- if ba
+  #update_form.modal.fade abindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true"
+    .modal-dialog.modal-lg
+      .modal-content
+        .modal-header
+          = button_tag type: :button, class: :close, data: { dismiss: :modal } do
+            span.glyphicon.glyphicon-remove
+          h4 この集計結果を会社テーブルに保存
+        .modal-body
+          = form_tag(params, method: :patch) do
+            .form-group
+              h5.col-md-2 保存先項目
+              .col-md-5 = select_tag :column, options_for_select(company_numeric_columns, params[:column]), class: "form-control"
+              .col-md-5 = select_tag :method, options_for_select(company_methods, params[:method]), class: "form-control"
+            
+            .form-group
+              = button_tag data: { confirm: "一括変更を反映してよろしいでしょうか\r事前にエクスポートをしておくことをお勧めいたします", "disable-with" => "反映中..."}, class: "btn btn-primary center-block" do
+                span.glyphicon.glyphicon-search
+                =< "一括変更"
+              
 #serach_form.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog.modal-lg
     .modal-content
@@ -50,4 +78,4 @@
 
 . class="#{params.dig(:sum, 0, :column) && params.dig(:sum, 1, :column) ? 'col-md-12': 'col-md-4'}"
   / = @datas.table_sum(params[:sum]).to_sql
-  = render "client_tables/sum_table", sums: @sums, all_count: @all_count, search_query: params[:s] || {}, sum_query: params[:sum] || {}
+  = render "client_tables/sum_table", sums: @sums, all_count: @all_count, search_query: @s_params, sum_query: @sum_params

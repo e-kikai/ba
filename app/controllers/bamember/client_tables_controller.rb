@@ -2,7 +2,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_client
   before_action :find_table, except: [:new, :create]
   before_action :find_company_table, only: [:rfm, :relation, :relation_confirm, :relation_do]
-  # before_action :check_session_spreadseet, only: [:csv_matching, :csv_matching_check, :csv_confirm, :csv_update, :csv_error]
 
   skip_before_filter :authenticate_bamember!, only: :bi
 
@@ -14,10 +13,11 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       if su.target = "sum"
         shaping_params = @klass.shaping_params(su.query["s"])
         datas          = @klass.table_search_02(shaping_params)
-        sums           = datas.table_sum(su.query["sum"])
+        sum_params     = @klass.sum_shaping_params(params[:sum])
+        sums           = datas.table_sum(sum_params)
         all_count      = @klass.all.count
 
-        {searchurl: su, sums: sums, all_count: all_count}
+        {searchurl: su, sums: sums, all_count: all_count, s_params: shaping_params, sum_params: sum_params}
       end
     end
   end
@@ -38,12 +38,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @table.soft_destroy!
     redirect_to "/bamember/clients/#{@client.id}/", notice: "#{@table.name}テーブルを削除しました"
   end
-  require 'nkf'
 
   def search
-    # @datas        = @klass.table_search(params[:s]).company_relation.table_order(params[:order]).order(:id)
     @s_params     = @klass.shaping_params(params[:s])
-    # @datas        = @klass.table_search_02(@s_params).company_relation.order(:id)
     @datas        = @klass.table_search_02(@s_params).order(:id)
     @show_columns = params[:all] ? @table.client_columns : @table.client_columns.show
 
@@ -60,7 +57,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def data_bulk
-    # @datas = @klass.table_search(params[:s])
     @s_params = @klass.shaping_params(params[:s])
     @datas    = @klass.table_search_02(@s_params)
   end
@@ -70,7 +66,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルのデータ#{count}件を一括削除しました"
   rescue => e
-    # @datas = @klass.table_search(params[:s])
     @s_params = @klass.shaping_params(params[:s])
     @datas    = @klass.table_search_02(@s_params)
 
@@ -80,7 +75,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   # PoweBI用CSV出力
   def bi
-    # @datas        = @klass.company_relation.order(:id)
     @datas        = @klass.order(:id)
     @show_columns = @table.client_columns
 
@@ -95,7 +89,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def sum
-    # @datas = @klass.table_search(params[:s])
     @s_params  = @klass.shaping_params(params[:s])
     @datas     = @klass.table_search_02(@s_params)
 
@@ -104,260 +97,51 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
   end
 
+  def sum_update_company
+    @s_params  = @klass.shaping_params(params[:s])
+    @datas     = @klass.table_search_02(@s_params)
+
+    @sum_params = @klass.sum_shaping_params(params[:sum])
+    @sums       = @datas.table_sum(@sum_params)
+    @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
+
+    error_mes = if params[:column].blank?
+      "保存先の項目が選択されていません"
+    elsif @sum_params.dig("axis", 0, "column") != "company_id"
+      "X軸項目が会社IDではありません"
+    elsif @sum_params.dig("axis", 1, "column").present?
+      "Y軸項目は空白にしてください"
+    else
+      nil
+    end
+
+    if error_mes.blank?
+      company_klass = @client.company_table.klass
+      @sums.each do |k, v|
+        next if v.nil?
+        begin
+          data = company_klass.find(k)
+
+          # 空白に保存
+          next if params[:method] == "save" && data[params[:column]].present?
+
+          data.update(params[:column] => v)
+        rescue
+          next
+        end
+      end
+
+      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "一括変更を反映しました"
+    else
+      flash[:alert] = error_mes
+      render :sum
+    end
+  end
+
   def rfm
     @rfm_params = @klass.rfm_shaping_params(params[:rfm])
     @rfms       = @klass.rfm(@rfm_params)
-
-    # params[:x_sepa] = params[:x_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "3, 6, 9, 12, 15, 18, 21, 24"
-    # params[:y_sepa] = params[:y_sepa].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s).join(", ").presence || "1, 2, 3, 4, 6, 10, 15, 20, 30"
-    #
-    # @x_unit, x_date, x_select, x_column = case params[:x]
-    # when /^(.*)__(.*)__(.*)$/
-    #   co = @table.client_columns.find_by(column_name: $1)
-    #
-    #   case co.column_type
-    #   when "datetime"
-    #     x_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
-    #     case $2
-    #     when "day"
-    #       ["日", "DAY", x_select, $1]
-    #     when "year"
-    #       ["年", "YEAR", x_select, $1]
-    #     else
-    #       ["ヶ月", "MONTH", x_select, $1]
-    #     end
-    #   when "integer", "float", "yen"
-    #     func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
-    #     [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
-    #   end
-    # else
-    #   params[:x] = :count
-    #   ["回", "", " count(*) ", "company_id"]
-    # end
-    #
-    # @y_unit, y_date, y_select, y_column = case params[:y]
-    # when /^(.*)__(.*)__(.*)$/
-    #   co = @table.client_columns.find_by(column_name: $1)
-    #
-    #   case co.column_type
-    #   when "datetime"
-    #     y_select = "CURRENT_DATE - CAST(#{$3 == "min" ? "MIN" : "MAX"}(#{$1}) AS TIMESTAMP)"
-    #     case $2
-    #     when "day"
-    #       ["日", "DAY", y_select, $1]
-    #     when "year"
-    #       ["年", "YEAR", y_select, $1]
-    #     else
-    #       ["ヶ月", "MONTH", y_select, $1]
-    #     end
-    #   when "integer", "float", "yen"
-    #     func = (["sum", "max", "min", "avg"].include? $3) ? $3 : "MAX"
-    #     [($2 == "yen" ? "円" : ""), "", "#{func}(#{$1})", $1]
-    #   end
-    # else
-    #   params[:y] = "count"
-    #   ["回", "", " count(*) ", "company_id"]
-    # end
-    #
-    # companies_sql = @klass.select("company_id, #{x_select} as ax, #{y_select} as ay")
-    #   .where.not(company_id: nil, x_column => nil, y_column => nil).group(:company_id).to_sql
-    #
-    # x_case = params[:x_sepa].split(",").inject(" CASE ") do |s, i|
-    #   s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ax <= ? THEN ? ", "#{i} #{x_date}", "#{i}"])
-    # end + " ELSE 'more' END "
-    #
-    # y_case = params[:y_sepa].split(",").inject(" CASE ") do |s, i|
-    #   s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN cs.ay <= ? THEN ? ", "#{i} #{y_date}", "#{i}"])
-    # end + " ELSE 'more' END "
-    #
-    # sql = "SELECT  #{x_case} AS x, #{y_case} AS y, count(*) as count, string_agg(CAST(company_id AS TEXT), ' ') as company_ids
-    #   FROM (#{companies_sql}) cs GROUP BY x, y ORDER BY x, y;"
-    #
-    # @sums = @klass.find_by_sql(sql)
   end
-
-  # def csv
-  # end
-  #
-  # def csv_upload
-  #   ss = @table.spreadsheet(params[:file].path, params[:file].original_filename)
-  #
-  #   session[:csv] = {
-  #     header: ss.row(1).map { |v| v.to_s.normalize_charwidth.strip },
-  #     first:  ss.row(2).map { |v| v.to_s.normalize_charwidth.strip },
-  #
-  #     path:               params[:file].path,
-  #     original_filename:  params[:file].original_filename,
-  #     count:              ss.last_row - 1,
-  #
-  #     table_header: [],
-  #     method:       [],
-  #     option:       {},
-  #     result:       {}
-  #   }
-  #
-  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/"
-  # end
-  #
-  # def csv_matching
-  # end
-  #
-  # def csv_matching_check
-  #   session[:csv][:option]       = params[:option]
-  #   session[:csv][:table_header] = params[:table_header].map { |k, v| v }
-  #   session[:csv][:method]       = params[:method].map { |k, v| v }
-  #   session[:csv][:result]       = {}
-  #   @csv = session[:csv]
-  #
-  #   # 項目設定がされているか
-  #   matchings = []
-  #   @csv[:table_header].each.with_index do |h, i|
-  #     matchings << {table_header: h, i: i } if h.present? && @csv[:method][i] == "matching"
-  #   end
-  #
-  #   raise "マッチング項目が設定されていません" if matchings.blank? && @csv[:option][:unmatch] != "new"
-  #
-  #   ctd = @klass.arel_table
-  #   ss  = @table.spreadsheet(@csv[:path], @csv[:original_filename])
-  #   (2..ss.last_row).each do |r|
-  #     d = ss.row(r)
-  #
-  #     ### すべて空白の列は無視 ###
-  #     next if d.all?(&:blank?)
-  #
-  #     ### マッチング処理 ###
-  #     if matchings.present?
-  #       # マッチングするためのフィルタリング
-  #       values = @table.filter(matchings.map { |m| [ m[:table_header], d[m[:i]] ] }.to_h)
-  #
-  #       if values.has_value? ""
-  #         count = :skip
-  #       else
-  #         # AND条件マッチング
-  #         if @csv[:option][:if] == "and" || @csv[:option][:if].blank?
-  #           res = @klass.where(values)
-  #         end
-  #
-  #         # OR条件マッチング
-  #         if @csv[:option][:if] == "or" || (@csv[:option][:if].blank? && res.exists? && matchings.length > 1)
-  #           cond = nil
-  #           values.each do |k, v|
-  #             cond = cond ? cond.or(ctd[k].eq(v)) : ctd[k].eq(v)
-  #           end
-  #           res = @klass.where(cond)
-  #         end
-  #
-  #         match_ids = res.limit(10).pluck(:id)
-  #         count     = match_ids.count
-  #       end
-  #
-  #       ### マッチング結果 ###
-  #       title, data = case count
-  #       when 1 # マッチ
-  #         [:match, res.first]
-  #       when 0 # マッチしない
-  #         if @csv[:option][:unmatch] == "new"
-  #           [:new, @klass.new] # 新規登録
-  #         else
-  #           [:none, nil]
-  #         end
-  #       when :skip # スキップ
-  #         if @csv[:option][:unmatch] == "new"
-  #           [:new, @klass.new] # 新規登録
-  #         else
-  #           [:skip, nil]
-  #         end
-  #       else
-  #         [:overlap, nil]
-  #       end
-  #     else
-  #       title, data = [:new, @klass.new] # 新規登録
-  #     end
-  #
-  #     ### バリデーション ###
-  #     if data.present?
-  #       @csv[:header].each_with_index do |h, i|
-  #         next if @csv[:table_header][i].blank?
-  #
-  #         # データ(バリデーション用に)格納
-  #         if @csv[:method][i] == "update" \
-  #            || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
-  #            || (@csv[:method][i] == "matching" && title == :new && @csv[:table_header][i] != "id")
-  #           data[@csv[:table_header][i]] = d[i]
-  #         end
-  #       end
-  #
-  #       # バリデーション(saveはまだしない)
-  #       data.valid?
-  #       if data.errors.messages.present?
-  #         title = :notvalid
-  #         error = data.errors.messages.map do |k, v|
-  #           v.map { |mes| "#{k} #{mes}" }.join("\n")
-  #         end.join("\n")
-  #       end
-  #     end
-  #
-  #     session[:csv][:result][r] = [title, match_ids, error]
-  #   end
-  #
-  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/"
-  # rescue => e
-  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_matching/", alert: e.message
-  # end
-  #
-  # def csv_confirm
-  # end
-  #
-  # def csv_update
-  #   ss  = @table.spreadsheet(@csv[:path], @csv[:original_filename])
-  #
-  #   @klass.transaction do
-  #     @csv[:result].each do |k, v|
-  #       # 保存先取得
-  #       data = case v[0]
-  #       when :new;   @klass.new
-  #       when :match; @klass.find(v[1].first)
-  #       else nil
-  #       end
-  #
-  #       # CSVデータ取得
-  #       d = ss.row(k)
-  #
-  #       next unless data && d
-  #
-  #       # データ保存部分
-  #       @csv[:header].each_with_index do |h, i|
-  #         next if @csv[:table_header][i].blank?
-  #
-  #         if @csv[:method][i] == "update" \
-  #            || (@csv[:method][i] == "save" && data[@csv[:table_header][i]].blank?) \
-  #            || (@csv[:method][i] == "matching" && v[0] == :new && @csv[:table_header][i] != "id")
-  #           data[@csv[:table_header][i]] = d[i]
-  #         end
-  #       end
-  #
-  #       data.save!
-  #     end
-  #   end
-  #
-  #   # 保存済のCSV情報をクリア
-  #   session[:csv] = nil
-  #   ActiveRecord::Base.connection.execute("VACUUM;")
-  #   # ActiveRecord::Base.connection.execute("REINDEX;")
-  #
-  #   redirect_to "/bamember/clients/#{@table.client.id}/", notice: "データをテーブルに反映しました"
-  # rescue => e
-  #   redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/csv_confirm/", alert: e.message
-  # end
-  #
-  # def csv_error
-  #   respond_to do |format|
-  #     format.csv { send_data render_to_string,
-  #       content_type: 'text/csv;charset=shift_jis',
-  #       filename: "error_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
-  #     }
-  #   end
-  # end
 
   def import_file
     @csvfiles = @table.csvfiles.without_soft_destroyed.order(created_at: :desc).page(params[:page])
@@ -508,7 +292,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def data_show
-    # @data = @klass.company_relation.find(params[:data_id])
     @data = @klass.find(params[:data_id])
   end
 

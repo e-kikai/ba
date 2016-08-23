@@ -283,21 +283,20 @@ module ClientTableDataModule
 
     def sum_shaping_params(sum_params)
       # 旧仕様URL対応
-      res = if sum_params.is_a? Array
-         { axis: Array(sum_params) }
+      if sum_params.is_a? Array
+        sum_params = { axis: Array(sum_params) }
       else
-         Hash(sum_params).dup
+        sum_params = Hash(sum_params)
       end
 
-      res[:method] = :count unless ClientTable::SUM_METHODS.value? res[:method]
-
-      res
+      sum_params[:method] = :count unless ClientTable::SUM_METHODS.value? sum_params[:method]
+      sum_params
     end
 
     # 検索条件を整形
     def rfm_shaping_params(rfm_params)
       res = {}
-      rfm_params = Hash(rfm_params)
+      rfm_params   = Hash(rfm_params)
 
       rfm_params.select { |k, v| k =~ /^hot_/ }.each do |k, v|
         res[k] = v.to_s

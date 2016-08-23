@@ -185,105 +185,6 @@ class ClientTable < ActiveRecord::Base
     end.to_h
   end
 
-  # # マッチングして保存
-  # #
-  # # @param [Hash]  params 入力パラメータ
-  # # @param [Array] matchings 整理した項目設定
-  # # @return self
-  # def import(params, import_file)
-  #   errors    = []
-  #   ctd       = klass.arel_table
-  #
-  #   matchings = import_check(params)
-  #
-  #   # ss        = spreadsheet(import_file[:path], import_file[:original_filename])
-  #   # (2..ss.last_row).each do |r|
-  #     # row = ss.row(r)
-  #   CSV.foreach(import_file[:path], { :headers => true, encoding: Encoding::SJIS }) do |row|
-  #     next if row.all?(&:blank?) # すべて空白の列は無視
-  #
-  #     ### マッチング処理 ###
-  #     match_ids = if matchings.present?
-  #       # マッチングするためのフィルタリング
-  #       values = filter(matchings.map { |m| [ m[:table_header], row[m[:i]] ] }.to_h)
-  #
-  #       if values.has_value? ""
-  #         [] # マッチング条件の値がない(スキップする)
-  #       else
-  #         # AND条件マッチング
-  #         if params[:option][:if] == "and" || params[:option][:if].blank?
-  #           res = klass.where(values)
-  #         end
-  #
-  #         # OR条件マッチング
-  #         if params[:option][:if] == "or" || (params[:option][:if].blank? && res.exists? && matchings.length > 1)
-  #           cond = nil
-  #           values.each do |k, v|
-  #             cond = cond ? cond.or(ctd[k].eq(v)) : ctd[k].eq(v)
-  #           end
-  #           res = klass.where(cond)
-  #         end
-  #
-  #         res.limit(10).pluck(:id)
-  #       end
-  #     else
-  #       []
-  #     end
-  #
-  #     ### マッチング結果 ###
-  #     data = if match_ids.count == 1
-  #       klass.find(match_ids.first)
-  #     elsif match_ids.count == 0 && params[:option][:unmatch] == "new"
-  #       klass.new
-  #     else
-  #       nil
-  #     end
-  #
-  #     ### 保存 ###
-  #     if data.present?
-  #       # begin
-  #         params[:table_header].each do |i, h|
-  #           next if params[:table_header][i].blank?
-  #
-  #           # データ(バリデーション用に)格納
-  #           if params[:method][i] == "update" \
-  #              || (params[:method][i] == "save" && data[params[:table_header][i]].blank?) \
-  #              || (params[:method][i] == "matching" && data.new_record? && params[:table_header][i] != "id")
-  #             data[h] = row[i.to_i]
-  #           end
-  #         end
-  #
-  #         data.save!
-  #       # rescue ActiveRecord::RecordInvalid => e
-  #       #
-  #       # end
-  #     end
-  #
-  #     # ### エラー出力処理 ###
-  #     # if data.blank?
-  #     #
-  #     # elsif data.errors.present?
-  #     #   error = data.errors.messages.map do |k, v|
-  #     #     v.map { |mes| "#{k} #{mes}" }.join("\n")
-  #     #   end.join("\n")
-  #     # end
-  #
-  #
-  #   #
-  #   #     if data.errors.messages.present?
-  #   #       title = :notvalid
-  #   #       error = data.errors.messages.map do |k, v|
-  #   #         v.map { |mes| "#{k} #{mes}" }.join("\n")
-  #   #       end.join("\n")
-  #   #     end
-  #   #   end
-  #   #
-  #   #   session[:csv][:result][r] = [title, match_ids, error]
-  #   end
-  #
-  #   ActiveRecord::Base.connection.execute("VACUUM;")
-  # end
-
   private
 
   def create_client_table_before
@@ -293,6 +194,8 @@ class ClientTable < ActiveRecord::Base
       t.timestamps null: false
       t.datetime   :soft_destroyed_at
     end
+
+    ActiveRecord::Base.connection.add_index self[:table_name], :soft_destroyed_at
   end
 
   def check_name(attributed)

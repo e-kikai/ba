@@ -8,10 +8,19 @@
         th class="#{co.column_name}" = co.name
         td class="#{co.column_name}"
           - if co.column_name == "company_id" && @data.company_id.present?
-            / = link_to "#{@data.company_id} : #{@data.company_name}", {action: :data_show, id: @table.client.company_table.id, data_id: @data.company_id}
-            = link_to "#{@data.company_id} : #{@data.company.name}", {action: :data_show, id: @table.client.company_table.id, data_id: @data.company_id}
+            = link_to "#{@data.company_id} : #{@data.company.name}", {action: :data_show, id: @client.company_table.id, data_id: @data.company_id}
           - else
             = column_format(@data[co.column_name], co.column_type, :show)
+            
+    - if @table.company?
+      - @client.child_tables.each do |ch|
+        - if chs =  @data.try(ch.table_name.pluralize.intern)
+          tr
+            th #{ch.name} : #{chs.size}件
+            td
+              - chs.each do |cd|
+                div = link_to "#{cd.id} : #{cd.name}", {action: :data_show, id: ch.id, data_id: cd.id}
+
     tr
       th 登録日時
       td.id = @data[:created_at]

@@ -8,18 +8,21 @@
       td.integer
         h2
           = link_to number_with_delimiter(sums), {action: :search, s: search_query}
-          .percent = "#{(sums * 100 / all_count).round(2)}%"
+          .percent = "#{(sums.to_f * 100 / all_count).round(2)}%"
       
 - elsif !sums.first[0].kind_of?(Array)
-  - x_group = sums.map { |k, v| k }.uniq.sort
+  - company_klass = @client.company_table.klass
   table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
-    tr
-    - x_group.each do |x|
+    - sums.sort_by { |k, v| v.to_f }.each do |k, v|
       tr
-        th = x
+        th
+          - if sum_query.dig("axis", 0, "column") == "company_id"
+            = "#{k} : #{company_klass.find(k).try(:name)}"
+          - else
+            = k
         td.integer
-          = link_to number_with_delimiter(sums[x]), {action: :search, s: search_query.merge({sum_query.dig(0, "column") => {v: x, c: :in}})}
-          .percent = "#{(sums[x] * 100 / all_count).round(2)}%"
+          = link_to number_with_delimiter(v || 0), {action: :search, s: search_query.merge({sum_query.dig("axis", 0, "column") => {v: k, c: :in}})}
+          .percent = "#{(v.to_f * 100 / all_count).round(2)}%"
       
 - else
   - x_group = sums.map { |k, v| k[0] }.uniq.sort
@@ -36,8 +39,8 @@
         - x_group.each do |x|
           td.integer
             - if sums[[x, y]].present?
-              = link_to number_with_delimiter(sums[[x, y]]), {action: :search, s: search_query.merge({sum_query.dig(0, "column") => {v: x, c: :in}, sum_query.dig(1, "column") => {v: y, c: :in}})}
-              .percent = "#{(sums[[x, y]] * 100 / all_count).round(2)}%"
+              = link_to number_with_delimiter(sums[[x, y]]), {action: :search, s: search_query.merge({sum_query.dig("axis", 0, "column") => {v: x, c: :in}, sum_query.dig("axis", 1, "column") => {v: y, c: :in}})}
+              .percent = "#{(sums[[x, y]].to_f * 100 / all_count).round(2)}%"
               
             - else
               = 0

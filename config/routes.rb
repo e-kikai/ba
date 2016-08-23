@@ -74,6 +74,8 @@ Rails.application.routes.draw do
     patch  'clients/:client_id/table/:id/bulk' => 'client_tables#data_bulk_update'
 
     get    'clients/:client_id/table/:id/sum'          => 'client_tables#sum'
+    patch  'clients/:client_id/table/:id/sum'          => 'client_tables#sum_update_company'
+
     get    'clients/:client_id/table/:id/rfm'          => 'client_tables#rfm'
 
     get    'clients/:client_id/table/:id/edit'         => 'client_tables#edit'
