@@ -28,7 +28,10 @@ Rails.application.routes.draw do
 
   # BA member pages
   namespace :bamember do
-    root      to: "main#index"
+    root to: "main#index"
+    get  'unicorn_restart' => 'main#unicorn_restart'
+    get  'sidekiq_restart' => 'main#sidekiq_restart'
+
     resources :clients, expect: :index
     get    'clients/:id/edit_password' => 'clients#edit_password'
     patch  'clients/:id/edit_password' => 'clients#update_password'
