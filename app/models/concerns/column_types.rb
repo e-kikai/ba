@@ -116,7 +116,7 @@ module ColumnTypes
 
   class Tel < ColumnTypes::String
     NAME = "TEL"
-    def self.filter(v, *args) v.gsub(/[^0-9]/, '').sub(/^[^0]/, '0\0') end
+    def self.filter(v, *args) v.gsub(/[^0-9-]/, '').sub(/^[^0]/, '0\0') end
   end
 
   class Mail < ColumnTypes::String

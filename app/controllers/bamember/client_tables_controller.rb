@@ -1,3 +1,5 @@
+require "open3"
+
 class Bamember::ClientTablesController < Bamember::ApplicationController
   before_action :find_client
   before_action :find_table, except: [:new, :create]
@@ -232,7 +234,15 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   def update
     if @table.update(client_table_params)
       @client.reflesh_class # client_table_dataクラス更新
-      redirect_to "/bamember/clients/#{@table.client.id}/", notice: "#{@table.name}テーブルの項目を変更しました"
+
+      # Sidekiq再起動
+      if Rails.env.development?
+        Open3.popen3('sudo systemctl restart sidekiq_ba')
+      else
+        Open3.popen3('sudo /etc/init.d/sidekiq_ba restart')
+      end
+
+      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルの項目を変更しました"
     else
       render :edit
     end
