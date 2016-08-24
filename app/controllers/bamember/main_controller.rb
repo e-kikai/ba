@@ -10,7 +10,7 @@ class Bamember::MainController < Bamember::ApplicationController
     if Rails.env.development?
       Open3.popen3('sleep 2; sudo systemctl restart unicorn_ba;')
     else
-      Open3.popen3('sleep 2; nohup sudo /etc/init.d/unicorn_ba restart &;')
+      `sudo /etc/init.d/unicorn_ba restart &`
     end
 
     redirect_to "/bamember/", notice: "Unicorn再起動を実行しました。再起動完了までしばらくお待ち下さい"
