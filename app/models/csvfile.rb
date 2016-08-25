@@ -39,8 +39,15 @@ class Csvfile < ActiveRecord::Base
   # CSVファイルのヘッダを除いた1行目取得
   def first
     if @first.blank?
-      File.open(path, {encoding: Encoding::SJIS}) do |f|
-        @first = f.readlines[1].parse_csv.map { |v| v.to_s.normalize_charwidth.strip }
+      # File.open(path, {encoding: Encoding::SJIS}) do |f|
+      #   @first = f.readlines[1].parse_csv.map { |v| v.to_s.normalize_charwidth.strip }
+      # end
+
+      CSV.foreach(path, { :headers => true, encoding: Encoding::SJIS }) do |row|
+        unless row.all?(&:blank?)
+          @first = row
+          break
+        end
       end
     end
 

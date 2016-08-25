@@ -46,7 +46,7 @@ coffee:
         tr
           td
             .column  = h
-            .example = @csvfile.first[i]
+            .example = @first[i]
           td ⇒
           td = select_tag("table_header[#{i}]",
             options_for_select(select_client_columns, params.dig("table_header", i.to_s)),

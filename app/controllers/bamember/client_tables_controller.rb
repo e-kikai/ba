@@ -159,6 +159,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
   def import_matching
     @csvfile = Csvfile.find(params[:csvfile_id])
+    @first   = @csvfile.first
   rescue => e
     redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/import_file/", alert: e.message
   end
