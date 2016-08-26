@@ -12,35 +12,109 @@
       
 - elsif !sums.first[0].kind_of?(Array)
   - company_klass = @client.company_table.klass
+  - x_axis = sum_query.dig("axis", 0)
+  
+  - if x_axis["sepa_array"].present?
+    - group = x_axis["sepa_array"] += [2000000000]
+  - else
+    - group = sums.keys.uniq.sort
+    
   table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
-    - sums.sort_by { |k, v| v.to_f }.each do |k, v|
+    - group.each.with_index do |k, i|
       tr
         th
-          - if sum_query.dig("axis", 0, "column") == "company_id"
+          - if x_axis["sepa_array"].present?
+            - if i == 0
+              = "〜 #{k}"
+              - x_column = {lteq: k}
+            - elsif i == group.size - 1
+              = "〜 それ以上"
+              - x_column = {gt: group[i-1]}
+            - else
+              = "〜 #{k}"
+              - x_column = {lteq: k, gt: group[i-1]}
+              
+          - elsif x_axis["column"] == "company_id"
             = "#{k} : #{company_klass.find(k).try(:name)}"
+            - x_column = {v: k, c: :in}
+            
           - else
             = k
+            - x_column = {v: k, c: :in}
+
         td.integer
-          = link_to number_with_delimiter(v || 0), {action: :search, s: search_query.merge({sum_query.dig("axis", 0, "column") => {v: k, c: :in}})}
-          .percent = "#{(v.to_f * 100 / all_count).round(2)}%"
+          = link_to number_with_delimiter(sums[k] || 0), {action: :search, s: search_query.merge({x_axis["column"] => x_column, presents: [x_axis["column"]]})}
+          - unless sums[k] == 0
+            .percent = "#{(sums[k].to_f * 100 / all_count).round(2)}%"
       
 - else
-  - x_group = sums.map { |k, v| k[0] }.uniq.sort
-  - y_group = sums.map { |k, v| k[1] }.uniq.sort
+  - company_klass = @client.company_table.klass
+  - x_column = []
+  - x_axis = sum_query.dig("axis", 0)
+  - if x_axis["sepa_array"].present?
+    - x_group = x_axis["sepa_array"] += [2000000000]
+  - else
+    - x_group = sums.map { |k, v| k[0] }.uniq.sort
+  
+  - y_axis = sum_query.dig("axis", 1)
+  - if y_axis["sepa_array"].present?
+    - y_group = y_axis["sepa_array"] += [2000000000]
+  - else
+    - y_group = sums.map { |k, v| k[1] }.uniq.sort
+
+  / - x_group = sums.map { |k, v| k[0] }.uniq.sort
+  / - y_group = sums.map { |k, v| k[1] }.uniq.sort
   
   table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
     tr
       th
-      - x_group.each do |x|
-        th.x = x
-    - y_group.each do |y|
-      tr
-        th.y = y
-        - x_group.each do |x|
-          td.integer
-            - if sums[[x, y]].present?
-              = link_to number_with_delimiter(sums[[x, y]]), {action: :search, s: search_query.merge({sum_query.dig("axis", 0, "column") => {v: x, c: :in}, sum_query.dig("axis", 1, "column") => {v: y, c: :in}})}
-              .percent = "#{(sums[[x, y]].to_f * 100 / all_count).round(2)}%"
-              
+      - x_group.each.with_index do |x, i|
+        th.x
+          - if x_axis["sepa_array"].present?
+            - if i == 0
+              = "〜 #{x}"
+              - x_column[i] = {lteq: x}
+            - elsif i == x_group.size - 1
+              = "〜 それ以上"
+              - x_column[i]  = {gt: x_group[i-1]}
             - else
-              = 0
+              = "〜 #{x}"
+              - x_column[i]  = {lteq: x, gt: x_group[i-1]}
+              
+          - elsif x_axis["column"] == "company_id"
+            = "#{x} : #{company_klass.find(x).try(:name)}"
+            - x_column[i]  = {v: x, c: :in}
+            
+          - else
+            = x
+            - x_column[i]  = {v: x, c: :in}
+
+        / th.x = x
+    - y_group.each.with_index do |y, j|
+      tr
+        th.y
+          - if y_axis["sepa_array"].present?
+            - if j == 0
+              = "〜 #{y}"
+              - y_column = {lteq: y}
+            - elsif j == y_group.size - 1
+              = "〜 それ以上"
+              - y_column = {gt: y_group[j-1]}
+            - else
+              = "〜 #{y}"
+              - y_column = {lteq: y, gt: y_group[j-1]}
+              
+          - elsif y_axis["column"] == "company_id"
+            = "#{y} : #{company_klass.find(y).try(:name)}"
+            - y_column = {v: y, c: :in}
+            
+          - else
+            = y
+            - y_column = {v: y, c: :in}
+            
+        - x_group.each.with_index do |x, i|
+          td.integer
+            = link_to number_with_delimiter(sums[[x, y]] || 0), {action: :search, s: search_query.merge({x_axis["column"] => x_column[i], y_axis["column"] => y_column, presents: [x_axis["column"], y_axis["column"]]})}
+            - unless sums[[x, y]].to_f == 0
+              .percent = "#{(sums[[x, y]].to_f * 100 / all_count).round(2)}%"
+            

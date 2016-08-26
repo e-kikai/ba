@@ -8,10 +8,11 @@ class ClientTablesController < ApplicationController
       if su.target = "sum"
         shaping_params = @klass.shaping_params(su.query["s"])
         datas          = @klass.table_search_02(shaping_params)
-        sums           = datas.table_sum(su.query["sum"])
-        all_count      = @klass.all.count
+        sum_params     = @klass.sum_shaping_params(su.query["sum"])
+        sums           = datas.table_sum(sum_params)
+        all_count  = @klass.all.table_sum(sum_params.merge("axis" => nil))
 
-        {searchurl: su, sums: sums, all_count: all_count}
+        {searchurl: su, sums: sums, all_count: all_count, s_params: shaping_params, sum_params: sum_params}
       end
     end
   end
@@ -25,7 +26,7 @@ class ClientTablesController < ApplicationController
     # CSV出力
     respond_to do |format|
       format.html { @pdatas = @datas.page(params[:page]) }
-      format.js   {}
+      format.js   { @pdatas = @datas.page(params[:page]) }
       format.csv  { send_data render_to_string,
         content_type: 'text/csv;charset=shift_jis',
         filename: "csv_#{@table.client.name}_#{@table.name}_#{Time.now.strftime('%Y%m%d%H%M%S')}.csv"
@@ -39,7 +40,7 @@ class ClientTablesController < ApplicationController
 
     @sum_params = @klass.sum_shaping_params(params[:sum])
     @sums       = @datas.table_sum(@sum_params)
-    @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
+    @all_count  = @klass.all.table_sum(@sum_params.merge("axis" => nil))
   end
 
   def rfm

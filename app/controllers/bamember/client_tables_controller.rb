@@ -15,9 +15,9 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       if su.target = "sum"
         shaping_params = @klass.shaping_params(su.query["s"])
         datas          = @klass.table_search_02(shaping_params)
-        sum_params     = @klass.sum_shaping_params(params[:sum])
+        sum_params     = @klass.sum_shaping_params(su.query["sum"])
         sums           = datas.table_sum(sum_params)
-        all_count      = @klass.all.count
+        all_count  = @klass.all.table_sum(sum_params.merge("axis" => nil))
 
         {searchurl: su, sums: sums, all_count: all_count, s_params: shaping_params, sum_params: sum_params}
       end
@@ -48,7 +48,10 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     respond_to do |format|
       format.html { @pdatas = @datas.page(params[:page]) }
-      format.js   { render "client_tables/search" }
+      format.js   {
+        @pdatas = @datas.page(params[:page])
+        render "client_tables/search"
+      }
       format.csv  {
         send_data(render_to_string("client_tables/search.csv.ruby"),
           content_type: 'text/csv;charset=shift_jis',
@@ -96,7 +99,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     @sum_params = @klass.sum_shaping_params(params[:sum])
     @sums       = @datas.table_sum(@sum_params)
-    @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
+    @all_count  = @klass.all.table_sum(@sum_params.merge("axis" => nil))
   end
 
   def sum_update_company
@@ -105,7 +108,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
 
     @sum_params = @klass.sum_shaping_params(params[:sum])
     @sums       = @datas.table_sum(@sum_params)
-    @all_count  = @klass.all.try(@sum_params[:method], @sum_params[:column])
+    @all_count  = @klass.all.table_sum(@sum_params.merge("axis" => nil))
 
     error_mes = if params[:column].blank?
       "保存先の項目が選択されていません"

@@ -19,8 +19,11 @@
       span.glyphicon.glyphicon-save-file
       =< "CSV出力"
   
-  .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
-    table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
+  div = paginate @pdatas
+  / .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
+
+  .scroll_div
+    table.table.table-bordered.table-striped.table-hover.table-condensed.search-table _fixedhead='rows:1'
       tr
         th ID
         - @show_columns.each do |co|
@@ -29,7 +32,7 @@
         th.datetime 登録日時
         th.datetime 変更日時
   
-      - @datas.each do |d|
+      - @pdatas.each do |d|
         tr
           td.id
             = link_to d[:id], {action: :data_show, data_id: d[:id]}

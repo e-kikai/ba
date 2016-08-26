@@ -116,29 +116,33 @@ module ClientTableDataModule
       tmp = all
       columns = client_table.client_columns_by_column_name
 
-      Array(sum_shaping_params[:axis]).each do |s|
-        next if s["column"].blank?
+      Array(sum_shaping_params["axis"]).each do |a|
+        next if a["column"].blank?
 
-        next unless co = columns[s["column"]]
+        next unless co = columns[a["column"]]
 
-        if co.numeric?
-          sepa = s["sepa"].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s)
+        tmp = if co.numeric?
+          # 数値のみセパレート処理
+          # sepa = s["sepa"].to_s.split(",").map(&:to_i).uniq.sort.map(&:to_s)
+          # sepa = s["sepa"].to_s.split(",").map(&:to_i).uniq.sort
 
-          casewhen = if sepa.blank?
-            s["column"]
+          # casewhen = if sepa.blank?
+          casewhen = if a["sepa_array"].blank?
+            a["column"]
           else
-            sepa.inject(" CASE ") do |s, i|
-              s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN #{co.column_name} <= ? THEN ? ", "#{i}", "〜 #{i}"])
-            end + " ELSE 'それ以上' END "
+            a["sepa_array"].inject(" CASE ") do |s, i|
+              s + ActiveRecord::Base.send(:sanitize_sql_array, [" WHEN #{co.column_name} <= ? THEN ? ", "#{i}", "#{i}"])
+            end + " ELSE 2000000000 END "
           end
 
-          tmp = tmp.group(casewhen).where("#{co.column_name} IS NOT NULL")
+          tmp.group(casewhen).where("#{co.column_name} IS NOT NULL")
         else
-          tmp = tmp.group(s["column"]).where.not(s["column"] => "")
+          a["sepa_array"] = nil
+          tmp.group(a["column"]).where.not(a["column"] => "")
         end
       end
 
-      tmp.try(sum_shaping_params[:method], sum_shaping_params[:column])
+      tmp.distinct.try(sum_shaping_params[:method], sum_shaping_params[:column])
     end
 
     # PostgreSQLでの型キャスト
@@ -283,14 +287,25 @@ module ClientTableDataModule
 
     def sum_shaping_params(sum_params)
       # 旧仕様URL対応
-      if sum_params.is_a? Array
-        sum_params = { axis: Array(sum_params) }
+      sum_params = if sum_params.is_a? Array
+        { "axis" => Array(sum_params) }
       else
-        sum_params = Hash(sum_params)
+        Hash(sum_params)
       end
 
-      sum_params[:method] = :count unless ClientTable::SUM_METHODS.value? sum_params[:method]
-      sum_params
+      res = sum_params
+
+      # セパレータ対応
+      Array(res["axis"]).delete_if{ |a| a["column"].blank? }.each do |a|
+        a["sepa_array"] = make_sepa_array(a["sepa"]) if a["sepa"].present?
+      end
+
+      res[:method] = :count unless ClientTable::SUM_METHODS.value? sum_params[:method]
+      res
+    end
+
+    def make_sepa_array(sepa)
+      sepa.to_s.split(",").map(&:to_i).uniq.sort
     end
 
     # 検索条件を整形
