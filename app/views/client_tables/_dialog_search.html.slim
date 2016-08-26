@@ -21,9 +21,7 @@
   
   div = paginate @pdatas, remote: true
   .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
-
-  / .scroll_div
-    table.table.table-bordered.table-striped.table-hover.table-condensed.search-table _fixedhead='rows:1'
+    table.table.table-bordered.table-striped.table-hover.table-condensed.search-table
       tr
         th ID
         - @show_columns.each do |co|
