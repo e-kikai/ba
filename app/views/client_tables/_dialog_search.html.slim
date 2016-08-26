@@ -19,7 +19,7 @@
       span.glyphicon.glyphicon-save-file
       =< "CSV出力"
   
-  div = paginate @pdatas
+  div = paginate @pdatas, remote: true
   / .embed-responsive.embed-responsive-16by9 style="overflow:scroll;"
 
   .scroll_div
