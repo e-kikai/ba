@@ -51,6 +51,9 @@ set :unicorn_config_path, 'config/unicorn.rb'
 
 after 'deploy:publishing', 'deploy:restart'
 
+# SidekiqnのPIDを指定
+set :sidekiq_pid, File.join(shared_path, 'tmp', 'pids', 'sidekiq.pid')
+
 namespace :deploy do
 
   desc 'Restart application'
