@@ -36,11 +36,11 @@
               
           - elsif x_axis["column"] == "company_id"
             = "#{k} : #{company_klass.find(k).try(:name)}"
-            - x_column = {v: k, c: :in}
+            - x_column = {in: k}
             
           - else
             = k
-            - x_column = {v: k, c: :in}
+            - x_column = {in: [k]}
 
         td.integer
           = link_to number_with_delimiter(sums[k] || 0), {action: :search, s: search_query.merge({x_axis["column"] => x_column, presents: [x_axis["column"]]})}
@@ -83,11 +83,11 @@
               
           - elsif x_axis["column"] == "company_id"
             = "#{x} : #{company_klass.find(x).try(:name)}"
-            - x_column[i]  = {v: x, c: :in}
+            - x_column[i]  = {in: x}
             
           - else
             = x
-            - x_column[i]  = {v: x, c: :in}
+            - x_column[i]  = {in: [x]}
 
         / th.x = x
     - y_group.each.with_index do |y, j|
@@ -106,11 +106,11 @@
               
           - elsif y_axis["column"] == "company_id"
             = "#{y} : #{company_klass.find(y).try(:name)}"
-            - y_column = {v: y, c: :in}
+            - y_column = {in: y}
             
           - else
             = y
-            - y_column = {v: y, c: :in}
+            - y_column = {in: [y]}
             
         - x_group.each.with_index do |x, i|
           td.integer
