@@ -15,6 +15,10 @@ class ClientTablesController < ApplicationController
         {searchurl: su, sums: sums, all_count: all_count, s_params: shaping_params, sum_params: sum_params}
       end
     end
+
+    if @summaries.present?
+      @company_names = @client.company_table.klass.order(:id).pluck(:id, :name).to_h
+    end
   end
 
   def search
@@ -41,6 +45,9 @@ class ClientTablesController < ApplicationController
     @sum_params = @klass.sum_shaping_params(params[:sum])
     @sums       = @datas.table_sum(@sum_params)
     @all_count  = @klass.all.table_sum(@sum_params.merge("axis" => nil))
+
+    @company_names = @client.company_table.klass.order(:id).pluck(:id, :name).to_h
+
   end
 
   def rfm

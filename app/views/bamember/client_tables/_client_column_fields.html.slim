@@ -1,9 +1,16 @@
 tr.fields
-  td = f.text_field :name, class: "form-control"
   td
-   = f.select(:column_type,
-     ClientColumn.column_types_selector(f.object.new_record? ? nil : f.object.db_type.presence),
-     {}, class: "form-control column_type")
+    - if f.object.column_name == "company_id"
+      = f.object.name
+    - else
+      = f.text_field :name, class: "form-control"
+  td
+    - if f.object.column_name == "company_id"
+      | ID
+    - else
+     = f.select(:column_type,
+       ClientColumn.column_types_selector(f.object.new_record? ? nil : f.object.db_type.presence),
+       {}, class: "form-control column_type")
   td = f.text_area  :selector, class: "form-control selector"
   td = f.text_field :default, class: "form-control"
   td = f.check_box  :unique
@@ -11,6 +18,10 @@ tr.fields
   td = f.check_box  :hidden
   td = f.check_box  :sumally
   td = f.text_field :order_no, class: "form-control order_no"
-  td = f.link_to_remove class: "btn btn-danger" do
-    span.glyphicon.glyphicon-remove
-    =< "削除"
+  td
+    - if %w|name company_id|.include? f.object.column_name
+      | 削除不可
+    - else
+      = f.link_to_remove class: "btn btn-danger" do
+        span.glyphicon.glyphicon-remove
+        =< "削除"

@@ -17,10 +17,14 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         datas          = @klass.table_search_02(shaping_params)
         sum_params     = @klass.sum_shaping_params(su.query["sum"])
         sums           = datas.table_sum(sum_params)
-        all_count  = @klass.all.table_sum(sum_params.merge("axis" => nil))
+        all_count      = @klass.all.table_sum(sum_params.merge("axis" => nil))
 
         {searchurl: su, sums: sums, all_count: all_count, s_params: shaping_params, sum_params: sum_params}
       end
+    end
+
+    if @summaries.present?
+      @company_names = @client.company_table.klass.order(:id).pluck(:id, :name).to_h
     end
   end
 
@@ -100,6 +104,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     @sum_params = @klass.sum_shaping_params(params[:sum])
     @sums       = @datas.table_sum(@sum_params)
     @all_count  = @klass.all.table_sum(@sum_params.merge("axis" => nil))
+
+    @company_names = @client.company_table.klass.order(:id).pluck(:id, :name).to_h
   end
 
   def sum_update_company

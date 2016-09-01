@@ -11,7 +11,6 @@
           .percent = "#{(sums.to_f * 100 / all_count).round(2)}%"
       
 - elsif !sums.first[0].kind_of?(Array)
-  - company_klass = @client.company_table.klass
   - x_axis = sum_query.dig("axis", 0)
   
   - if x_axis["sepa_array"].present?
@@ -35,7 +34,7 @@
               - x_column = {lteq: k, gt: group[i-1]}
               
           - elsif x_axis["column"] == "company_id"
-            = "#{k} : #{company_klass.find(k).try(:name)}"
+            = "#{k} : #{company_names[k]}"
             - x_column = {in: k}
             
           - else
@@ -48,7 +47,6 @@
             .percent = "#{(sums[k].to_f * 100 / all_count).round(2)}%"
       
 - else
-  - company_klass = @client.company_table.klass
   - x_column = []
   - x_axis = sum_query.dig("axis", 0)
   - if x_axis["sepa_array"].present?
@@ -82,7 +80,7 @@
               - x_column[i]  = {lteq: x, gt: x_group[i-1]}
               
           - elsif x_axis["column"] == "company_id"
-            = "#{x} : #{company_klass.find(x).try(:name)}"
+            = "#{x} : #{company_names[x]}"
             - x_column[i]  = {in: x}
             
           - else
@@ -105,7 +103,7 @@
               - y_column = {lteq: y, gt: y_group[j-1]}
               
           - elsif y_axis["column"] == "company_id"
-            = "#{y} : #{company_klass.find(y).try(:name)}"
+            = "#{y} : #{company_names[y]}"
             - y_column = {in: y}
             
           - else
