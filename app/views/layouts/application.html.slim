@@ -34,8 +34,10 @@ html
       .breadcrumb-area
         .col-md-2
           .beader-client
-            span.glyphicon.glyphicon-user
-            =< current_client.name
+            - if request.path_info =~ /^\/bamember/
+            - else
+              span.glyphicon.glyphicon-user
+              =< current_client.name if client_signed_in?
         .col-md-10 = raw breadcrumbs style: :bootstrap, semantic: true, display_single_fragment: true
 
       - if notice.present?
