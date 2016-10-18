@@ -70,7 +70,7 @@ class ClientTable < ActiveRecord::Base
     ch = self.create(client_id: client_id, name: name, table_name: "c#{client_id}_#{Time.now.strftime('%Y%m%d%H%M%S')}", company: false)
 
     ch.client_columns.create(name: "#{name}名", column_name: :name,       column_type: :string, order_no: 100)
-    ch.client_columns.create(name: "会社ID",    column_name: :company_id, column_type: :id,     order_no: 200)
+    ch.client_columns.create(name: "BA会社ID",    column_name: :company_id, column_type: :id,     order_no: 200)
 
     ch
   end
@@ -115,7 +115,7 @@ class ClientTable < ActiveRecord::Base
   end
 
   def columns_options
-    options = [["ID", "id", {data: { db_type: :id}}]]
+    options = [["BA#{name}ID", "id", {data: { db_type: :id}}]]
     options += show_columns.map do |co|
       [co.name, co.column_name, {data: { db_type: co.db_type}}]
     end

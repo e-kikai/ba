@@ -17,7 +17,11 @@ tr.fields
   td = f.check_box  :presence
   td = f.check_box  :hidden
   td = f.check_box  :sumally
-  td = f.text_field :order_no, class: "form-control order_no"
+  td
+    - if %w|name|.include? f.object.column_name
+      = f.text_field :order_no, class: "form-control order_no", readonly: true, value: 10
+    - else
+      = f.text_field :order_no, class: "form-control order_no"
   td
     - if %w|name company_id|.include? f.object.column_name
       | 削除不可

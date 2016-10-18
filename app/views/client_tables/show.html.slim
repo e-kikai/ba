@@ -1,19 +1,46 @@
 - set_meta_tags title: "#{@table.name} テーブル"
 - breadcrumb    :table, @table
 
-.col-md-6.col-md-offset-1
-  table.table.table-striped.table-hover.table-responsive#menu_table
-    caption #{@table.name}テーブル #{number_with_delimiter(@table.klass.count)}件
-    tr
-      td = link_to "検索",         "/client_tables/#{@table.id}/search/"
-      td = link_to "集計",         "/client_tables/#{@table.id}/sum/"
-      td
-        - unless @table.company?
-          = link_to "RFM",         "/client_tables/#{@table.id}/rfm/"
-      td = link_to "条件一覧",     "/client_tables/#{@table.id}/searchurls/"
-      td = link_to "/client_tables/#{@table.id}/search.csv", class: "btn btn-warning" do
+.titles
+  span.glyphicon.glyphicon-paperclip
+  | ダッシュボード
+  
+.col-md-10.col-md-offset-1
+  .table-area
+    .table-info.col-md-6
+      .table-name
+        span.glyphicon.glyphicon-list-alt
+        = "#{@table.name}テーブル"
+      .count-area
+        span.count #{@table.klass.count}
+        | 件
+    .button-area.col-md-6
+      = link_to "/client_tables/#{@table.id}/search/", class: "btn btn-default btn-square" do
+        span.glyphicon.glyphicon-search
+        = "検索"
+      = link_to "/client_tables/#{@table.id}/sum/", class: "btn btn-default btn-square" do
+        span.glyphicon.glyphicon-indent-left
+        = "集計"
+      = link_to "/client_tables/#{@table.id}/searchurls/", class: "btn btn-default btn-square" do
+        span.glyphicon.glyphicon-list
+        = "検索条件"
+      = link_to "/client_tables/#{@table.id}/search.csv", class: "btn btn-default btn-square" do
         span.glyphicon.glyphicon-save-file
-        =< "エクスポート"
+        = "エクスポート"
+
+/ .col-md-6.col-md-offset-1
+/   table.table.table-striped.table-hover.table-responsive#menu_table
+/     caption #{@table.name}テーブル #{number_with_delimiter(@table.klass.count)}件
+/     tr
+/       td = link_to "検索",         "/client_tables/#{@table.id}/search/"
+/       td = link_to "集計",         "/client_tables/#{@table.id}/sum/"
+/       td
+/         - unless @table.company?
+/           = link_to "RFM",         "/client_tables/#{@table.id}/rfm/"
+/       td = link_to "条件一覧",     "/client_tables/#{@table.id}/searchurls/"
+/       td = link_to "/client_tables/#{@table.id}/search.csv", class: "btn btn-warning" do
+/         span.glyphicon.glyphicon-save-file
+/         =< "エクスポート"
     
 .col-md-12
   = render "client_tables/summary", table: @table

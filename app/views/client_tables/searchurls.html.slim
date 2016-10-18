@@ -6,6 +6,7 @@
     caption 検索条件
     tr
       th タイトル
+      th 備考
       th 登録日時
     - @table.searchurls.each do |su|
       tr
@@ -18,4 +19,5 @@
             = link_to title, {action: :rfm}.merge(Hash(su.query))
           - else
             = link_to title, {action: :sum}.merge(Hash(su.query))
+        td = simple_format(su.comment)
         td = su.created_at

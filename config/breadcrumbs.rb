@@ -5,16 +5,16 @@
 
 ### client ###
 crumb :client_root do
-  link "TOP", "/"
+  link content_tag(:span, "", class: "glyphicon glyphicon-list-alt") + "テーブル一覧", "/"
 end
 
 crumb :table do |table|
-  link   "#{table.name}テーブル", "/client_tables/#{table.id}/"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-paperclip") + "#{table.name}テーブル:ダッシュボード", "/client_tables/#{table.id}/"
   parent :client_root, table.client
 end
 
 crumb :search do |table|
-  link   "検索", "/client_tables/#{table.id}/search"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-search") + "検索結果", "/client_tables/#{table.id}/search"
   parent :table, table
 end
 
@@ -24,7 +24,7 @@ crumb :sum do |table|
 end
 
 crumb :data do |table, data|
-  link   data[:name], "/client_tables/#{table.id}/#{data.id}"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-folder-open") + "#{data[:name]}:カルテ", "/client_tables/#{table.id}/#{data.id}"
   parent :search, table
 end
 

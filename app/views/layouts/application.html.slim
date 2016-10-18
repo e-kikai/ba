@@ -10,12 +10,33 @@ html
     = csrf_meta_tags
 
   body
-    header.navbar.navbar-default.container-fluid role="navigation"
-      .navbar-header
-        .navbar-brand BA System
+    header.navbar.navbar-default.container-fluid.navbar-area role="navigation"
+      .container
+        .navbar-collapse.collapse
+          - if request.path_info =~ /^\/bamember/
+            = link_to "/bamember/", class: "navbar-brand" do
+              = image_tag "olive_logo.png", alt: "OLIVE-DB by business alliance"
+            .bamember-label BAメンバページ
+            = link_to "/bamember/logout", method: :delete, class: "btn btn-default navbar-btn btn-warning navbar-right" do
+              span.glyphicon.glyphicon-log-out
+              =< "ログアウト"
+          - else
+            = link_to "/", class: "navbar-brand" do
+              = image_tag "olive_logo.png", alt: "OLIVE-DB by business alliance"
+            = link_to "/logout", method: :delete, class: "btn btn-default navbar-btn btn-warning navbar-right" do
+              span.glyphicon.glyphicon-log-out
+              =< "ログアウト"
+            = link_to "/edit_password", method: :delete, class: "btn btn-default navbar-btn btn-success navbar-right" do
+              span.glyphicon.glyphicon-pencil
+              =< "パスワード変更"
 
     .container-fluid
-      = raw breadcrumbs style: :bootstrap, semantic: true
+      .breadcrumb-area
+        .col-md-2
+          .beader-client
+            span.glyphicon.glyphicon-user
+            =< current_client.name
+        .col-md-10 = raw breadcrumbs style: :bootstrap, semantic: true, display_single_fragment: true
 
       - if notice.present?
         .alert.alert-success

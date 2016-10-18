@@ -44,8 +44,8 @@ module ApplicationHelper
   # @param  [Iinteger] column_name カラム名
   # @return [string]   HTMLタグ
   def column_sorter(column_name)
-    content_tag(:div, class: "dropdown", style: "display:inline-block;") do
-      concat( button_tag(type: :button, class: "dropdown-toggle btn btn-primary btn-xs", data: { toggle: "dropdown" }) do
+    content_tag(:div, class: "dropdown column-sorter", style: "display:inline-block;") do
+      concat( button_tag(type: :button, class: "dropdown-toggle btn btn-default btn-xs", data: { toggle: "dropdown" }) do
         tag :span, class: "glyphicon glyphicon-option-vertical"
       end)
 

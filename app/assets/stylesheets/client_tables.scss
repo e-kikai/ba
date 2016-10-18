@@ -2,8 +2,19 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 table.search-table {
+  > tbody > tr {
+    &:nth-of-type(odd) {
+      background-color: #BAEBAC;
+    }
+
+    &:nth-of-type(even) {
+      background-color: #fff;
+    }
+  }
+
   th {
     white-space: nowrap;
+    border-color: #A7D49C;
 
     &.company {
       min-width: 200px;
@@ -16,6 +27,8 @@ table.search-table {
   }
 
   td {
+    border-color: #A7D49C;
+
     &.id {
       text-align: right;
     }
@@ -65,14 +78,6 @@ table.sum-table {
 
 .hotspots .form-control {
   width: 48%;
-}
-
-.search-menu {
-  margin-bottom: 8px;
-
-  .btn {
-    margin-right: 4px;
-  }
 }
 
 #serach_form {

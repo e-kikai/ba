@@ -25,7 +25,7 @@
 
 - s = Hash(s)
 .form-group.col-md-6
-  h5.col-md-3 ID
+  h5.col-md-3 BA#{@table.name}ID
   .col-md-9 = text_field_tag "s[id][in]", s.dig("id", "in").try(:join, ' '), class: "form-control", placeholder: "完全一致"
   
 - table.show_columns.each do |co|

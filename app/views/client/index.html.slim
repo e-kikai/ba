@@ -1,31 +1,55 @@
 - set_meta_tags title: "メニュー"
 - breadcrumb    :client_root, @client
     
-.col-md-6.col-md-offset-3
-  table.table.table-striped.table-hover.table-responsive.tables
-    caption テーブル管理
-    tr
-      td = link_to "#{@client.company_table.name}テーブル", "/client_tables/#{@client.company_table.id}/"
-      td.integer #{@client.company_table.klass.count}件
-      / td = link_to "検索",         "/client_tables/#{@client.company_table.id}/search/"
-      / td = link_to "集計",         "/client_tables/#{@client.company_table.id}/sum/"
-      / td
-      td = link_to "/client_tables/#{@client.company_table.id}/search.csv", class: "btn btn-warning" do
-        span.glyphicon.glyphicon-save-file
-        =< "エクスポート"
-
-    - @client.child_tables.each do |t|
-      tr
-        td = link_to "#{t.name}テーブル", "/client_tables/#{t.id}/"
-        td.integer #{t.klass.count}件
-        / td = link_to "検索",         "/client_tables/#{t.id}/search/"
-        / td = link_to "集計",         "/client_tables/#{t.id}/sum/"
-        / td = link_to "RFM",          "/client_tables/#{t.id}/rfm/"
-        td = link_to "/client_tables/#{t.id}/search.csv", class: "btn btn-warning" do
-          span.glyphicon.glyphicon-save-file
-          =< "エクスポート"
-        
-  ul.nav.nav-pills
+.titles
+  span.glyphicon.glyphicon-bullhorn
+  | お知らせ
+  
+p.infos
+  - if @client.infos
+    - @client.infos.each do |i|
+      .info-area = i.content
+  - else
+    . お知らせはありません
+.titles
+  span.glyphicon.glyphicon-list-alt
+  | テーブル管理
+  
+.col-md-8.col-md-offset-2
+  = render "/client/table_area", t: @client.company_table
+  
+  - @client.child_tables.each do |t|
+    = render "/client/table_area", t: t
+    
+/ .col-md-6.col-md-offset-3
+/   table.table.table-striped.table-hover.table-responsive.tables
+/     caption テーブル管理
+/     tr
+/       td = link_to "#{@client.company_table.name}テーブル", "/client_tables/#{@client.company_table.id}/"
+/       td.integer
+/         span.count #{@client.company_table.klass.count}
+/         | 件
+/       / td = link_to "検索",         "/client_tables/#{@client.company_table.id}/search/"
+/       / td = link_to "集計",         "/client_tables/#{@client.company_table.id}/sum/"
+/       / td
+/       td = link_to "/client_tables/#{@client.company_table.id}/search.csv", class: "btn btn-warning btn-square" do
+/         span.glyphicon.glyphicon-save-file
+/         = "エクスポート"
+/ 
+/     - @client.child_tables.each do |t|
+/       tr
+/         td = link_to "#{t.name}テーブル", "/client_tables/#{t.id}/"
+/         td.integer
+/           span.count #{t.klass.count}
+/           | 件
+/         / td = link_to "検索",         "/client_tables/#{t.id}/search/"
+/         / td = link_to "集計",         "/client_tables/#{t.id}/sum/"
+/         / td = link_to "RFM",          "/client_tables/#{t.id}/rfm/"
+/         td = link_to "/client_tables/#{t.id}/search.csv", class: "btn btn-warning btn-square" do
+/           span.glyphicon.glyphicon-save-file
+/           ="エクスポート"
+/         
+/   ul.nav.nav-pills
     / li = link_to "クライアント情報変更", "/bamember/clients/#{@client.id}/edit"
-    li = link_to "パスワード変更", "/client/edit_password"
-    li = link_to "ログアウト",     "/client/logout", method: :delete
+    / li = link_to "パスワード変更", "/client/edit_password"
+    / li = link_to "ログアウト",     "/client/logout", method: :delete

@@ -1,7 +1,7 @@
 .col-md-offset-3.col-md-6
   table.table.table-hover.table-condensed
     tr
-      th ID
+      th BA#{@table.name}ID
       td.id = @data[:id]
     - @table.show_columns.each do |co|
       tr

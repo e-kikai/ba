@@ -3,6 +3,7 @@
 - elsif all_count == 0
   . データがありません
 - elsif !sums.kind_of?(Hash)
+  / 結果が単数のみ
   table.table.table-bordered.table-hover.table-condensed.sum-table
     tr
       td.integer
@@ -70,13 +71,13 @@
         th.x
           - if x_axis["sepa_array"].present?
             - if i == 0
-              = "〜 #{x}"
+              = "〜 #{x.to_s(:delimited)}"
               - x_column[i] = {lteq: x}
             - elsif i == x_group.size - 1
               = "〜 それ以上"
               - x_column[i]  = {gt: x_group[i-1]}
             - else
-              = "〜 #{x}"
+              = "〜 #{x.to_s(:delimited)}"
               - x_column[i]  = {lteq: x, gt: x_group[i-1]}
               
           - elsif x_axis["column"] == "company_id"
@@ -93,13 +94,13 @@
         th.y
           - if y_axis["sepa_array"].present?
             - if j == 0
-              = "〜 #{y}"
+              = "〜 #{y.to_s(:delimited)}"
               - y_column = {lteq: y}
             - elsif j == y_group.size - 1
               = "〜 それ以上"
               - y_column = {gt: y_group[j-1]}
             - else
-              = "〜 #{y}"
+              = "〜 #{y.to_s(:delimited)}"
               - y_column = {lteq: y, gt: y_group[j-1]}
               
           - elsif y_axis["column"] == "company_id"

@@ -10,6 +10,7 @@ class Client < ActiveRecord::Base
   has_many :client_tables
   has_many :csvfiles,     through: :client_tables
   has_many :imports,      through: :csvfiles
+  has_many :infos
   # has_many :dashboards
 
   # accepts_nested_attributes_for :dashboards, allow_destroy: true

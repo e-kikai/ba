@@ -21,7 +21,165 @@ $icon-font-path: "bootstrap-sass-official/assets/fonts/bootstrap/";
 @import "bootstrap-sass-official/bootstrap";
 @import 'bootstrap-fileinput';
 
+$link_color: #2B8B04;
+$hover_color: #1c5d01;
+//// body ////
+body {
+  background-color: #F4F6EB;
+}
+
+.breadcrumb {
+  background: #FFFFFF;
+}
+
+a {
+  color: $link_color;
+
+  &:hover,
+  &:focus {
+    color: $hover_color;
+  }
+}
+
+.btn.btn-square {
+  width: 92px;
+  height: 69px;
+  text-align: center;
+  padding: 11px 0;
+  font-size: 12px;
+  color: #2B8B04;
+  border-radius: 0;
+  display: inline-block;
+  margin: 0 8px 0 0;
+  vertical-align: top;
+
+  span.glyphicon {
+    display: block;
+    font-size: 28px;
+    vertical-align: middle;
+    margin-bottom: 5px;
+  }
+}
+
+span.count {
+  color: #F90000;
+  font-size: 24px;
+  margin-right: 4px;
+}
+
+.titles {
+  font-size: 18px;
+  margin: 10px 0 8px 0;
+
+  span.glyphicon {
+    margin-right: 8px;
+  }
+}
+
+.table-area {
+  .table-info {
+    background: #FFF;
+    border: 1px solid #CCC;
+    display: table-cell;
+    vertical-align: middle;
+    height: 69px;
+    line-height: 69px;
+    margin-bottom: 8px;
+
+    .table-link,
+    .table-name {
+      display: inline;
+
+      vertical-align: middle;
+      font-size: 18px;
+      margin-right: 32px;
+
+      .glyphicon {
+        margin-right: 8px;
+      }
+    }
+
+    .count-area {
+      display: inline;
+      vertical-align: middle;
+      float: right;
+      margin-right: 64px;
+    }
+  }
+
+
+}
+
+.search-menu {
+  margin-bottom: 4px;
+
+  .pagination {
+    margin: 0 8px;
+    vertical-align: bottom;
+
+    li a {
+      color: $link_color;
+    }
+
+    li.active a {
+      background-color: $link_color;
+      border-color: $link_color;
+      color: #FFF;
+    }
+  }
+
+  .count-area {
+    display: inline-block;
+    vertical-align: bottom;
+    margin: 0 8px;
+  }
+}
+
+//// header ////
+header {
+  &.navbar-default {
+    background-color: #4AD246;
+    border: none;
+    border-radius: 0;
+  }
+
+  .navbar-brand {
+    padding: 4px 0;
+
+    img {
+      height: 100%;
+    }
+  }
+
+  .bamember-label {
+    float: left;
+    color: #FFF;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-left: 12px;
+  }
+
+  .btn.navbar-right {
+    margin-left: 8px;
+  }
+}
+
+.beader-client {
+  padding: 8px 15px;
+}
+
+.breadcrumb {
+  > li + li:before {
+    content: " > ";
+  }
+
+  span.glyphicon {
+    margin-right: 4px;
+  }
+}
+//// footer ////
 footer {
   margin-top: 16px;
   text-align: center;
+  color: #777;
 }

@@ -1,0 +1,12 @@
+.table-area
+  .table-info.col-md-10
+    = link_to "/client_tables/#{t.id}/", class: "table-link" do
+      span.glyphicon.glyphicon-list-alt
+      = "#{t.name}テーブル"
+    .count-area
+      span.count #{t.klass.count}
+      | 件
+  .button-area.col-md-2
+    = link_to "/client_tables/#{t.id}/search.csv", class: "btn btn-default btn-square" do
+      span.glyphicon.glyphicon-save-file
+      = "エクスポート"

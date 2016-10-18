@@ -1,0 +1,48 @@
+- set_meta_tags title: "#{@table.client.name}/#{@table.name} ファイル検索"
+- breadcrumb  :clients_table_import_matching, @csvfile
+
+- select_client_columns = [["--使用しない--", ""], ["ID", :id]] + @table.show_columns.pluck(:name, :column_name)
+
+coffee:
+  $ ->
+    $(document).on 'change', 'select.column_name', ->
+      # 使用済み項目を非表示
+      $('select.column_name option').show()
+      $('select.column_name').each ->
+        val2 = $(@).val()
+        if val2 == "" then return true
+        $('select.column_name').each ->
+          if $(@).val() != val2
+            $(@).find('option').each ->
+              if $(@).attr('value') == val2 then $(@).hide()
+      
+    $('select.column_name').trigger('change')
+
+.col-md-6.col-md-offset-3
+  dl.dl-horizontal
+    dt データ件数
+    dd #{number_with_delimiter(@csvfile.all_num)} 件 (先頭行、空行を除く)
+    
+  = form_tag({action: :search}, method: :get, class: 'form-horizontal') do
+    table.table.table-striped.table-hover.table-responsive
+      caption 検索項目設定
+      tr
+        th CSV項目
+        th ⇒
+        th テーブル項目
+      - @csvfile.header.each_with_index do |h, i|
+        tr
+          td
+            .column  = h
+            .example = @csvfile.first[i]
+          td ⇒
+          td = select_tag("table_header[#{i}]",
+            options_for_select(select_client_columns, params.dig("table_header", i.to_s)),
+            class: "form-control column_name")
+          
+    div style="text-align:center;"
+      span.glyphicon.glyphicon-arrow-down
+    = button_tag class: "btn btn-primary center-block" do
+      span.glyphicon.glyphicon-search
+      =< "検索"
+      

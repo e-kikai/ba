@@ -5,19 +5,19 @@
 - company_methods         = {"空欄に保存" => :save, "上書き" => :update}
 
 .container-fluid.search-menu
-  = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#serach_form" } do
+  = button_tag type: :button, class: "btn btn-default btn-square option", data: { toggle: :modal, target: "#serach_form" } do
     span.glyphicon.glyphicon-menu-hamburger
-    =< "集計フォーム"
-  = link_to "#{request.path_info}", class: "btn btn-warning" do
+    = "集計フォーム"
+  = link_to "#{request.path_info}", class: "btn btn-default btn-square" do
     span.glyphicon.glyphicon-remove
-    =< "条件リセット"
+    = "条件リセット"
   - if ba
-    = link_to params.merge({action: :searchurls, target: :sum}), method: :put, class: "btn btn-success" do
+    = link_to params.merge({action: :searchurls, target: :sum}), method: :put, class: "btn btn-default btn-square" do
       span.glyphicon.glyphicon-save
-      =< "この条件を保存"
+      =< "条件を保存"
       
     - if @sum_params.dig("axis", 0, "column") == "company_id" && @sum_params.dig("axis", 1, "column").blank?
-      = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#update_form" } do
+      = button_tag type: :button, class: "btn btn-default btn-square option", data: { toggle: :modal, target: "#update_form" } do
         span.glyphicon.glyphicon-save
         =< "この集計結果を会社テーブルに一括変更"
 
