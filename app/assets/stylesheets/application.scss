@@ -135,6 +135,151 @@ span.count {
   }
 }
 
+/// karte ///
+.karte-dates {
+  display: inline-block;
+  margin-right: 32px;
+
+  dt {
+    float: left;
+    clear: both;
+    width: 80px;
+    color: #666;
+  }
+
+  dd {
+    float: left;
+    color: #666;
+
+  }
+}
+
+.karte-print {
+  float: right;
+}
+
+.karte-large {
+  margin-bottom: 32px;
+
+  dl {
+    border-bottom: 1px solid #CCC;
+    position: relative;
+    min-height: 40px;
+    margin: 16px 0 0 0;
+  }
+
+  dt {
+    width: 120px;
+    color: #666;
+    display: inline-block;
+    vertical-align: baseline;
+    font-weight: normal;
+    position: absolute;
+    bottom: 0;
+
+  }
+
+  dd {
+    font-size: 20px;
+    display: inline-block;
+    vertical-align: bottom;
+    position: absolute;
+    bottom: 0;
+    left: 120px;
+
+  }
+}
+
+.karte-middle {
+  border: 1px solid #CCC;
+  padding: 16px;
+  background: #FFF;
+  border-radius: 4px;
+
+  table {
+    tbody > tr > th {
+      color: #666;
+      font-weight: normal;
+      border-bottom: 1px solid #ddd;
+      border-top: 0;
+    }
+
+    tbody > tr > td {
+      border-bottom: 1px solid #ddd;
+      border-top: 0;
+    }
+  }
+
+}
+
+.karte-small {
+  padding: 16px;
+
+  table {
+    tbody > tr > th {
+      color: #666;
+      font-weight: normal;
+      border-bottom: 1px solid #ddd;
+      border-top: 0;
+    }
+
+    tbody > tr > td {
+      border-bottom: 1px solid #ddd;
+      border-top: 0;
+    }
+  }
+
+}
+
+/// sum ///
+.sum-result {
+  font-size: 40px;
+  text-align: right;
+  padding: 0 32px;
+}
+
+table.sum-table {
+  th.y {
+    min-width: 150px;
+  }
+}
+
+.percent {
+  color: #777;
+  font-size: 80%;
+}
+
+.summary-area {
+  overflow: auto;
+}
+
+.summary-small {
+  .summary-panel .panel-body {
+    height: 120px;
+  }
+}
+
+.summary-middle {
+  .summary-panel .panel-body  {
+    height: 300px;
+  }
+}
+
+.summary-panel {
+  background: inherit;
+  border-width: 0 1px 1px 0;
+  border-radius: 0;
+
+  .panel-heading {
+    background: inherit;
+    border: 0;
+
+    .glyphicon {
+      margin-right: 4px;
+    }
+  }
+
+}
 //// header ////
 header {
   &.navbar-default {

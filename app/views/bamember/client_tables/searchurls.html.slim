@@ -1,4 +1,4 @@
 - set_meta_tags title: "#{@table.client.name}/#{@table.name}テーブル 検索条件一覧"
-- breadcrumb  :clients_table_something, "検索条件一覧", @table
+- breadcrumb  :clients_table_something, content_tag(:span, "", class: "glyphicon glyphicon-list") + "検索条件一覧", @table
 
 = render "client_tables/searchurls", ba: true

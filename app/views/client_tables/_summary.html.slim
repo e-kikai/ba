@@ -1,12 +1,51 @@
-h4 概要
+/ h4 概要
 - @summaries.each do |su|
-  div class="col-md-#{su[:searchurl].size.presence || 2}"
-    .panel.panel-default
-      .panel-heading
-        = su[:searchurl].name
-        
-        .pull-right =< link_to url_for({action: su[:searchurl].target.presence || "sum"}.merge(Hash(su[:searchurl].query))) do
-          span.glyphicon.glyphicon-resize-full
-        
-      .panel-body.embed-responsive.embed-responsive-4by3 style="overflow:scroll;"
-        = render "client_tables/sum_table", sums: su[:sums], all_count: su[:all_count], search_query: su[:s_params], sum_query: su[:sum_params], company_names: @company_names
+  - if su[:sum_params]["axis"].try(:length).blank?
+    / div class="col-md-#{su[:searchurl].size.presence || 2}"
+    .col-md-3.summary-area.summary-small
+      .panel.panel-default.summary-panel
+        .panel-heading
+          span.glyphicon.glyphicon-indent-left
+          = su[:searchurl].name
+          
+          .pull-right =< link_to url_for({action: su[:searchurl].target.presence || "sum"}.merge(Hash(su[:searchurl].query))) do
+            span.glyphicon.glyphicon-resize-full
+          
+        / .panel-body.embed-responsive.embed-responsive-4by3 style="overflow:scroll;"
+        .panel-body
+          = render "client_tables/sum_table", sums: su[:sums], all_count: su[:all_count], search_query: su[:s_params], sum_query: su[:sum_params], company_names: @company_names
+
+br clear="both"
+- @summaries.each do |su|
+  - if su[:sum_params]["axis"].try(:length) == 1
+
+    / div class="col-md-#{su[:searchurl].size.presence || 2}"
+    .col-md-3.summary-area.summary-middle
+      .panel.panel-default.summary-panel
+        .panel-heading
+          span.glyphicon.glyphicon-indent-left
+          = su[:searchurl].name
+          
+          .pull-right =< link_to url_for({action: su[:searchurl].target.presence || "sum"}.merge(Hash(su[:searchurl].query))) do
+            span.glyphicon.glyphicon-resize-full
+          
+        / .panel-body.embed-responsive.embed-responsive-4by3 style="overflow:scroll;"
+        .panel-body
+          = render "client_tables/sum_table", sums: su[:sums], all_count: su[:all_count], search_query: su[:s_params], sum_query: su[:sum_params], company_names: @company_names
+br clear="both"
+- @summaries.each do |su|
+  - if su[:sum_params]["axis"].try(:length) == 2
+
+    / div class="col-md-#{su[:searchurl].size.presence || 2}"
+    .col-md-12.summary-area.summary-large
+      .panel.panel-default.summary-panel
+        .panel-heading
+          span.glyphicon.glyphicon-indent-left
+          = su[:searchurl].name
+          
+          .pull-right =< link_to url_for({action: su[:searchurl].target.presence || "sum"}.merge(Hash(su[:searchurl].query))) do
+            span.glyphicon.glyphicon-resize-full
+          
+        / .panel-body.embed-responsive.embed-responsive-4by3 style="overflow:scroll;"
+        .panel-body
+          = render "client_tables/sum_table", sums: su[:sums], all_count: su[:all_count], search_query: su[:s_params], sum_query: su[:sum_params], company_names: @company_names

@@ -4,14 +4,19 @@
   . データがありません
 - elsif !sums.kind_of?(Hash)
   / 結果が単数のみ
-  table.table.table-bordered.table-hover.table-condensed.sum-table
-    tr
-      td.integer
-        h2
-          = link_to number_with_delimiter(sums), {action: :search, s: search_query}
-          .percent = "#{(sums.to_f * 100 / all_count).round(2)}%"
+  .sum-result
+    = link_to number_with_delimiter(sums), {action: :search, s: search_query}
+    .percent = "#{(sums.to_f * 100 / all_count).round(2)}%"
+    
+  / table.table.table-bordered.table-hover.table-condensed.sum-table
+  /   tr
+  /     td.integer
+  /       h2
+  /         = link_to number_with_delimiter(sums), {action: :search, s: search_query}
+  /         .percent = "#{(sums.to_f * 100 / all_count).round(2)}%"
       
 - elsif !sums.first[0].kind_of?(Array)
+  / 一軸
   - x_axis = sum_query.dig("axis", 0)
   
   - if x_axis["sepa_array"].present?
@@ -20,18 +25,21 @@
     - group = sums.keys.uniq.sort
     
   table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
+    tr
+      th = @table.client_columns.find_by(column_name: x_axis["column"]).name
+      th 値
     - group.each.with_index do |k, i|
       tr
         th
           - if x_axis["sepa_array"].present?
             - if i == 0
-              = "〜 #{k}"
+              = "〜 #{number_with_delimiter(k)}以下"
               - x_column = {lteq: k}
             - elsif i == group.size - 1
-              = "〜 それ以上"
+              = "#{number_with_delimiter(group[i-1])}超 〜"
               - x_column = {gt: group[i-1]}
             - else
-              = "〜 #{k}"
+              = "#{number_with_delimiter(group[i-1])}超 〜 #{number_with_delimiter(k)}以下"
               - x_column = {lteq: k, gt: group[i-1]}
               
           - elsif x_axis["column"] == "company_id"
@@ -39,7 +47,7 @@
             - x_column = {in: k}
             
           - else
-            = k
+            = number_with_delimiter(k)
             - x_column = {in: [k]}
 
         td.integer
@@ -66,18 +74,18 @@
   
   table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
     tr
-      th
+      th #{@table.client_columns.find_by(column_name: sum_query["axis"][1]["column"]).name} ＼ #{@table.client_columns.find_by(column_name: sum_query["axis"][0]["column"]).name}
       - x_group.each.with_index do |x, i|
         th.x
           - if x_axis["sepa_array"].present?
             - if i == 0
-              = "〜 #{x.to_s(:delimited)}"
+              = "〜 #{number_with_delimiter(x)}以下"
               - x_column[i] = {lteq: x}
             - elsif i == x_group.size - 1
-              = "〜 それ以上"
+              = "#{number_with_delimiter(x_group[i-1])}超 〜"
               - x_column[i]  = {gt: x_group[i-1]}
             - else
-              = "〜 #{x.to_s(:delimited)}"
+              = "#{number_with_delimiter(x_group[i-1])}超 〜 #{number_with_delimiter(x)}以下"
               - x_column[i]  = {lteq: x, gt: x_group[i-1]}
               
           - elsif x_axis["column"] == "company_id"
@@ -85,7 +93,7 @@
             - x_column[i]  = {in: x}
             
           - else
-            = x
+            = number_with_delimiter(x)
             - x_column[i]  = {in: [x]}
 
         / th.x = x
@@ -94,13 +102,13 @@
         th.y
           - if y_axis["sepa_array"].present?
             - if j == 0
-              = "〜 #{y.to_s(:delimited)}"
+              = "〜 #{number_with_delimiter(y)}以下"
               - y_column = {lteq: y}
             - elsif j == y_group.size - 1
-              = "〜 それ以上"
+              = "#{number_with_delimiter(y_group[j-1])}超 〜"
               - y_column = {gt: y_group[j-1]}
             - else
-              = "〜 #{y.to_s(:delimited)}"
+              = "{number_with_delimiter(y_group[j-1])}超 〜 #{number_with_delimiter(y)}以下"
               - y_column = {lteq: y, gt: y_group[j-1]}
               
           - elsif y_axis["column"] == "company_id"
@@ -108,7 +116,7 @@
             - y_column = {in: y}
             
           - else
-            = y
+            = number_with_delimiter(y)
             - y_column = {in: [y]}
             
         - x_group.each.with_index do |x, i|

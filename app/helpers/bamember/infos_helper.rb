@@ -1,0 +1,2 @@
+module Bamember::InfosHelper
+end

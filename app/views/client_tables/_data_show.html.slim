@@ -1,9 +1,48 @@
-.col-md-offset-3.col-md-6
-  table.table.table-hover.table-condensed
-    tr
-      th BA#{@table.name}ID
-      td.id = @data[:id]
-    - @table.show_columns.each do |co|
+.titles
+  span.glyphicon.glyphicon-folder-open
+  | #{@table.name}カルテ
+
+.col-md-10.col-md-offset-1
+  = button_tag type: :button, class: "btn btn-default btn-square option pull-right", onclick: "window.print();" do
+    span.glyphicon.glyphicon-print
+    = "印刷"
+      
+  dl.karte-dates.pull-right
+    dt 登録日時
+    dd = @data[:created_at]
+    dt 変更日時
+    dd = @data[:updated_at]
+  
+.col-md-10.col-md-offset-1.karte-large
+  .col-md-6
+    dl
+      dt BA#{@table.name}ID
+      dd = @data.id
+
+  - @table.show_columns.where("order_no < 10000").each do |co|
+    .col-md-6
+      dl
+        dt class="#{co.column_name}" = co.name
+        dd class="#{co.column_name}"
+          - if co.column_name == "company_id" && @data.company_id.present?
+            = link_to "#{@data.company_id} : #{@data.company.name}", {action: :data_show, id: @client.company_table.id, data_id: @data.company_id}
+          - else
+            = column_format(@data[co.column_name], co.column_type, :show)
+
+.col-md-offset-1.col-md-5.karte-middle
+  table.table
+    - @table.show_columns.where("order_no >= 10000 AND order_no < 100000").each do |co|
+      tr
+        th class="#{co.column_name}" = co.name
+        td class="#{co.column_name}"
+          - if co.column_name == "company_id" && @data.company_id.present?
+            = link_to "#{@data.company_id} : #{@data.company.name}", {action: :data_show, id: @client.company_table.id, data_id: @data.company_id}
+          - else
+            = column_format(@data[co.column_name], co.column_type, :show)
+                
+.col-md-5.karte-small
+  table.table
+    - @table.show_columns.where("order_no >= 100000").each do |co|
       tr
         th class="#{co.column_name}" = co.name
         td class="#{co.column_name}"
@@ -20,18 +59,41 @@
             td
               - chs.each do |cd|
                 div = link_to "#{cd.id} : #{cd.name}", {action: :data_show, id: ch.id, data_id: cd.id}
-
-    tr
-      th 登録日時
-      td.id = @data[:created_at]
-    tr
-      th 変更日時
-      td.id = @data[:updated_at]
-  - if ba
-    .buttons
-      = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/#{@data[:id]}/edit", class: "btn btn-success" do
-        span.glyphicon.glyphicon-edit
-        =< "データを変更"
-      = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{@data[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"}, class: "btn btn-danger" do
-        span.glyphicon.glyphicon-remove
-        =< "データを削除"
+      
+/ .col-md-offset-3.col-md-6
+/   table.table.table-hover.table-condensed
+/     tr
+/       th BA#{@table.name}ID
+/       td.id = @data[:id]
+/     - @table.show_columns.each do |co|
+/       tr
+/         th class="#{co.column_name}" = co.name
+/         td class="#{co.column_name}"
+/           - if co.column_name == "company_id" && @data.company_id.present?
+/             = link_to "#{@data.company_id} : #{@data.company.name}", {action: :data_show, id: @client.company_table.id, data_id: @data.company_id}
+/           - else
+/             = column_format(@data[co.column_name], co.column_type, :show)
+/             
+/     - if @table.company?
+/       - @client.child_tables.each do |ch|
+/         - if chs =  @data.try(ch.table_name.pluralize.intern)
+/           tr
+/             th #{ch.name} : #{chs.size}件
+/             td
+/               - chs.each do |cd|
+/                 div = link_to "#{cd.id} : #{cd.name}", {action: :data_show, id: ch.id, data_id: cd.id}
+/ 
+/     tr
+/       th 登録日時
+/       td.id = @data[:created_at]
+/     tr
+/       th 変更日時
+/       td.id = @data[:updated_at]
+- if ba
+  .buttons
+    = link_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/#{@data[:id]}/edit", class: "btn btn-success" do
+      span.glyphicon.glyphicon-edit
+      =< "データを変更"
+    = link_to "/bamember/clients/#{@table.client_id}/table/#{@table.id}/#{@data[:id]}", method: :delete, data: { confirm: "このデータを削除します\r事前にバックアップCSVファイルをダウンロードをしておくことをお勧めいたします\r\r本当によろしいですか"}, class: "btn btn-danger" do
+      span.glyphicon.glyphicon-remove
+      =< "データを削除"

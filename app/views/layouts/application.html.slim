@@ -23,7 +23,7 @@ html
           - else
             = link_to "/", class: "navbar-brand" do
               = image_tag "olive_logo.png", alt: "OLIVE-DB by business alliance"
-            = link_to "/logout", method: :delete, class: "btn btn-default navbar-btn btn-warning navbar-right" do
+            = link_to "/client/logout", method: :delete, class: "btn btn-default navbar-btn btn-warning navbar-right" do
               span.glyphicon.glyphicon-log-out
               =< "ログアウト"
             = link_to "/edit_password", method: :delete, class: "btn btn-default navbar-btn btn-success navbar-right" do
@@ -36,9 +36,11 @@ html
           .beader-client
             - if request.path_info =~ /^\/bamember/
             - else
-              span.glyphicon.glyphicon-user
-              =< current_client.name if client_signed_in?
+              - if client_signed_in?
+                span.glyphicon.glyphicon-user
+                =< current_client.name
         .col-md-10 = raw breadcrumbs style: :bootstrap, semantic: true, display_single_fragment: true
+      br clear="both"
 
       - if notice.present?
         .alert.alert-success

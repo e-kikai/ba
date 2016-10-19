@@ -19,7 +19,7 @@ crumb :search do |table|
 end
 
 crumb :sum do |table|
-  link   "集計", "/client_tables/#{table.id}/sum"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-indent-left") + "集計", "/client_tables/#{table.id}/sum"
   parent :table, table
 end
 
@@ -49,12 +49,12 @@ crumb :bamember_something do |title|
 end
 
 crumb :clients_show do |client|
-  link   "#{client.name} メニュー", "/bamember/clients/#{client.id}"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-list-alt") + "#{client.name}:テーブル一覧", "/bamember/clients/#{client.id}"
   parent :bamember_root
 end
 
 crumb :clients_table do |table|
-  link   "#{table.name}テーブル", "/bamember/clients/#{table.client.id}/table/#{table.id}/"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-paperclip") + "#{table.name}テーブル:ダッシュボード", "/bamember/clients/#{table.client.id}/table/#{table.id}/"
   parent :clients_show, table.client
 end
 
@@ -64,12 +64,12 @@ crumb :clients_something do |title, client|
 end
 
 crumb :clients_search do |table|
-  link   "検索", "/bamember/clients/#{table.client.id}/table/#{table.id}/search"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-search") + "検索結果", "/bamember/clients/#{table.client.id}/table/#{table.id}/search"
   parent :clients_table, table
 end
 
 crumb :clients_data do |table, data|
-  link   data[:name], "/bamember/clients/#{table.client.id}/table/#{table.id}/#{data.id}"
+  link   content_tag(:span, "", class: "glyphicon glyphicon-folder-open") + "#{data[:name]}:カルテ", "/bamember/clients/#{table.client.id}/table/#{table.id}/#{data.id}"
   parent :clients_search, table
 end
 

@@ -416,6 +416,6 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
   end
 
   def searchurls_params
-    params.require(:client_table).permit(searchurls_attributes: [:id, :name, :summary, :query, :size, :order_no, :soft_destroyed_at])
+    params.require(:client_table).permit(searchurls_attributes: [:id, :name, :comment, :summary, :query, :size, :order_no, :soft_destroyed_at])
   end
 end

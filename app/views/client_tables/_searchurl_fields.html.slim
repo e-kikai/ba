@@ -14,10 +14,11 @@ tr.fields
       
   - if ba
     td = f.text_field :name,            class: "form-control"
+    td = f.text_area  :comment,         class: "form-control"
     td
       - if f.object.target == "sum" 
         = f.check_box  :summary
-    td = f.select     :size, 2..12, {}, class: "form-control"
+    / td = f.select     :size, 2..12, {}, class: "form-control"
     td = f.text_field :order_no,        class: "form-control order_no"
     / td = f.link_to_remove class: "btn btn-danger" do
     /   span.glyphicon.glyphicon-remove
@@ -25,3 +26,4 @@ tr.fields
     td = f.check_box :soft_destroyed_at, {}, Time.now
   - else
     td = f.object.name
+    td = simple_format(f.object.comment)
