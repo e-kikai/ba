@@ -5,22 +5,26 @@
   span.glyphicon.glyphicon-paperclip
   | ダッシュボード
   
-.col-md-10.col-md-offset-1
+.col-md-12
   .table-area
-    .table-info.col-md-6
+    .table-info.col-md-4
       .table-name
         span.glyphicon.glyphicon-list-alt
         = "#{@table.name}テーブル"
       .count-area
         span.count #{@table.klass.count}
         | 件
-    .button-area.col-md-6
+    .button-area.col-md-8
       = link_to "/client_tables/#{@table.id}/search/", class: "btn btn-default btn-square" do
         span.glyphicon.glyphicon-search
         = "検索"
       = link_to "/client_tables/#{@table.id}/sum/", class: "btn btn-default btn-square" do
         span.glyphicon.glyphicon-indent-left
         = "集計"
+      - unless @table.company?
+        = link_to "/client_tables/#{@table.id}/rfm/", class: "btn btn-default btn-square" do
+          span.glyphicon.glyphicon-align-center
+          = "RFM"
       = link_to "/client_tables/#{@table.id}/searchurls/", class: "btn btn-default btn-square" do
         span.glyphicon.glyphicon-list
         = "検索条件"

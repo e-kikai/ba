@@ -15,14 +15,14 @@ coffee:
       $('button.btn.option').click()
   
 .container-fluid.search-menu
-  = button_tag type: :button, class: "btn btn-primary option", data: { toggle: :modal, target: "#RFMForm" } do
-    span.glyphicon.glyphicon-menu-hamburger
-    =< "設定フォーム"
+  = button_tag type: :button, class: "btn btn-default option btn-square", data: { toggle: :modal, target: "#RFMForm" } do
+    span.glyphicon.glyphicon-search
+    = "設定フォーム"
 
   - if ba
-    = link_to params.merge({action: :searchurls, target: :rfm}), method: :put, class: "btn btn-success" do
+    = link_to params.merge({action: :searchurls, target: :rfm}), method: :put, class: "btn btn-default btn-square" do
       span.glyphicon.glyphicon-save
-      =< "この条件を保存"
+      = "条件を保存"
 
 #RFMForm.modal.fade abindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
   .modal-dialog
@@ -89,7 +89,7 @@ coffee:
 - sum_count = sum_res.inject(0) { |sum, (key, s)| sum + s[:count] }
     
 .table-responsive
-  table.table.table-bordered.table-striped.table-hover.table-condensed
+  table.table.table-bordered.table-striped.table-hover.table-condensed.sum-table
     - rows.each.with_index do |row, i|
       tr
         th = row == "more" ? "それ以上" : "〜 #{row}#{@rfm_params["y_unit"]}"

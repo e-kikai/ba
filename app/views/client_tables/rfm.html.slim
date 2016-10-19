@@ -1,4 +1,4 @@
 - set_meta_tags title: "#{@table.name} RFM"
-- breadcrumb  :table_something, "RFM", @table
+- breadcrumb  :table_something, content_tag(:span, "", class: "glyphicon glyphicon-align-center") + "RFM", @table
 
 = render "client_tables/rfm", ba: false
