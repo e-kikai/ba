@@ -108,7 +108,7 @@
               = "#{number_with_delimiter(y_group[j-1])}超 〜"
               - y_column = {gt: y_group[j-1]}
             - else
-              = "{number_with_delimiter(y_group[j-1])}超 〜 #{number_with_delimiter(y)}以下"
+              = "#{number_with_delimiter(y_group[j-1])}超 〜 #{number_with_delimiter(y)}以下"
               - y_column = {lteq: y, gt: y_group[j-1]}
               
           - elsif y_axis["column"] == "company_id"
