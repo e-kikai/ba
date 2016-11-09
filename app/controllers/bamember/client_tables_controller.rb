@@ -189,7 +189,8 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
       ImportJob.perform_later(import.id)
       notice =  "バックグラウンドジョブに登録しました"
     else
-      ImportJob.perform_now(import.id)
+      # ImportJob.perform_now(import.id)
+      Import.find(import.id).import
       notice =  "インポートが完了しました"
     end
 
