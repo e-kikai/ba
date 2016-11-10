@@ -246,6 +246,12 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
     if @table.update(client_table_params)
       @client.reflesh_class # client_table_dataクラス更新
 
+      if Rails.env.development?
+        Open3.popen3('sleep 2; sudo systemctl restart unicorn_ba;')
+      else
+        Open3.popen3('sleep 2; nohup sudo /etc/init.d/unicorn_ba restart > /dev/null &')
+      end
+
       # Sidekiq再起動
       if Rails.env.development?
         Open3.popen3('sudo systemctl restart sidekiq_ba')
@@ -253,7 +259,7 @@ class Bamember::ClientTablesController < Bamember::ApplicationController
         Open3.popen3('sudo /etc/init.d/sidekiq_ba restart')
       end
 
-      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルの項目を変更しました"
+      redirect_to "/bamember/clients/#{@table.client.id}/table/#{@table.id}/", notice: "#{@table.name}テーブルの項目を変更しました\n(unicorn再起動を実行しました。再起動完了までしばらくお待ち下さい)"
     else
       render :edit
     end
